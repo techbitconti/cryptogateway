@@ -1,0 +1,471 @@
+package eth
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"math/big"
+	"net/http"
+	"reflect"
+	"strconv"
+	"strings"
+
+	Abi "github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/accounts/keystore"
+	"github.com/ethereum/go-ethereum/common"
+	Solc "github.com/ethereum/go-ethereum/common/compiler"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/ethclient"
+
+	"golang.org/x/net/context"
+
+	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/core/types"
+)
+
+var Url string
+
+var client *ethclient.Client
+
+var txList map[string][]uint64
+
+func Connect(url string) {
+
+	if client != nil {
+		return
+	}
+
+	Url = url
+
+	// connect to rpc
+	rpc, err := ethclient.Dial(url)
+	if err != nil {
+		panic(err)
+	}
+
+	client = rpc
+
+	txList = make(map[string][]uint64)
+
+}
+
+func call_RPC(method string, paramsIn ...interface{}) map[string]interface{} {
+
+	fmt.Println("method : ", method, "  params : ", paramsIn)
+
+	values := map[string]interface{}{"jsonrpc": "2.0", "method": method, "params": paramsIn, "id": 1}
+	jsonStr, _ := json.Marshal(values)
+
+	resp, err := http.Post(Url, "application/json", bytes.NewBuffer(jsonStr))
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	result := map[string]interface{}{}
+	body, err := ioutil.ReadAll(resp.Body)
+
+	fmt.Println(method, string(body))
+
+	json.Unmarshal(body, &result)
+
+	return result
+}
+
+func NewAccount(path, pass string) (common.Address, error) {
+
+	// Generate a new random account and a funded simulator
+	key, err := crypto.GenerateKey()
+	addr := crypto.PubkeyToAddress(key.PublicKey)
+	fmt.Println("prvKey Hex : ", common.Bytes2Hex(crypto.FromECDSA(key)))
+	fmt.Println("pubKey : ", common.ToHex(crypto.FromECDSAPub(&key.PublicKey)), "  addr : ", addr.Hex())
+
+	ks := keystore.NewKeyStore(path, keystore.StandardScryptN, keystore.StandardScryptP)
+	ks.ImportECDSA(key, pass)
+
+	fmt.Println("ETH Accounts : ", ks.Accounts())
+
+	return addr, err
+}
+
+func IsHexAddress(address string) bool {
+
+	return common.IsHexAddress(address)
+}
+
+func ValidateAmount(amount string) bool {
+
+	f, err := strconv.ParseInt(amount, 0, 64)
+	if err != nil || len(amount) > 20 {
+		fmt.Println("ValidateAmount ", err)
+		return false
+	}
+
+	fmt.Println("ValidateAmount : ", f)
+
+	return true
+}
+
+func GetCoinbase() string {
+	return call_RPC("eth_coinbase")["result"].(string)
+}
+
+func GetBlockNumber() string {
+	return call_RPC("eth_blockNumber")["result"].(string)
+}
+
+func GetAccounts() []string {
+	result := call_RPC("eth_accounts")["result"]
+
+	data, err := json.Marshal(result)
+	if err != nil {
+		panic(err)
+	}
+
+	arr := []string{}
+	json.Unmarshal(data, &arr)
+
+	return arr
+}
+
+func GetBlockByNumber(number interface{}) map[string]interface{} {
+	return call_RPC("eth_getBlockByNumber", number, true)["result"].(map[string]interface{})
+}
+
+func GetTransactionByHash(tx interface{}) map[string]interface{} {
+	return call_RPC("eth_getTransactionByHash", tx)
+}
+
+func GetFilterChanges(number interface{}) map[string]interface{} {
+	return call_RPC("eth_getFilterChanges", number)
+}
+
+func GetTransactions(number interface{}) []interface{} {
+	txs := GetBlockByNumber(number)["result"].(map[string]interface{})["transactions"].([]interface{})
+	return txs
+}
+
+func GetTransactionCount(addr, block interface{}) interface{} {
+	return call_RPC("eth_getTransactionCount", addr)["result"].(string)
+}
+
+func GetTransactionReceipt(tx interface{}) map[string]interface{} {
+	return call_RPC("eth_getTransactionReceipt", tx)
+}
+
+func GetLogs(tx interface{}) []interface{} {
+	logs := GetTransactionReceipt(tx)["result"].(map[string]interface{})["logs"].([]interface{})
+	return logs
+}
+
+func GetSyncing() map[string]interface{} {
+	return call_RPC("eth_syncing")
+}
+
+func GetBalance(addr interface{}) *big.Int {
+
+	str := call_RPC("eth_getBalance", addr, "latest")["result"].(string)
+	balance, _ := strconv.ParseInt(str, 0, 64)
+
+	return big.NewInt(balance)
+}
+
+func SendTransaction(message map[string]interface{}) string {
+	return call_RPC("eth_sendTransaction", message)["result"].(string)
+}
+
+func SendRawTransaction(message interface{}) interface{} {
+	return call_RPC("eth_sendRawTransaction", message)
+}
+
+func Sign(addr, data interface{}) interface{} {
+	return call_RPC("eth_sign", addr, data)["result"].(string)
+}
+
+func Web3_sha3(hs interface{}) interface{} {
+	return call_RPC("web3_sha3", hs)["result"].(string)
+}
+
+func Sha3FromHex(s string) string {
+	return crypto.Keccak256Hash(common.FromHex(s)).Hex()
+}
+
+func Sha3FromEvent(s string) string {
+	return crypto.Keccak256Hash([]byte(s)).Hex()
+}
+
+func AddressFromEvent(s string) string {
+	data := common.FromHex(s)
+	hex := common.ToHex(data[12:])
+	return hex
+}
+
+func SolidityCompile(path string) (string, string) {
+
+	fmt.Println("SolidityCompile : ", path)
+
+	data, _ := ioutil.ReadFile(path)
+	source := string(data)
+	fmt.Println("source : ", source)
+
+	contracts, _ := Solc.CompileSolidityString("", source)
+
+	fmt.Println("compile contracts : ", contracts)
+
+	for _, c := range contracts {
+		//c, _ := contracts["<stdin>:Test"]
+		code := c.Code
+		abi, _ := json.Marshal(c.Info.AbiDefinition)
+		fmt.Println("code : ", code)
+		fmt.Println("abi : ", string(abi))
+
+		return code, string(abi)
+	}
+	return "", ""
+}
+
+func SolidityDeploy(prvKey, abi, codeHex string, params ...interface{}) (string, string) {
+
+	if client == nil {
+		return "", ""
+	}
+
+	parsed, eabi := Abi.JSON(strings.NewReader(abi))
+	if eabi != nil {
+		return "", ""
+	}
+
+	fmt.Println("abi : ", parsed)
+
+	key, _ := crypto.HexToECDSA(prvKey)
+	opts := bind.NewKeyedTransactor(key)
+
+	addr, tx, contract, err := bind.DeployContract(opts, parsed, common.FromHex(codeHex), client, params)
+	if err != nil {
+		return "", ""
+	}
+	fmt.Println("contract : ", contract)
+	fmt.Println("address : ", addr.Hex())
+	fmt.Println("tx : ", tx)
+
+	return addr.Hex(), tx.Hash().Hex()
+}
+
+func SolidityCall(result interface{}, addr, abi, method string, params ...interface{}) interface{} {
+
+	if client == nil {
+		fmt.Println("Err Client")
+		return ""
+	}
+
+	parsed, eabi := Abi.JSON(strings.NewReader(abi))
+	if eabi != nil {
+		fmt.Println("Err eabi")
+		return ""
+	}
+
+	contract := bind.NewBoundContract(common.HexToAddress(addr), parsed, client, nil)
+	erc := contract.Call(nil, &result, method, params...)
+	if erc != nil {
+		fmt.Println("Err Call", erc)
+		return ""
+	}
+	fmt.Println("Call : ", result)
+
+	return result
+}
+
+func SolidityTransact(prvKey, addr, abi, method string, params ...interface{}) interface{} {
+
+	if client == nil {
+		return ""
+	}
+
+	parsed, eabi := Abi.JSON(strings.NewReader(abi))
+	if eabi != nil {
+		return ""
+	}
+
+	key, _ := crypto.HexToECDSA(prvKey)
+	addr0 := crypto.PubkeyToAddress(key.PublicKey)
+	opts := bind.NewKeyedTransactor(key)
+
+	// Nonce //
+	nonce, ern := client.PendingNonceAt(context.Background(), addr0)
+	if ern != nil {
+		n, _ := fmt.Printf("%v", ern)
+		fmt.Println(n)
+	}
+	fmt.Println("nonce : ", nonce)
+
+	if len(txList[addr0.Hex()]) <= 0 {
+		txList[addr0.Hex()] = make([]uint64, 0)
+	} else {
+		max := len(txList[addr0.Hex()])
+		nonce = txList[addr0.Hex()][max-1] + 1
+	}
+	txList[addr0.Hex()] = append(txList[addr0.Hex()], nonce)
+
+	opts.Nonce = big.NewInt(int64(nonce))
+
+	contract := bind.NewBoundContract(common.HexToAddress(addr), parsed, nil, client)
+	tx, err := contract.Transact(opts, method, params...)
+	if err != nil {
+		return ""
+	}
+	fmt.Println("Transact", tx.Hash().Hex(), "tx : ", tx)
+
+	return tx.Hash().Hex()
+}
+
+//SolRaw(prvKey, addressContract, `transfer(address,uint256)`, `0x5e531bb813994f27f65d2d5f7dc7c51dbe5406f7`, big.NewInt(100))
+func SolidityTransactRaw(prvKey, addr, method string, params ...interface{}) interface{} {
+
+	if client == nil {
+		return ""
+	}
+
+	key0, _ := crypto.HexToECDSA(prvKey)
+	addr0 := crypto.PubkeyToAddress(key0.PublicKey)
+	opts := bind.NewKeyedTransactor(key0)
+
+	// Input //
+	//method := `print(uint256)`
+	//value := big.NewInt(11)
+
+	event := Sha3FromEvent(method)
+	sig := common.FromHex(event)[:4]
+	//data := append(sig, common.BigToHash(value).Bytes()...)
+	data := make([]byte, 0)
+	data = append(data, sig...)
+	for _, value := range params {
+
+		r := reflect.ValueOf(value)
+
+		if r.Kind() == reflect.String {
+			v := common.HexToAddress(value.(string)).Bytes()
+			data = append(data, common.BytesToHash(v).Bytes()...)
+		} else {
+			v := common.BigToHash(value.(*big.Int)).Bytes()
+			data = append(data, v...)
+		}
+	}
+
+	input := common.ToHex(data)
+
+	fmt.Println("method : ", method)
+	fmt.Println("event : ", event)
+	fmt.Println("sig : ", common.ToHex(sig))
+	fmt.Println("value : ", params)
+	fmt.Println("data : ", data)
+	fmt.Println("input : ", input)
+	// Input //
+
+	// gasLimit //
+	var aC common.Address = common.HexToAddress(addr)
+	msg := ethereum.CallMsg{From: opts.From, To: &aC, Value: nil, Data: data}
+	gasLimit, erg := client.EstimateGas(context.Background(), msg)
+	if erg != nil {
+		return ""
+	}
+
+	// Nonce //
+	nonce, ern := client.PendingNonceAt(context.Background(), addr0)
+	if ern != nil {
+		n, _ := fmt.Printf("%v", ern)
+		fmt.Println(n)
+	}
+	fmt.Println("nonce : ", nonce)
+
+	if len(txList[addr0.Hex()]) <= 0 {
+		txList[addr0.Hex()] = make([]uint64, 0)
+	} else {
+		max := len(txList[addr0.Hex()])
+		nonce = txList[addr0.Hex()][max-1] + 1
+	}
+	txList[addr0.Hex()] = append(txList[addr0.Hex()], nonce)
+
+	// NewTransaction
+	tx := types.NewTransaction(nonce, common.HexToAddress(addr), nil, gasLimit, nil, data)
+	//fmt.Println("tx un signed : ", tx)
+
+	signer := types.HomesteadSigner{}
+	signature, err := crypto.Sign(signer.Hash(tx).Bytes(), key0)
+	if err != nil {
+		return ""
+	}
+	rawTx, err := tx.WithSignature(signer, signature)
+	if err != nil {
+		return ""
+	}
+	fmt.Println("rawTx : ", rawTx, rawTx.Hash().Hex())
+
+	// SendTraction to Contract //
+	ers := client.SendTransaction(context.Background(), rawTx)
+	if ers != nil {
+		return ""
+	}
+
+	return rawTx.Hash().Hex()
+}
+
+func SendTransactionRaw(prvKey, to string, value *big.Int, data []byte) string {
+
+	if client == nil {
+		return ""
+	}
+
+	key0, _ := crypto.HexToECDSA(prvKey)
+	addr0 := crypto.PubkeyToAddress(key0.PublicKey)
+	opts := bind.NewKeyedTransactor(key0)
+
+	// gasLimit //
+	var aC common.Address = common.HexToAddress(to)
+	msg := ethereum.CallMsg{From: opts.From, To: &aC, Value: value, Data: data}
+	gasLimit, erg := client.EstimateGas(context.Background(), msg)
+	if erg != nil {
+		return ""
+	}
+	fmt.Println("msg : ", msg)
+
+	// Nonce //
+	nonce, ern := client.PendingNonceAt(context.Background(), addr0)
+	if ern != nil {
+		n, _ := fmt.Printf("%v", ern)
+		fmt.Println(n)
+	}
+	fmt.Println("nonce : ", nonce)
+
+	if len(txList[addr0.Hex()]) <= 0 {
+		txList[addr0.Hex()] = make([]uint64, 0)
+	} else {
+		max := len(txList[addr0.Hex()])
+		nonce = txList[addr0.Hex()][max-1] + 1
+	}
+	txList[addr0.Hex()] = append(txList[addr0.Hex()], nonce)
+
+	// NewTransaction
+	tx := types.NewTransaction(nonce, common.HexToAddress(to), value, gasLimit, nil, data)
+	//fmt.Println("tx un signed : ", tx)
+
+	signer := types.HomesteadSigner{}
+	signature, err := crypto.Sign(signer.Hash(tx).Bytes(), key0)
+	if err != nil {
+		return ""
+	}
+	rawTx, err := tx.WithSignature(signer, signature)
+	if err != nil {
+		return ""
+	}
+	fmt.Println("rawTx : ", rawTx, rawTx.Hash().Hex())
+
+	// SendTraction to Contract //
+	ers := client.SendTransaction(context.Background(), rawTx)
+	if ers != nil {
+		return ""
+	}
+
+	return rawTx.Hash().Hex()
+}
