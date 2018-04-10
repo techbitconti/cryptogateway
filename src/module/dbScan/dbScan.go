@@ -81,7 +81,7 @@ func getBalance(coin, addr string) float64 {
 		fmt.Println("getBalance BTC : ", amount)
 		return amount
 
-	case "ETH", "ERC20":
+	case "ETH":
 		bigInt := eth.GetBalance(addr)
 		bigFloat := new(big.Float).SetInt(bigInt)
 		f, _ := bigFloat.Float64()

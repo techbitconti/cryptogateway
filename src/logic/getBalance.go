@@ -58,7 +58,7 @@ func verifyAddress(coin string, addr string) bool {
 			return false
 		}
 
-	case "ETH":
+	case "ETH", "ERC20":
 		if !eth.IsHexAddress(addr) {
 			return false
 		}
