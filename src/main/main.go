@@ -11,13 +11,13 @@ import (
 
 func main() {
 
-	config.SetPATH("local")
+	config.SetPATH("server")
 
 	startETH()
 	startBTC()
 	dbScan.Start()
 
-	http.Create(":8083")
+	http.Create(":8082")
 
 }
 
