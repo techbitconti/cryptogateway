@@ -9,8 +9,8 @@ func SetPATH(net string) {
 		PATH_ETH = "/Users/A/ethereum/private/keystore"
 		PATH_BTC = "/Users/A/bitcoin/btcwallet"
 	case "server":
-		PATH_ETH = "/home/ubuntu/ethereum/private/keystore"
-		PATH_BTC = "/home/ubuntu/bitcoin/btcwallet"
+		PATH_ETH = "/home/ramost/ethereum/private/keystore"
+		PATH_BTC = "/home//bitcoin/btcwallet"
 	}
 }
 
