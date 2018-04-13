@@ -52,7 +52,7 @@ func initial() {
 
 func Start() {
 
-	initial()
+	//initial()
 
 	go func() {
 		for {
@@ -101,7 +101,7 @@ func waiting(addr_deposit string, data map[string]string) {
 	fmt.Println("GO-0 : check balance")
 
 	balance := getBalance(data["coin"], addr_deposit)
-	if balance < float64(0) {
+	if balance <= float64(0) {
 		return
 	}
 

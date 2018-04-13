@@ -14,7 +14,7 @@ import (
 )
 
 func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
-	fmt.Println("Do_Withdraw : ", string(params)) // {"coin" : "ETH/BTC/ERC20", "deposit" : "", withdraw : ""}
+	fmt.Println("Do_Withdraw : ", string(params)) // {"coin" : "ETH/BTC/ERC20", "deposit" : "", "withdraw" : ""}
 
 	resp := Writer{Api: api.WITHDRAW}
 
@@ -34,7 +34,7 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 		withdraw_Address := request["withdraw"].(string)
 
 		// GO-0 : check coin type
-		if coin != "BTC" && coin != "ETH" && coin != "ERC20" {
+		if coin != "BTC" && coin != "ETH" { //}&& coin != "ERC20" {
 			resp.Status = -2
 			resp.Error = "Error Coin !!!"
 
@@ -44,7 +44,7 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 		if resp.Status == 0 {
 
 			// GO-1 :  verifyAddress
-			if verifyAddress(coin, deposit_Address) || verifyAddress(coin, withdraw_Address) {
+			if !verifyAddress(coin, deposit_Address) || !verifyAddress(coin, withdraw_Address) {
 				resp.Status = -3
 				resp.Error = "Invalid verifyAddress !!!"
 				fmt.Println(resp.Error)

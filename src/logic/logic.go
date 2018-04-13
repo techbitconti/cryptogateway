@@ -152,10 +152,14 @@ func sendTransaction(coin string, obj map[string]string) (tx string) {
 				return ""
 			}
 
-			tokens := aMountETH
-			// if balanceOf[config.ETH_SIM.Address] < tokens
-			// return
+			hex, err := eth.SolidityCallRaw(config.ETH_SIM.Address, to, `balanceOf(address)`, config.ETH_SIM.Address)
+			if err != nil {
+				fmt.Println("ERC20 Token not enough !!!")
+				return ""
+			}
+			fmt.Println(common.BytesToHash(hex).Big(), new(big.Int).SetBytes(hex))
 
+			tokens := aMountETH
 			tx = eth.SolidityTransactRaw(config.ETH_SIM.PrivKey, to, `transfer(address,uint256)`, nil, common.HexToAddress(receiver), tokens)
 			fmt.Println("tx ERC20 : ", tx)
 		}
