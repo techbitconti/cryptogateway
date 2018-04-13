@@ -1,38 +1,59 @@
 package config
 
-var Path_ETH = "/home/ramost/ethereum/private/keystore"
-var Path_BTC = "/home/ramost/bitcoin/btcwallet"
+var PATH_ETH = "/Users/A/ethereum/private/keystore"
+var PATH_BTC = "/Users/A/bitcoin/btcwallet"
 
-var BTC_SIM = map[string]string{
-	`prv`:  `FwMCdKjGEMYe1VPL2tXEqH7ecXhZXshqzpBoxQieCXDG5yGQvGuZ`,
-	`pub`:  ``,
-	`addr`: `ShGn19iCHHhGjy7huZeQ2T8vtBo7DFpA9U`,
-	`pass`: `123456`,
+func SetPATH(net string) {
+	switch net {
+	case "local":
+		PATH_ETH = "/Users/A/ethereum/private/keystore"
+		PATH_BTC = "/Users/A/bitcoin/btcwallet"
+	case "server":
+		PATH_ETH = "/home/ubuntu/ethereum/private/keystore"
+		PATH_BTC = "/home/ubuntu/bitcoin/btcwallet"
+	}
 }
 
-var BTC_TEST = map[string]string{
-	`prv`:  `cQJYynSnzuUbNisDb7FsM2tpKi7Hu3HKtxegWohemwf8YU1EDduD`,
-	`pub`:  ``,
-	`addr`: `2NAKhJLCi6yTM6oLjyG2U3sZJAdbcSMhgjh`,
-	`pass`: `123456`,
+var BTC_SIM = struct {
+	PrivKey string
+	Address string
+}{
+	`FwMCdKjGEMYe1VPL2tXEqH7ecXhZXshqzpBoxQieCXDG5yGQvGuZ`,
+	`ShGn19iCHHhGjy7huZeQ2T8vtBo7DFpA9U`,
 }
 
-var ETH_SIM = map[string]string{
-	`prv`:  `47de15108b35169c4aff4826d5c413fe117e361a900325f6d3df1f0e04cbd706`,
-	`pub`:  `0x049787724d3ed0909705bcc044f7bba3ed2a77dfc59119fd8773b0de74aa00a7f58cccf2fe74b447769f964c33de87a49890bea034e2a9a0bfc3a9b19c9911816f`,
-	`addr`: `0x8dD75F7c03A048C0a66a53dbf9ED76d04E9a9eA3`,
+var BTC_TEST = struct {
+	PrivKey string
+	Address string
+}{
+	`cQJYynSnzuUbNisDb7FsM2tpKi7Hu3HKtxegWohemwf8YU1EDduD`,
+	`2NAKhJLCi6yTM6oLjyG2U3sZJAdbcSMhgjh`,
 }
 
-var ETH_TEST = map[string]string{
-	`prv`:  ``,
-	`pub`:  ``,
-	`addr`: ``,
+var ETH_SIM = struct {
+	PrivKey string
+	Address string
+}{
+	`47de15108b35169c4aff4826d5c413fe117e361a900325f6d3df1f0e04cbd706`,
+	`0x8dD75F7c03A048C0a66a53dbf9ED76d04E9a9eA3`,
 }
 
-var ERC20_SIM = map[string]string{
-	`admin`: ETH_SIM[`prv`],
-	`addr`:  `0x1da98ecccd7fca0e38d8b0732b53a1ce6a382ce7`,
-	`abi`: `[
+var ETH_TEST = struct {
+	PrivKey string
+	Address string
+}{
+	`47de15108b35169c4aff4826d5c413fe117e361a900325f6d3df1f0e04cbd706`,
+	`0x8dD75F7c03A048C0a66a53dbf9ED76d04E9a9eA3`,
+}
+
+var ERC20_SIM = struct {
+	PrivKey string
+	Address string
+	Abi     string
+}{
+	ETH_SIM.PrivKey,
+	`0x1da98ecccd7fca0e38d8b0732b53a1ce6a382ce7`,
+	`[
 	{
 		"constant": true,
 		"inputs": [],
@@ -391,37 +412,27 @@ var ERC20_SIM = map[string]string{
 		"name": "Approval",
 		"type": "event"
 	}
-			]`,
+]`,
 }
 
-var ERC20_TEST = map[string]string{
-	`admin`: ETH_TEST[`prv`],
-	`addr`:  ``,
-	`abi`:   ``,
+var ERC20_TEST = struct {
+	PrivKey string
+	Address string
+	Abi     string
+}{
+	ETH_TEST.PrivKey,
+	``,
+	``,
 }
 
-var MASS = map[string]string{
-	`addr`: `0x25a12cda4cdd61bff3be3b1e585dc3c5651be217`,
-	`abi`: `[
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "arr",
-				"type": "address[]"
-			}
-		],
-		"name": "testArr",
-		"outputs": [
-			{
-				"name": "",
-				"type": "address[]"
-			}
-		],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
+var MASS = struct {
+	PrivKey string
+	Address string
+	Abi     string
+}{
+	ETH_TEST.PrivKey,
+	`0x25a12cda4cdd61bff3be3b1e585dc3c5651be217`,
+	`[
 	{
 		"constant": false,
 		"inputs": [
@@ -437,32 +448,6 @@ var MASS = map[string]string{
 				"type": "address"
 			}
 		],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "_addrDeposit",
-				"type": "string"
-			},
-			{
-				"name": "_receipts",
-				"type": "string"
-			},
-			{
-				"name": "_tokens",
-				"type": "uint256[]"
-			},
-			{
-				"name": "num",
-				"type": "uint256"
-			}
-		],
-		"name": "upload",
-		"outputs": [],
 		"payable": false,
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -514,10 +499,100 @@ var MASS = map[string]string{
 		"inputs": [
 			{
 				"name": "_addrDeposit",
-				"type": "string"
+				"type": "address"
+			},
+			{
+				"name": "_receipts",
+				"type": "address[]"
+			},
+			{
+				"name": "_tokens",
+				"type": "uint256[]"
 			}
 		],
-		"name": "transfer",
+		"name": "uploadETH",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_addrDeposit",
+				"type": "address"
+			},
+			{
+				"name": "_erc20",
+				"type": "address[]"
+			},
+			{
+				"name": "_receipts",
+				"type": "address[]"
+			},
+			{
+				"name": "_tokens",
+				"type": "uint256[]"
+			}
+		],
+		"name": "uploadERC20",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"name": "",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_addrDeposit",
+				"type": "address"
+			}
+		],
+		"name": "transferERC20",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "newOwner",
+		"outputs": [
+			{
+				"name": "",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_addrDeposit",
+				"type": "address"
+			}
+		],
+		"name": "transferETH",
 		"outputs": [],
 		"payable": false,
 		"stateMutability": "nonpayable",
@@ -554,12 +629,12 @@ var MASS = map[string]string{
 			{
 				"indexed": false,
 				"name": "_addrDeposit",
-				"type": "string"
+				"type": "address"
 			},
 			{
 				"indexed": false,
-				"name": "_addrMapTo",
-				"type": "string"
+				"name": "_receipts",
+				"type": "address[]"
 			},
 			{
 				"indexed": false,
@@ -567,7 +642,7 @@ var MASS = map[string]string{
 				"type": "uint256[]"
 			}
 		],
-		"name": "LogUpLoad",
+		"name": "LogUpLoadETH",
 		"type": "event"
 	},
 	{
@@ -575,11 +650,97 @@ var MASS = map[string]string{
 		"inputs": [
 			{
 				"indexed": false,
-				"name": "arr",
+				"name": "_addrDeposit",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "_erc20",
 				"type": "address[]"
+			},
+			{
+				"indexed": false,
+				"name": "_receipts",
+				"type": "address[]"
+			},
+			{
+				"indexed": false,
+				"name": "_tokens",
+				"type": "uint256[]"
 			}
 		],
-		"name": "LogArr",
+		"name": "LogUpLoadERC20",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "_ok",
+				"type": "bool"
+			},
+			{
+				"indexed": false,
+				"name": "_addrDeposit",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "_receipts",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "_coin",
+				"type": "uint256"
+			}
+		],
+		"name": "LogTranferETH",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "_addrDeposit",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "_erc20",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "_receipts",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "_tokens",
+				"type": "uint256"
+			}
+		],
+		"name": "LogTranferERC20",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"name": "_from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"name": "_to",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferred",
 		"type": "event"
 	}
 ]`,

@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"math/big"
 	"net/http"
+	"os/exec"
 	"reflect"
 	"strconv"
 	"strings"
@@ -22,6 +23,7 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
@@ -42,7 +44,8 @@ func Connect(url string) {
 	// connect to rpc
 	rpc, err := ethclient.Dial(url)
 	if err != nil {
-		panic(err)
+		fmt.Println("Error ethClient ", err)
+		return
 	}
 
 	client = rpc
@@ -60,7 +63,8 @@ func call_RPC(method string, paramsIn ...interface{}) map[string]interface{} {
 
 	resp, err := http.Post(Url, "application/json", bytes.NewBuffer(jsonStr))
 	if err != nil {
-		panic(err)
+		fmt.Println("Error web3 call ", err)
+		return nil
 	}
 	defer resp.Body.Close()
 
@@ -116,18 +120,18 @@ func GetBlockNumber() string {
 	return call_RPC("eth_blockNumber")["result"].(string)
 }
 
-func GetAccounts() []string {
+func GetAccounts() (arr []string) {
 	result := call_RPC("eth_accounts")["result"]
 
 	data, err := json.Marshal(result)
 	if err != nil {
-		panic(err)
+		fmt.Println("Error GetAccounts")
+		return
 	}
 
-	arr := []string{}
 	json.Unmarshal(data, &arr)
 
-	return arr
+	return
 }
 
 func GetBlockByNumber(number interface{}) map[string]interface{} {
@@ -202,38 +206,53 @@ func AddressFromEvent(s string) string {
 	return hex
 }
 
-func SolidityCompile(path string) (string, string) {
+func SolidityCompile(path string) (mContracts map[string]map[string]string) {
 
+	if _, err := exec.LookPath("solc"); err != nil {
+		fmt.Println("exec solc", err)
+		return
+	}
 	fmt.Println("SolidityCompile : ", path)
+
+	mContracts = make(map[string]map[string]string)
 
 	data, _ := ioutil.ReadFile(path)
 	source := string(data)
 	fmt.Println("source : ", source)
 
-	contracts, _ := Solc.CompileSolidityString("", source)
+	contracts, crr := Solc.CompileSolidityString("", source)
 
-	fmt.Println("compile contracts : ", contracts)
+	fmt.Println("compile contracts : ", contracts, crr)
 
-	for _, c := range contracts {
+	for stdin, c := range contracts {
 		//c, _ := contracts["<stdin>:Test"]
+		name := strings.Split(stdin, "<stdin>:")[1]
 		code := c.Code
 		abi, _ := json.Marshal(c.Info.AbiDefinition)
+
+		fmt.Println("name : ", name)
 		fmt.Println("code : ", code)
 		fmt.Println("abi : ", string(abi))
 
-		return code, string(abi)
+		mCon := map[string]string{
+			"code": code,
+			"abi":  string(abi),
+		}
+		mContracts[name] = mCon
 	}
-	return "", ""
+	return
 }
 
 func SolidityDeploy(prvKey, abi, codeHex string, params ...interface{}) (string, string) {
 
 	if client == nil {
+		fmt.Println("Error SolidityDeploy Client")
 		return "", ""
 	}
 
 	parsed, eabi := Abi.JSON(strings.NewReader(abi))
 	if eabi != nil {
+		fmt.Println("Error SolidityDeploy Abi", eabi)
 		return "", ""
 	}
 
@@ -241,9 +260,10 @@ func SolidityDeploy(prvKey, abi, codeHex string, params ...interface{}) (string,
 
 	key, _ := crypto.HexToECDSA(prvKey)
 	opts := bind.NewKeyedTransactor(key)
-
-	addr, tx, contract, err := bind.DeployContract(opts, parsed, common.FromHex(codeHex), client, params)
+	fmt.Println("params........", len(params), params)
+	addr, tx, contract, err := bind.DeployContract(opts, parsed, common.FromHex(codeHex), client, params...)
 	if err != nil {
+		fmt.Println("Error SolidityDeploy Bind", err)
 		return "", ""
 	}
 	fmt.Println("contract : ", contract)
@@ -266,6 +286,8 @@ func SolidityCall(result interface{}, addr, abi, method string, params ...interf
 		return ""
 	}
 
+	fmt.Println("abi : ", parsed)
+
 	contract := bind.NewBoundContract(common.HexToAddress(addr), parsed, client, nil)
 	erc := contract.Call(nil, &result, method, params...)
 	if erc != nil {
@@ -277,7 +299,60 @@ func SolidityCall(result interface{}, addr, abi, method string, params ...interf
 	return result
 }
 
-func SolidityTransact(prvKey, addr, abi, method string, params ...interface{}) interface{} {
+//`balanceOf(address)`
+func SolidityCallRaw(_from, _to, method string, params ...interface{}) (hexutil.Bytes, error) {
+
+	if client == nil {
+		fmt.Println("Err Client")
+		return nil, nil
+	}
+
+	event := Sha3FromEvent(method)
+
+	sig := common.FromHex(event)[:4]
+
+	data := make([]byte, 0)
+	data = append(data, sig...)
+
+	for _, value := range params {
+
+		r := reflect.ValueOf(value)
+
+		if r.Kind() == reflect.String {
+			v := common.HexToAddress(value.(string)).Bytes()
+			data = append(data, common.BytesToHash(v).Bytes()...)
+		} else {
+			v := common.BigToHash(value.(*big.Int)).Bytes()
+			data = append(data, v...)
+		}
+	}
+
+	input := common.ToHex(data)
+
+	fmt.Println("method : ", method)
+	fmt.Println("event : ", event)
+	fmt.Println("sig : ", common.ToHex(sig))
+	fmt.Println("value : ", params)
+	fmt.Println("data : ", data)
+	fmt.Println("input : ", input)
+	// Input //
+
+	var from common.Address = common.HexToAddress(_from)
+	var to common.Address = common.HexToAddress(_to)
+
+	msg := ethereum.CallMsg{From: from, To: &to, Data: data}
+
+	hex, err := client.CallContract(context.Background(), msg, nil)
+	if err != nil {
+		fmt.Println("Error CallContract")
+	}
+
+	fmt.Println("CallContract : ", hex)
+
+	return hex, err
+}
+
+func SolidityTransact(prvKey, addr, abi, method string, params ...interface{}) string {
 
 	if client == nil {
 		return ""
@@ -313,6 +388,7 @@ func SolidityTransact(prvKey, addr, abi, method string, params ...interface{}) i
 	contract := bind.NewBoundContract(common.HexToAddress(addr), parsed, nil, client)
 	tx, err := contract.Transact(opts, method, params...)
 	if err != nil {
+		fmt.Println("Error Transact", err)
 		return ""
 	}
 	fmt.Println("Transact", tx.Hash().Hex(), "tx : ", tx)
@@ -321,7 +397,7 @@ func SolidityTransact(prvKey, addr, abi, method string, params ...interface{}) i
 }
 
 //SolRaw(prvKey, addressContract, `transfer(address,uint256)`, `0x5e531bb813994f27f65d2d5f7dc7c51dbe5406f7`, big.NewInt(100))
-func SolidityTransactRaw(prvKey, addr, method string, params ...interface{}) interface{} {
+func SolidityTransactRaw(prvKey, addr, method string, amount *big.Int, params ...interface{}) string {
 
 	if client == nil {
 		return ""
@@ -336,10 +412,12 @@ func SolidityTransactRaw(prvKey, addr, method string, params ...interface{}) int
 	//value := big.NewInt(11)
 
 	event := Sha3FromEvent(method)
+
 	sig := common.FromHex(event)[:4]
-	//data := append(sig, common.BigToHash(value).Bytes()...)
+
 	data := make([]byte, 0)
 	data = append(data, sig...)
+
 	for _, value := range params {
 
 		r := reflect.ValueOf(value)
@@ -388,7 +466,7 @@ func SolidityTransactRaw(prvKey, addr, method string, params ...interface{}) int
 	txList[addr0.Hex()] = append(txList[addr0.Hex()], nonce)
 
 	// NewTransaction
-	tx := types.NewTransaction(nonce, common.HexToAddress(addr), nil, gasLimit, nil, data)
+	tx := types.NewTransaction(nonce, common.HexToAddress(addr), amount, gasLimit, nil, data)
 	//fmt.Println("tx un signed : ", tx)
 
 	signer := types.HomesteadSigner{}

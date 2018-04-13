@@ -1,6 +1,7 @@
 package btc
 
 import (
+	"config"
 	"fmt"
 	"path/filepath"
 
@@ -11,7 +12,7 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-var certificateFile = filepath.Join("/home/ramost/bitcoin/btcwallet", "rpc.cert")
+var certificateFile = filepath.Join(config.PATH_BTC, "rpc.cert")
 
 var c pb.WalletServiceClient
 

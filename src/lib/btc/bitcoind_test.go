@@ -6,7 +6,7 @@ import (
 
 func Test_bitcoind(t *testing.T) {
 
-	Connect_bitcoind()
+	Connect_bitcoind("testnet")
 
 	GetBlockCount()
 	//	blockHash, _ := GetBlockHash(blockHeight)
@@ -27,8 +27,6 @@ func Test_bitcoind(t *testing.T) {
 	//GetBalance("2NAKhJLCi6yTM6oLjyG2U3sZJAdbcSMhgjh")
 	//GetReceivedByAddress("2NAKhJLCi6yTM6oLjyG2U3sZJAdbcSMhgjh")
 
-	//GetRawTransactionVerbose("c6b8619d339fb253cebeda1dae13312c8167c4d32c90897c85a220cc3d3240ec")
-
-	SendFrom("2NAKhJLCi6yTM6oLjyG2U3sZJAdbcSMhgjh", "2MssTcpVUccPxTbZRAPjygF5F5sr4DBZHbz", float64(0.002))
-
+	//SendFrom("2NAKhJLCi6yTM6oLjyG2U3sZJAdbcSMhgjh", "2MssTcpVUccPxTbZRAPjygF5F5sr4DBZHbz", float64(0.001))
+	//GetRawTransactionVerbose("0987d04f5ea00a54dcb606392c5bc04ccee798f8d60f44dfd789c6f0662402cd")
 }

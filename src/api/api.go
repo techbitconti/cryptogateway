@@ -1,6 +1,7 @@
 package api
 
 const (
-	ADDRESS = "address"
-	BALANCE = "balance"
+	BALANCE  = "balance"
+	DEPOSIT  = "deposit"
+	WITHDRAW = "withdraw"
 )

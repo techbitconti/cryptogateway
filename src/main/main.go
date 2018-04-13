@@ -3,13 +3,15 @@ package main
 import (
 	"network/http"
 
+	"config"
 	"lib/btc"
 	"lib/eth"
-
 	"module/dbScan"
 )
 
 func main() {
+
+	config.SetPATH("local")
 
 	startETH()
 	startBTC()

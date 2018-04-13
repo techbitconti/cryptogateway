@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strconv"
 	//"time"
+	"config"
 	"encoding/json"
 	"net/http"
 
@@ -26,7 +27,7 @@ var Btcd *rpcclient.Client
 var Chaincfg chaincfg.Params
 var NotifyHandlers rpcclient.NotificationHandlers
 
-var btcdHomeDir string = "/home/ramost/bitcoin/btcwallet"
+var btcdHomeDir string = config.PATH_BTC
 
 func Connect_btcd(net string) {
 
@@ -261,9 +262,9 @@ func DecodeAddress(addr string) (address btcutil.Address, err error) {
 
 func ValidateAddress(addr string) (acc *btcjson.ValidateAddressWalletResult, err error) {
 
-	address, rr := DecodeAddress(addr)
-	if rr != nil {
-		log.Println("Error  DecodeAddress", rr)
+	address, err := DecodeAddress(addr)
+	if err != nil {
+		log.Println("Error  DecodeAddress", err)
 		return
 	}
 

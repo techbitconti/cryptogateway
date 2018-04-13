@@ -1,16 +1,13 @@
 package logic
 
 import (
-	"api"
 	"encoding/json"
 	"fmt"
-	"math/big"
 	"net/http"
 
-	"lib/btc"
-	"lib/eth"
-
 	"gopkg.in/mgo.v2/bson"
+
+	"api"
 )
 
 func Do_GetBalance(ip string, w http.ResponseWriter, params []byte) {
@@ -32,59 +29,33 @@ func Do_GetBalance(ip string, w http.ResponseWriter, params []byte) {
 		coin := request["coin"].(string)
 		addr := request["address"].(string)
 
-		isValid := verifyAddress(coin, addr)
-		if !isValid {
+		// GO-0 : check coin type
+		if coin != "BTC" && coin != "ETH" && coin != "ERC20" {
 			resp.Status = -2
-			resp.Error = "Invalid Address !!!"
-			fmt.Println(resp.Error)
+			resp.Error = "Error Coin !!!"
 
-		} else {
-			balance := getBalance(coin, addr)
-			resp.Status = 0
-			resp.Data = bson.M{"address": addr, "balance": balance}
+			fmt.Println(resp.Error)
+		}
+
+		if resp.Status == 0 {
+
+			isValid := verifyAddress(coin, addr)
+			if !isValid {
+				resp.Status = -3
+				resp.Error = "Invalid Address !!!"
+				fmt.Println(resp.Error)
+
+			} else {
+
+				balance := getBalance(coin, addr)
+				resp.Status = 0
+				resp.Data = bson.M{"address": addr, "balance": balance}
+			}
 		}
 	}
 
 	data, _ := json.Marshal(resp)
 	w.Write(data)
-}
-
-func verifyAddress(coin string, addr string) bool {
-
-	switch coin {
-	case "BTC":
-		address, err := btc.ValidateAddress(addr)
-		if err != nil || !address.IsValid {
-			return false
-		}
-
-	case "ETH", "ERC20":
-		if !eth.IsHexAddress(addr) {
-			return false
-		}
-	}
-
-	return true
-}
-
-func getBalance(coin string, addr string) float64 {
-
-	switch coin {
-	case "BTC":
-		amount := btc.GetBalance(addr)
-		fmt.Println("getBalance BTC : ", amount)
-		return amount
-
-	case "ETH":
-		bigInt := eth.GetBalance(addr)
-		bigFloat := new(big.Float).SetInt(bigInt)
-		f, _ := bigFloat.Float64()
-
-		fmt.Println("getBalance ETH : ", f)
-		return f
-	}
-
-	return float64(0)
 }
 
 func check_getBalance(request map[string]interface{}) bool {

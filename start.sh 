@@ -1,0 +1,78 @@
+geth --fast --cache=512 --networkid=14 --rpc --rpccorsdomain "*" --rpcapi "net,eth,web3,miner,personal"  console 2>>geth.log --datadir=/Users/A/ethereum/private/  
+
+
+bitcoind -rpcuser="123" -rpcpassword="123"  -server -rest -txindex -debug=1 -daemon -testnet -datadir=/Users/A/bitcoin/bitcoind/
+bitcoin-cli -rpcuser="123" -rpcpassword="123" -testnet -datadir=/Users/A/bitcoin/bitcoind/
+
+
+btcd --rpcuser="123" --rpcpass="123" --datadir=/Users/A/bitcoin/btcd/ --logdir=/Users/A/bitcoin/btcd/  --testnet 
+ --generate 1 --miningaddr=ShGn19iCHHhGjy7huZeQ2T8vtBo7DFpA9U
+
+btcwallet --username="123" --password="123"  --appdata=/Users/A/bitcoin/btcwallet/  --logdir=/Users/A/bitcoin/btcwallet/ --testnet
+ --experimentalrpclisten=127.0.0.1:18332
+
+
+
+ cd ~/go/src/mass/src/main 
+ export GOPATH=~/go:~/go/src/mass/
+ xgo -targets "linux/amd64" ~/go/src/mass/src/main
+
+
+############################################
+#				BTC Simnet					#
+############################################
+# addres 	: ShGn19iCHHhGjy7huZeQ2T8vtBo7DFpA9U 								
+# pub 		: 								
+# prv 		: FwMCdKjGEMYe1VPL2tXEqH7ecXhZXshqzpBoxQieCXDG5yGQvGuZ								
+# pass 		: 123456						
+############################################
+
+
+https://testnet.manu.backend.hamburg/faucet
+############################################
+#				BTC Testnet					#
+############################################
+# addres 	: 2NAKhJLCi6yTM6oLjyG2U3sZJAdbcSMhgjh 																
+# prv 		: cQJYynSnzuUbNisDb7FsM2tpKi7Hu3HKtxegWohemwf8YU1EDduD		
+# account	: bitcoin				
+############################################
+# addres 	: 2MssTcpVUccPxTbZRAPjygF5F5sr4DBZHbz 																
+# prv 		: cVLPeduQmBL8QAGj22sMn2zFSDpNxVAqqLVBavHFPdFhgyz1DvMw		
+# account	: test				
+############################################
+
+
+############################################
+#				BTC Mainnet					#
+############################################
+# addres 	: 35bs43XVCtFuhFAPpmi1mw7cnoB48mUvg2 								
+# pub 		: 								
+# prv 		: 													
+############################################
+
+
+
+
+############################################
+#				ETH Simnet					#
+############################################
+# addres 	: 0x932ba2c642fa583f9b41525722b032b126d5c2dc								
+# pub 		:								
+# prv 		:								
+############################################
+
+############################################
+#				ETH Testnet Rinkerby		#
+############################################
+# addres 	: 								
+# pub 		:								
+# prv 		:								
+############################################
+
+############################################
+#				ETH Mainnet		#
+############################################
+# addres 	: 582c33e754fad21305068a77f0f08f93857fa8f9								
+# pub 		:								
+# prv 		:								
+############################################

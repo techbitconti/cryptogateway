@@ -175,7 +175,7 @@ func TestSha3(t *testing.T) {
 	LogStart := "LogStart(uint256,uint256,uint256,uint256,uint256,uint256)"
 	fmt.Println("LogStart : ", Sha3FromEvent(LogStart))
 
-	//	fmt.Println("AddressToHex : ", .AddressFromEvent("0x0000000000000000000000007e5b63af5d65d6b72bfc5c00f7195a0515e4b0ed"))
+	//	fmt.Println("AddressToHex : ", AddressFromEvent("0x0000000000000000000000007e5b63af5d65d6b72bfc5c00f7195a0515e4b0ed"))
 
 	//	print := `print(uint256)`
 	//	value := big.NewInt(11)
@@ -243,11 +243,11 @@ func TestDeploy(t *testing.T) {
 	//abi :  [{"constant":false,"inputs":[],"name":"stop","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"_block_Join","type":"uint256"},{"name":"_block_Publish","type":"uint256"},{"name":"_block_Review","type":"uint256"},{"name":"_block_Split","type":"uint256"}],"name":"setConfigBlock","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"to","type":"address"},{"name":"amount","type":"uint256"}],"name":"split","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"review","outputs":[{"name":"","type":"bytes"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"from","type":"address"},{"name":"data","type":"bytes"}],"name":"publish","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"start","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"k","type":"bytes32"},{"name":"b","type":"uint256"}],"name":"join","outputs":[],"payable":true,"type":"function"},{"inputs":[],"payable":false,"type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"roundID","type":"uint256"},{"indexed":false,"name":"block_Start","type":"uint256"},{"indexed":false,"name":"block_Join","type":"uint256"},{"indexed":false,"name":"block_Publish","type":"uint256"},{"indexed":false,"name":"block_Review","type":"uint256"},{"indexed":false,"name":"block_Split","type":"uint256"}],"name":"LogStart","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"roundID","type":"uint256"},{"indexed":false,"name":"K","type":"bytes32"},{"indexed":false,"name":"B","type":"uint256"}],"name":"LogJoinOK","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"roundID","type":"uint256"},{"indexed":false,"name":"K","type":"bytes32"},{"indexed":false,"name":"B","type":"uint256"},{"indexed":false,"name":"err","type":"uint256"}],"name":"LogJoinFail","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"roundID","type":"uint256"},{"indexed":false,"name":"to","type":"address"},{"indexed":false,"name":"amount","type":"uint256"}],"name":"LogSplitOK","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"roundID","type":"uint256"},{"indexed":false,"name":"to","type":"address"},{"indexed":false,"name":"err","type":"uint256"}],"name":"LogSplitFail","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"roundID","type":"uint256"},{"indexed":false,"name":"from","type":"address"},{"indexed":false,"name":"data","type":"bytes"}],"name":"LogPublishOK","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"roundID","type":"uint256"},{"indexed":false,"name":"err","type":"uint256"}],"name":"LogFailCampaign","type":"event"}]
 	//address := "0x60322b54143ac440328960dc6d4e82a06324afe1"
 
-	url := "http://127.0.0.1:8545"
-	prv := prvKey
-	Connect(url)
-	code, abi := SolidityCompile("/home/trung/Desktop/Solarium/JoinSplit/SmartContract/contracts/JoinSplit.sol")
-	SolidityDeploy(prv, abi, code)
+	//	url := "http://127.0.0.1:8545"
+	//	prv := prvKey
+	//	Connect(url)
+	//	code, abi := SolidityCompile("/home/trung/Desktop/Solarium/JoinSplit/SmartContract/contracts/JoinSplit.sol")
+	//	SolidityDeploy(prv, abi, code)
 
 	//web3.SolidityTransact(prv, "0x60322b54143ac440328960dc6d4e82a06324afe1", abi, "start")
 }
@@ -400,4 +400,21 @@ func testSolRaw(prvKey, addr, method string, params ...interface{}) {
 	if ers != nil {
 		panic(ers)
 	}
+}
+
+func TestContract(t *testing.T) {
+
+	//	eth.Connect("http://localhost:8545")
+
+	//	contracts := eth.SolidityCompile("/Users/A/Desktop/nexle/mass/truffle/contracts/TestSource.sol")
+	//	code := contracts["Test"]["code"]
+	//	abi := contracts["Test"]["abi"]
+
+	//	eth.SolidityDeploy(config.ETH_SIM.PrivKey, abi, code)
+
+	//	eth.SolidityTransactRaw(config.ETH_SIM.PrivKey, config.ERC20_SIM.Address, `transfer(address,uint256)`, nil, "0x34e58de83ae76f96eecb8765890669a9784d641d", big.NewInt(10000000))
+
+	//	hex, _ := eth.SolidityCallRaw(config.ETH_SIM.Address, config.ERC20_SIM.Address, `balanceOf(address)`, "0x34e58de83ae76f96eecb8765890669a9784d641d")
+	//	fmt.Println(common.BytesToHash(hex).Big(), new(big.Int).SetBytes(hex))
+
 }
