@@ -57,8 +57,7 @@ func Start() {
 	go func() {
 		for {
 			update()
-			time.Sleep(3 * time.Second)
-			fmt.Println(time.Second)
+			time.Sleep(5 * time.Second)
 		}
 	}()
 }
@@ -68,7 +67,7 @@ func update() {
 	for k, v := range HMAP_DEPOSIT {
 		switch v["status"] {
 		case "waiting":
-			waiting(k, v)
+			go waiting(k, v)
 		}
 	}
 }

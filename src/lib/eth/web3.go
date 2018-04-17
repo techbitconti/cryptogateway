@@ -78,7 +78,7 @@ func call_RPC(method string, paramsIn ...interface{}) map[string]interface{} {
 	return result
 }
 
-func NewAccount(path, pass string) (common.Address, error) {
+func NewAccount(path, pass string) (string, error) {
 
 	// Generate a new random account and a funded simulator
 	key, err := crypto.GenerateKey()
@@ -91,12 +91,12 @@ func NewAccount(path, pass string) (common.Address, error) {
 
 	fmt.Println("ETH Accounts : ", ks.Accounts())
 
-	return addr, err
+	return strings.ToLower(addr.Hex()), err
 }
 
 func IsHexAddress(address string) bool {
 
-	return common.IsHexAddress(address)
+	return common.IsHexAddress(strings.ToLower(address))
 }
 
 func ValidateAmount(amount string) bool {
@@ -120,6 +120,10 @@ func GetBlockNumber() string {
 	return call_RPC("eth_blockNumber")["result"].(string)
 }
 
+func GetBlockByNumber(number interface{}) map[string]interface{} {
+	return call_RPC("eth_getBlockByNumber", number, true)["result"].(map[string]interface{})
+}
+
 func GetAccounts() (arr []string) {
 	result := call_RPC("eth_accounts")["result"]
 
@@ -134,8 +138,8 @@ func GetAccounts() (arr []string) {
 	return
 }
 
-func GetBlockByNumber(number interface{}) map[string]interface{} {
-	return call_RPC("eth_getBlockByNumber", number, true)["result"].(map[string]interface{})
+func GetCodeAt(addr string) interface{} {
+	return call_RPC("eth_getCode", addr)["result"]
 }
 
 func GetTransactionByHash(tx interface{}) map[string]interface{} {
@@ -168,12 +172,23 @@ func GetSyncing() map[string]interface{} {
 	return call_RPC("eth_syncing")
 }
 
-func GetBalance(addr interface{}) *big.Int {
+func GetBalance(addr string) *big.Int {
 
-	str := call_RPC("eth_getBalance", addr, "latest")["result"].(string)
+	result := call_RPC("eth_getBalance", addr, "latest")
+
+	if _, ok := result["result"]; !ok {
+		return big.NewInt(int64(0))
+	}
+
+	str := result["result"].(string)
+
 	balance, _ := strconv.ParseInt(str, 0, 64)
 
 	return big.NewInt(balance)
+}
+
+func UnlockAccount(addr, pass string, sec uint64) {
+	call_RPC("personal_unlockAccount", addr, pass, sec)
 }
 
 func SendTransaction(message map[string]interface{}) string {
@@ -546,4 +561,29 @@ func SendTransactionRaw(prvKey, to string, value *big.Int, data []byte) string {
 	}
 
 	return rawTx.Hash().Hex()
+}
+
+func CodeAt(addr string) ([]byte, string) {
+
+	if client == nil {
+		return []byte{}, ""
+	}
+
+	var aC common.Address = common.HexToAddress(addr)
+	code, err := client.CodeAt(context.Background(), aC, nil)
+	if err != nil {
+		return []byte{}, ""
+	}
+
+	return code, common.ToHex(code)
+}
+
+func IsHexContract(addr string) bool {
+
+	_, codeHex := CodeAt(addr)
+	if codeHex == "0x0" {
+		return false
+	}
+
+	return true
 }

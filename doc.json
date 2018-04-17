@@ -1,0 +1,110 @@
+-------------------Deposit----------------------
+url  : 	1.161.40.26:8082/deposit
+method : POST
+content-type : application/json
+body : 	{"coin" : "ETH/BTC"}
+respone :
+{
+	"result" : 0,
+	"api" : "deposit",
+	"data" : {"coin": "ETH/BTC", "deposit": "0x"},
+	"error": null
+}
+
+{
+	"result" : -1,
+	"api" : "deposit",
+	"data" : null,
+	"error": "Invalid input !!!"
+}
+
+{
+	"result" : -2,
+	"api" : "deposit",
+	"data" : null,
+	"error": "Error Coin !!!"
+}
+
+
+-------------------Withdraw----------------------
+url  : 	1.161.40.26:8082/withdraw
+method : POST
+content-type : application/json
+body : 	{"coin" : "ETH", "deposit" : "0x54B586b6e560059a16585f74FA29c5564Db5964c", "withdraw" : "0x92e69227aee8a5826ad7b310b1048c8998f9de25"}
+respone :
+{
+	"result" : 0,
+	"api" : "withdraw",
+	"data" : {"tx" : "txID" },
+	"error": null
+}
+
+{
+	"result" : -1,
+	"api" : "withdraw",
+	"data" : null,
+	"error": "Invalid input !!!"
+}
+
+{
+	"result" : -2,
+	"api" : "withdraw",
+	"data" : null,
+	"error": "Error Coin !!!"
+}
+
+{
+	"result" : -3,
+	"api" : "withdraw",
+	"data" : null,
+	"error": "Invalid verifyAddress !!!"
+}
+
+{
+	"result" : -4,
+	"api" : "withdraw",
+	"data" : null,
+	"error": "Invalid Deposit Address !!!"
+}
+
+{
+	"result" : -5,
+	"api" : "withdraw",
+	"data" : null,
+	"error": "Invalid DEPOSIT Coin !!!"
+}
+
+-------------------GetBalance----------------------
+url  : 	1.161.40.26:8082/balance
+method : POST
+content-type : application/json
+body : 	{"coin" : "ETH/BTC", "address" : "0x8dd75f7c03a048c0a66a53dbf9ed76d04e9a9ea3"}
+respone :
+
+{
+	"result" : 0,
+	"api" : "balance",
+	"data" : {"address": "0x", "balance": "10"},
+	"error": null
+}
+
+{
+	"result" : -1,
+	"api" : "balance",
+	"data" : null,
+	"error": "Invalid input !!!"
+}
+
+{
+	"result" : -2,
+	"api" : "balance",
+	"data" : null,
+	"error": "Error Coin !!!"
+}
+
+{
+	"result" : -3,
+	"api" : "balance",
+	"data" : null,
+	"error": "Invalid Address !!!"
+}

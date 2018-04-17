@@ -8,7 +8,7 @@ import (
 	"net/http"
 	//"lib/btc"
 	//"lib/eth"
-	//"gopkg.in/mgo.v2/bson"
+	"gopkg.in/mgo.v2/bson"
 
 	"module/dbScan"
 )
@@ -70,23 +70,44 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 			}
 		}
 
-		// Go-3 : sendTransaction
+		// Go-3 : check deposit balance
+		if resp.Status == 0 {
+
+			if dbScan.HMAP_DEPOSIT[deposit_Address]["status"] != "pending" {
+
+				resp.Status = -6
+				resp.Error = "Invalid Balance Of Deposit Address = 0 !!!"
+				fmt.Println(resp.Error)
+			}
+		}
+
+		// Go-4 : sendTransaction
 		if resp.Status == 0 {
 
 			amount := dbScan.HMAP_DEPOSIT[deposit_Address]["amount"]
+			fromAdmin := getAddressAdmin(coin)
 
-			mTx := map[string]string{
+			//Go-5: sendFrom Deposit to Admin
+			mTxDeposit := map[string]string{
+				"addr":     fromAdmin,
+				"amount":   amount,
+				"receiver": "NaN",
+			}
+			txFromDe := sendTransaction(coin, deposit_Address, mTxDeposit)
+			fmt.Println("txFromDe : ", txFromDe)
+
+			dbScan.HMAP_DEPOSIT[deposit_Address]["status"] = "waiting"
+
+			//Go-6 : sendFromAdmin
+			mTxAdmin := map[string]string{
 				"addr":     withdraw_Address,
 				"amount":   amount,
 				"receiver": "NaN",
 			}
+			txFromAdmin := sendTransaction(coin, fromAdmin, mTxAdmin)
+			fmt.Println("txFromAdmin : ", txFromAdmin)
 
-			//			if coin == "ERC20" {
-			//				mTx["receiver"]
-			//			}
-
-			tx := sendTransaction(coin, mTx)
-			fmt.Println(tx)
+			resp.Data = bson.M{"tx": txFromAdmin}
 		}
 	}
 
