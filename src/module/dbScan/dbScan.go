@@ -14,7 +14,7 @@ import (
 
 var HMAP_DEPOSIT = map[string]*Deposit{}
 
-func getBalance(coin, addr string) float64 {
+func GetBalance(coin, addr string) float64 {
 
 	switch coin {
 	case "BTC":
@@ -36,7 +36,7 @@ func getBalance(coin, addr string) float64 {
 	return 0
 }
 
-func getBalanceOf(ercAddr, toAddr string) int64 {
+func GetBalanceOf(ercAddr, toAddr string) int64 {
 
 	hex, err := eth.SolidityCallRaw(config.ETH_SIM.Address, ercAddr, `balanceOf(address)`, toAddr)
 	if err != nil {

@@ -8,11 +8,12 @@ import (
 	"net/http"
 	"strconv"
 
+	"config"
+	"module/dbScan"
 	//"lib/btc"
 	//"lib/eth"
-	"gopkg.in/mgo.v2/bson"
 
-	"module/dbScan"
+	"gopkg.in/mgo.v2/bson"
 )
 
 func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
@@ -92,64 +93,110 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 			// Go-4 : sendTransaction
 			if resp.Status == 0 {
 
-				amountDespsit := mDeposit.Amount
+				switch coin {
+				case "BTC", "ETH":
+					{
+						amountDespsit := mDeposit.Amount
+						aMDe, _ := strconv.ParseFloat(amountDespsit, 64)
+						aMWith, _ := strconv.ParseFloat(amountWithdraw, 64)
 
-				aMDe, _ := strconv.ParseFloat(amountDespsit, 64)
-				aMWith, _ := strconv.ParseFloat(amountWithdraw, 64)
+						balance := aMWith - aMDe
 
-				balance := aMWith - aMDe
+						if balance < float64(0) {
+							resp.Status = -7
+							resp.Error = "Amount deposit less then withdraw !!!"
+							fmt.Println(resp.Error)
+						} else {
 
-				if balance < float64(0) {
-					resp.Status = -7
-					resp.Error = "Amount deposit less then withdraw !!!"
-					fmt.Println(resp.Error)
+							fromAdmin := ""
+							switch coin {
+							case "BTC":
+								fromAdmin = config.BTC_SIM.Address
+							case "ETH":
+								fromAdmin = config.ETH_SIM.Address
+							}
 
-				} else {
+							//Go-5 : sendFrom Deposit to Admin
+							mTxDeposit := map[string]string{
+								"addr":     fromAdmin,
+								"amount":   amountWithdraw,
+								"receiver": "NaN",
+							}
+							txFromDe := sendCoin(coin, deposit_Address, mTxDeposit)
+							fmt.Println("txFromDe : ", txFromDe)
 
-					fromAdmin := ""
-					switch coin {
-					case "BTC":
-						fromAdmin = config.BTC_SIM.Address
-					case "ETH", "ERC20":
-						fromAdmin = config.ETH_SIM.Address
-					}
-
-					//Go-5 : sendFrom Deposit to Admin
-					mTxDeposit := map[string]string{
-						"addr":     fromAdmin,
-						"amount":   amountWithdraw,
-						"receiver": "NaN",
-					}
-					txFromDe := sendCoin(coin, deposit_Address, mTxDeposit)
-					fmt.Println("txFromDe : ", txFromDe)
-
-					//Go-6 : sendFromAdmin toreceipt
-					var txFromAdmin string
-					switch coin {
-					case "BTC", "ETH":
-						{
+							//Go-6 : sendFromAdmin to Receipt
 							mTxAdmin := map[string]string{
 								"addr":     withdraw_Address,
 								"amount":   amountWithdraw,
 								"receiver": "NaN",
 							}
-							txFromAdmin = sendCoin(coin, fromAdmin, mTxAdmin)
+							txFromAdmin := sendCoin(coin, fromAdmin, mTxAdmin)
 							fmt.Println("txFromAdmin : ", txFromAdmin)
-						}
-					case "ERC20":
-						{
-							tokens := amountWithdraw
-							txFromAdmin = sendERC20(mDeposit.AddressContract, withdraw_Address, tokens)
+
+							//Go-7 : update HMAP_DEPOSIT
+							mDeposit.Amount = strconv.FormatFloat(balance, 'f', -1, 64)
+							if balance <= 0 {
+								mDeposit.Status = dbScan.STATUS_WAITING
+							}
+
+							resp.Data = bson.M{"tx": txFromAdmin}
 						}
 					}
+				case "ERC20":
+					{
+						rating := getRatingFromEtherScan(mDeposit.AddressContract, "test")
+						if rating <= float64(0) {
+							resp.Status = -8
+							resp.Error = "Contract Not On EtherScan !!!" + mDeposit.AddressContract
+							fmt.Println(resp.Error)
+						}
 
-					//Go-7 : update HMAP_DEPOSIT
-					mDeposit.Amount = strconv.FormatFloat(balance, 'f', -1, 64)
-					if balance <= 0 {
-						mDeposit.Status = dbScan.STATUS_WAITING
+						if resp.Status == 0 {
+							ethDeposit, _ := strconv.ParseFloat(mDeposit.Amount, 64)
+							tokenDeposit := int64(ethDeposit / rating)
+
+							tokenWidthDraw, _ := strconv.ParseInt(amountWithdraw, 0, 64)
+							ethWidthDraw := float64(tokenWidthDraw) * rating
+
+							ethBalance := ethWidthDraw - ethDeposit
+							tokenBalance := tokenWidthDraw - tokenDeposit
+
+							if tokenBalance <= int64(0) {
+								resp.Status = -9
+								resp.Error = "Token deposit less then Token Withdraw !!!"
+								fmt.Println(resp.Error)
+
+							}
+
+							if resp.Status == 0 {
+
+								toAdmin := config.ETH_SIM.Address
+								AmountETH := strconv.FormatFloat(ethWidthDraw, 'f', -1, 64)
+
+								//Go-5 : sendFrom Deposit to Admin
+								mTxDeposit := map[string]string{
+									"addr":     toAdmin,
+									"amount":   AmountETH,
+									"receiver": "NaN",
+								}
+								txFromDe := sendCoin("ETH", deposit_Address, mTxDeposit)
+								fmt.Println("txFromDe : ", txFromDe)
+
+								//Go-6 : sendFromAdmin to Receipt
+								tokens := strconv.FormatInt(tokenWidthDraw, 10)
+								txFromAdmin := sendERC20(mDeposit.AddressContract, withdraw_Address, tokens)
+
+								//Go-7 : update HMAP_DEPOSIT
+								mDeposit.Amount = strconv.FormatFloat(ethBalance, 'f', -1, 64)
+								if ethBalance <= 0 {
+									mDeposit.Status = dbScan.STATUS_WAITING
+								}
+
+								resp.Data = bson.M{"tx": txFromAdmin}
+							}
+						}
 					}
-
-					resp.Data = bson.M{"tx": txFromAdmin}
 				}
 			}
 		}

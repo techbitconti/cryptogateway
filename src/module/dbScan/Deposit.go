@@ -73,7 +73,7 @@ func (de *Deposit) waiting() {
 
 	// GO-0 : check balance
 	fmt.Println("GO-0 : check balance")
-	balance := getBalance(de.Coin, de.AddressDeposit)
+	balance := GetBalance(de.Coin, de.AddressDeposit)
 	if balance <= float64(0) {
 		de.Status = STATUS_WAITING
 		return

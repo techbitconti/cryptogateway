@@ -6,7 +6,6 @@ import (
 	"config"
 	"lib/btc"
 	"lib/eth"
-	"module/dbScan"
 )
 
 func main() {
@@ -15,7 +14,6 @@ func main() {
 
 	startETH()
 	startBTC()
-	dbScan.Start()
 
 	http.Create(":8082")
 

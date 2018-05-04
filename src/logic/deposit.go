@@ -69,7 +69,7 @@ func Do_Deposit(ip string, w http.ResponseWriter, params []byte) {
 
 						if ratio <= float64(0) {
 							resp.Status = -4
-							resp.Error = "Error Contract Not On EtherScan !!!"
+							resp.Error = "Contract Not On EtherScan !!!" + contract
 
 							fmt.Println(resp.Error)
 						}

@@ -2,10 +2,13 @@ package logic
 
 import (
 	"encoding/base64"
+	"encoding/csv"
 	"fmt"
+	"math"
 	"math/big"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"config"
@@ -65,11 +68,11 @@ func verityTX(coin, tx string) bool {
 
 func getBalance(coin string, addr string) float64 {
 
-	return dbScan.getBalance(coin, addr)
+	return dbScan.GetBalance(coin, addr)
 }
 
 func getBalanceOf(ercAddr, toAddr string) int64 {
-	return dbScan.getBalanceOf(ercAddr, toAddr)
+	return dbScan.GetBalanceOf(ercAddr, toAddr)
 }
 
 func genAddress(coin string) (address string) {
@@ -139,7 +142,6 @@ func getRatingFromEtherScan(addr, net string) float64 {
 		records, err := r.ReadAll()
 		if err != nil {
 			fmt.Println(err)
-			return float64(0)
 		} else {
 			fmt.Println("Html records : ", records)
 
@@ -196,7 +198,7 @@ func sendCoin(coin, from string, obj map[string]string) (tx string) {
 			//tx = eth.SendTransactionRaw(config.ETH_SIM.PrivKey, to, aMountETH, []byte{})
 
 			weiBig := big.NewInt(int64(wei))
-			b := hexutil.Big(weiBig)
+			b := hexutil.Big(*weiBig)
 			value := b.String()
 
 			eth.UnlockAccount(from, "123456", uint64(10))
@@ -216,7 +218,7 @@ func sendCoin(coin, from string, obj map[string]string) (tx string) {
 
 func sendERC20(contract, to, amount string) (tx string) {
 
-	if getBalance(coin, config.ETH_SIM.Address) < float64(21000) {
+	if getBalance("ETH", config.ETH_SIM.Address) < float64(21000) {
 		fmt.Println("ERC20 not enough !!!")
 		return ""
 	}
@@ -231,4 +233,6 @@ func sendERC20(contract, to, amount string) (tx string) {
 
 	tx = eth.SolidityTransactRaw(config.ETH_SIM.PrivKey, contract, `transfer(address,uint256)`, nil, common.HexToAddress(to), tokens)
 	fmt.Println("tx ERC20 : ", tx)
+
+	return tx
 }
