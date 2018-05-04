@@ -105,7 +105,7 @@ func check_deposit(request map[string]interface{}) bool {
 		return false
 	}
 
-	if ccontract, ok := request["ccontract"]; !ok || !reflectString(ccontract) {
+	if contract, ok := request["contract"]; !ok || !reflectString(contract) {
 		return false
 	}
 

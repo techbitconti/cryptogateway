@@ -68,6 +68,10 @@ func getBalance(coin string, addr string) float64 {
 	return dbScan.getBalance(coin, addr)
 }
 
+func getBalanceOf(ercAddr, toAddr string) int64 {
+	return dbScan.getBalanceOf(ercAddr, toAddr)
+}
+
 func getAddressAdmin(coin string) string {
 	switch coin {
 	case "BTC":

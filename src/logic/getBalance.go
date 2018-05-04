@@ -11,7 +11,7 @@ import (
 )
 
 func Do_GetBalance(ip string, w http.ResponseWriter, params []byte) {
-	fmt.Println("Do_GetBalance : ", string(params)) // {"coin" : "ETH/BTC/ERC20", "address" : ""}
+	fmt.Println("Do_GetBalance : ", string(params)) // {"coin" : "ETH/BTC/ERC20", "address" : "", "contract" : ""}
 
 	resp := Writer{Api: api.BALANCE}
 
@@ -39,18 +39,44 @@ func Do_GetBalance(ip string, w http.ResponseWriter, params []byte) {
 
 		if resp.Status == 0 {
 
-			isValid := verifyAddress(coin, addr)
-			if !isValid {
-				resp.Status = -3
-				resp.Error = "Invalid Address !!!"
-				fmt.Println(resp.Error)
+			switch coin {
+			case "BTC", "ETH":
+				{
+					isValid := verifyAddress(coin, addr)
+					if !isValid {
+						resp.Status = -3
+						resp.Error = "Invalid Address !!!"
+						fmt.Println(resp.Error)
 
-			} else {
+					} else {
 
-				balance := getBalance(coin, addr)
-				resp.Status = 0
-				resp.Data = bson.M{"address": addr, "balance": balance}
+						balance := getBalance(coin, addr)
+						resp.Status = 0
+						resp.Data = bson.M{"address": addr, "balance": balance}
+					}
+				}
+
+			case "ERC20":
+				{
+					contract := request["contract"].(string)
+
+					isValid := verifyAddress("ETH", addr)
+					isValid = verifyAddress(coin, contract)
+
+					if !isValid {
+						resp.Status = -3
+						resp.Error = "Invalid Address !!!"
+						fmt.Println(resp.Error)
+
+					} else {
+
+						balance := getBalanceOf(contract, addr)
+						resp.Status = 0
+						resp.Data = bson.M{"address": addr, "balance": balance}
+					}
+				}
 			}
+
 		}
 	}
 
@@ -60,7 +86,7 @@ func Do_GetBalance(ip string, w http.ResponseWriter, params []byte) {
 
 func check_getBalance(request map[string]interface{}) bool {
 
-	if len(request) != 2 {
+	if len(request) != 4 {
 		return false
 	}
 
@@ -72,5 +98,8 @@ func check_getBalance(request map[string]interface{}) bool {
 		return false
 	}
 
+	if contract, ok := request["contract"]; !ok || !reflectString(contract) {
+		return false
+	}
 	return true
 }

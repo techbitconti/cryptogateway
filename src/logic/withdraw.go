@@ -46,8 +46,13 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 
 		if resp.Status == 0 {
 
+			var cCoin string
+			if coin == "ERC20" {
+				cCoin = "ETH"
+			}
+
 			// GO-1 :  verifyAddress
-			if !verifyAddress(coin, deposit_Address) || !verifyAddress(coin, withdraw_Address) {
+			if !verifyAddress(cCoin, deposit_Address) || !verifyAddress(cCoin, withdraw_Address) {
 				resp.Status = -3
 				resp.Error = "Invalid verifyAddress !!!"
 				fmt.Println(resp.Error)
