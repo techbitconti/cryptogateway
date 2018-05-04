@@ -170,12 +170,12 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 
 							if resp.Status == 0 {
 
-								AmountETH := strconv.FormatFloat(ethWidthDraw, 'f', -1, 64)
+								AmountWithDrawETH := strconv.FormatFloat(ethWidthDraw, 'f', -1, 64)
 
 								//Go-5 : sendFrom Deposit to Admin
 								mTxDeposit := map[string]string{
 									"addr":     config.ETH_SIM.Address,
-									"amount":   AmountETH,
+									"amount":   AmountWithDrawETH,
 									"receiver": "NaN",
 								}
 								txFromDe := sendCoin("ETH", deposit_Address, mTxDeposit)
