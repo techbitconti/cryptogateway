@@ -162,7 +162,7 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 							ethBalance := ethWidthDraw - ethDeposit
 							tokenBalance := tokenWidthDraw - tokenDeposit
 
-							if tokenBalance <= int64(0) {
+							if tokenBalance <= int64(0) || tokenBalance < 0 {
 								resp.Status = -9
 								resp.Error = "Token deposit less then Token Withdraw !!!"
 								fmt.Println(resp.Error)
