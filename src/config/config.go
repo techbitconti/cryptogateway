@@ -42,8 +42,8 @@ var ETH_TEST = struct {
 	PrivKey string
 	Address string
 }{
-	`47de15108b35169c4aff4826d5c413fe117e361a900325f6d3df1f0e04cbd706`,
-	`0x8dD75F7c03A048C0a66a53dbf9ED76d04E9a9eA3`,
+	`4d113fab8b518c9baf72e54984a20b996c38d9a858c917576eb511ac6d1ca45e`,
+	`0x99aa996ade9150137f537f15ed40b1f742ca7fd6`,
 }
 
 var ERC20_SIM = struct {

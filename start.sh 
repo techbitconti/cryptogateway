@@ -1,12 +1,28 @@
-geth --fast --cache=512 --networkid=14 --rpc --rpccorsdomain "*" --rpcapi "net,eth,web3,miner,personal"  console 2>>geth.log --datadir=/Users/A/ethereum/private/  
+geth  --rpc --rpccorsdomain "*" --rpcapi "net,eth,web3,miner,personal"  console 2>>geth.log 
+--fast --cache=512 --networkid=14 
+--rinkeby --networkid=4 
+--datadir=/Users/A/ethereum/private/ 
+--datadir=/Users/A/ethereum/rinkeby/ 
+--datadir=/Users/A/ethereum/mainnet/  
+
+--datadir=/home/ubuntu/ethereum/private
+--datadir=/home/ubuntu/ethereum/rinkeby
+--datadir=/home/ubuntu/ethereum/mainnet
 
 
-bitcoind -rpcuser="123" -rpcpassword="123"  -server -rest -txindex -debug=1 -daemon -testnet -datadir=/Users/A/bitcoin/bitcoind/
-bitcoin-cli -rpcuser="123" -rpcpassword="123" -testnet -datadir=/Users/A/bitcoin/bitcoind/
+bitcoind -rpcuser="123" -rpcpassword="123" -txindex -debug=1 -server -rest  -daemon 
+-testnet 
+-datadir=/Users/A/bitcoin/bitcoind/testnet
+-datadir=/Users/A/bitcoin/bitcoind/mainnet
+-datadir=/home/ubuntu/bitcoin/bitcoind/testnet
+-datadir=/home/ubuntu/bitcoin/bitcoind/mainnet
+
+bitcoin-cli -rpcuser="123" -rpcpassword="123"
+ -testnet -datadir=/Users/A/bitcoin/bitcoind/testnet
 
 
-btcd --rpcuser="123" --rpcpass="123" --datadir=/Users/A/bitcoin/btcd/ --logdir=/Users/A/bitcoin/btcd/  --testnet 
- --generate 1 --miningaddr=ShGn19iCHHhGjy7huZeQ2T8vtBo7DFpA9U
+btcd --rpcuser="123" --rpcpass="123" --datadir=/Users/A/bitcoin/btcd/ --logdir=/Users/A/bitcoin/btcd/ --txindex --addrindex  --notls  --testnet 
+ --generate 1 --miningaddr=2NAKhJLCi6yTM6oLjyG2U3sZJAdbcSMhgjh
 
 btcwallet --username="123" --password="123"  --appdata=/Users/A/bitcoin/btcwallet/  --logdir=/Users/A/bitcoin/btcwallet/ --testnet
  --experimentalrpclisten=127.0.0.1:18332
@@ -56,17 +72,17 @@ https://testnet.manu.backend.hamburg/faucet
 ############################################
 #				ETH Simnet					#
 ############################################
-# addres 	: 0x932ba2c642fa583f9b41525722b032b126d5c2dc								
+# addres 	: 0x8dD75F7c03A048C0a66a53dbf9ED76d04E9a9eA3								
 # pub 		:								
-# prv 		:								
+# prv 		: 47de15108b35169c4aff4826d5c413fe117e361a900325f6d3df1f0e04cbd706							
 ############################################
 
 ############################################
 #				ETH Testnet Rinkerby		#
 ############################################
-# addres 	: 								
-# pub 		:								
-# prv 		:								
+# addres 	: 0x99aa996ade9150137f537f15ed40b1f742ca7fd6								
+# pub 		: 0x04070b9d719033a78c2045eebd74f5216d764bdb97acf1e403372570573f9f7c80d265168ca6723ff245825973adcd26a09bf924c5f81422671537e94788d7c391								
+# prv 		: 4d113fab8b518c9baf72e54984a20b996c38d9a858c917576eb511ac6d1ca45e								
 ############################################
 
 ############################################

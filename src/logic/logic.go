@@ -4,15 +4,18 @@ import (
 	"encoding/base64"
 	"fmt"
 	"math/big"
+	"net/http"
 	"strconv"
 	"time"
-
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 
 	"config"
 	"lib/btc"
 	"lib/eth"
+	"module/dbScan"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 func verifyAddress(coin string, addr string) bool {
@@ -62,22 +65,7 @@ func verityTX(coin, tx string) bool {
 
 func getBalance(coin string, addr string) float64 {
 
-	switch coin {
-	case "BTC":
-		amount := btc.GetBalance(addr)
-		fmt.Println("getBalance BTC : ", amount)
-		return amount
-
-	case "ETH":
-		bigInt := eth.GetBalance(addr)
-		bigFloat := new(big.Float).SetInt(bigInt)
-		f, _ := bigFloat.Float64()
-
-		fmt.Println("getBalance ETH : ", f)
-		return f
-	}
-
-	return float64(0)
+	return dbScan.getBalance(coin, addr)
 }
 
 func getAddressAdmin(coin string) string {
@@ -98,7 +86,7 @@ func genAddress(coin string) (address string) {
 	switch coin {
 	case "BTC":
 		address = genAddressBTC()
-	case "ETH":
+	case "ETH", "ERC20":
 		address = genAddressETH()
 	}
 
@@ -125,28 +113,78 @@ func genAddressETH() string {
 	return address
 }
 
-func sendTransaction(coin, from string, obj map[string]string) (tx string) {
+func getRatingFromEtherScan(addr, net string) float64 {
+
+	if net != "main" {
+		return float64(1)
+	}
+
+	res, err := http.Get("https://etherscan.io/token/" + addr)
+	if err != nil {
+		fmt.Println(err)
+		return float64(0)
+	}
+	defer res.Body.Close()
+	if res.StatusCode != 200 {
+		fmt.Println("status code error: %d %s", res.StatusCode, res.Status)
+		return float64(0)
+	}
+
+	doc, err := goquery.NewDocumentFromReader(res.Body)
+	if err != nil {
+		fmt.Println(err)
+		return float64(0)
+	}
+
+	rating := "0"
+	doc.Find(".container #ContentPlaceHolder1_divSummary #ContentPlaceHolder1_tr_valuepertoken").Each(func(i int, s *goquery.Selection) {
+
+		data := s.Find("td").Text()
+		fmt.Println("Html td : ", data)
+
+		in := string(data)
+		r := csv.NewReader(strings.NewReader(in))
+
+		records, err := r.ReadAll()
+		if err != nil {
+			fmt.Println(err)
+			return float64(0)
+		} else {
+			fmt.Println("Html records : ", records)
+
+			record := records[1][0]
+			fmt.Println("Html record", record)
+
+			rating = strings.Split(record, " ")[2]
+			fmt.Println("Html rating", rating)
+		}
+	})
+
+	f, _ := strconv.ParseFloat(rating, 64)
+	fmt.Println(f, "Eth")
+
+	return f
+}
+
+func sendCoin(coin, from string, obj map[string]string) (tx string) {
 
 	to := obj["addr"]
 	amount := obj["amount"]
-	receiver := obj["receiver"]
-
-	aMountBTC := btc.ToBTC(amount)
-
-	amETH, _ := strconv.ParseInt(amount, 0, 64)
-	aMountETH := big.NewInt(amETH)
+	//receiver := obj["receiver"]
 
 	switch coin {
 	case "BTC":
 		{
-			//if getBalance(coin, from)+float64(0.001) < aMountBTC {
+			aMountBTC := btc.ToBTC(amount)
+			satoshi := btc.ToSatoshi(amount)
+
 			if getBalance(coin, from) < aMountBTC {
 				fmt.Println("BTC not enough !!!")
 				return ""
 			}
 
 			//btc.WalletPassphrase("123456", 10)
-			txHash, err := btc.SendFrom(from, to, aMountBTC)
+			txHash, err := btc.SendFrom(from, to, satoshi)
 			if err != nil {
 				return ""
 			}
@@ -156,15 +194,18 @@ func sendTransaction(coin, from string, obj map[string]string) (tx string) {
 
 	case "ETH":
 		{
-			//if getBalance(coin, from)+float64(21000) < float64(aMountETH.Int64()) {
-			if getBalance(coin, from) < float64(aMountETH.Int64()) {
+			amETH, _ := strconv.ParseFloat(amount, 64)
+			wei := amETH * math.Pow10(18)
+
+			if getBalance(coin, from) < float64(wei) {
 				fmt.Println("ETH not enough !!!")
 				return ""
 			}
 
 			//tx = eth.SendTransactionRaw(config.ETH_SIM.PrivKey, to, aMountETH, []byte{})
 
-			b := hexutil.Big(*aMountETH)
+			weiBig := big.NewInt(int64(wei))
+			b := hexutil.Big(weiBig)
 			value := b.String()
 
 			eth.UnlockAccount(from, "123456", uint64(10))
@@ -177,27 +218,26 @@ func sendTransaction(coin, from string, obj map[string]string) (tx string) {
 
 			fmt.Println("tx ETH : ", tx)
 		}
-
-	case "ERC20":
-		{
-			if getBalance(coin, config.ETH_SIM.Address) < float64(21000) {
-				fmt.Println("ERC20 not enough !!!")
-				return ""
-			}
-
-			hex, err := eth.SolidityCallRaw(config.ETH_SIM.Address, to, `balanceOf(address)`, config.ETH_SIM.Address)
-			if err != nil {
-				fmt.Println("ERC20 Token not enough !!!")
-				return ""
-			}
-			fmt.Println(common.BytesToHash(hex).Big(), new(big.Int).SetBytes(hex))
-
-			tokens := aMountETH
-			tx = eth.SolidityTransactRaw(config.ETH_SIM.PrivKey, to, `transfer(address,uint256)`, nil, common.HexToAddress(receiver), tokens)
-			fmt.Println("tx ERC20 : ", tx)
-		}
-
 	}
 
 	return tx
+}
+
+func sendERC20(contract, to, amount string) (tx string) {
+
+	if getBalance(coin, config.ETH_SIM.Address) < float64(21000) {
+		fmt.Println("ERC20 not enough !!!")
+		return ""
+	}
+
+	tokens, _ := strconv.ParseInt(amount, 0, 64)
+	balance := getBalanceOf(contract, config.ETH_SIM.Address)
+
+	if balance < tokens {
+		fmt.Println("ERC20 Token not enough !!!")
+		return ""
+	}
+
+	tx = eth.SolidityTransactRaw(config.ETH_SIM.PrivKey, contract, `transfer(address,uint256)`, nil, common.HexToAddress(to), tokens)
+	fmt.Println("tx ERC20 : ", tx)
 }

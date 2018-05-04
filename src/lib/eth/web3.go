@@ -99,15 +99,38 @@ func IsHexAddress(address string) bool {
 	return common.IsHexAddress(strings.ToLower(address))
 }
 
+func IsHexContract(addr string) bool {
+
+	_, codeHex := CodeAt(addr)
+	if codeHex == "0x0" {
+		return false
+	}
+
+	return true
+}
+
 func ValidateAmount(amount string) bool {
 
-	f, err := strconv.ParseInt(amount, 0, 64)
-	if err != nil || len(amount) > 20 {
+	f, err := strconv.ParseFloat(amount, 64)
+	if err != nil || len(amount) > 19 {
 		fmt.Println("ValidateAmount ", err)
 		return false
 	}
 
 	fmt.Println("ValidateAmount : ", f)
+
+	return true
+}
+
+func ValidateToken(amount string) bool {
+
+	f, err := strconv.ParseInt(amount, 0, 64)
+	if err != nil || len(amount) > 19 {
+		fmt.Println("ValidateToken ", err)
+		return false
+	}
+
+	fmt.Println("ValidateToken : ", f)
 
 	return true
 }
@@ -342,14 +365,14 @@ func SolidityCallRaw(_from, _to, method string, params ...interface{}) (hexutil.
 		}
 	}
 
-	input := common.ToHex(data)
+	//	input := common.ToHex(data)
 
-	fmt.Println("method : ", method)
-	fmt.Println("event : ", event)
-	fmt.Println("sig : ", common.ToHex(sig))
-	fmt.Println("value : ", params)
-	fmt.Println("data : ", data)
-	fmt.Println("input : ", input)
+	//	fmt.Println("method : ", method)
+	//	fmt.Println("event : ", event)
+	//	fmt.Println("sig : ", common.ToHex(sig))
+	//	fmt.Println("value : ", params)
+	//	fmt.Println("data : ", data)
+	//	fmt.Println("input : ", input)
 	// Input //
 
 	var from common.Address = common.HexToAddress(_from)
@@ -394,7 +417,10 @@ func SolidityTransact(prvKey, addr, abi, method string, params ...interface{}) s
 		txList[addr0.Hex()] = make([]uint64, 0)
 	} else {
 		max := len(txList[addr0.Hex()])
-		nonce = txList[addr0.Hex()][max-1] + 1
+		nc := txList[addr0.Hex()][max-1] + 1
+		if nc >= nonce {
+			nonce = nc
+		}
 	}
 	txList[addr0.Hex()] = append(txList[addr0.Hex()], nonce)
 
@@ -448,11 +474,11 @@ func SolidityTransactRaw(prvKey, addr, method string, amount *big.Int, params ..
 
 	input := common.ToHex(data)
 
-	fmt.Println("method : ", method)
-	fmt.Println("event : ", event)
-	fmt.Println("sig : ", common.ToHex(sig))
-	fmt.Println("value : ", params)
-	fmt.Println("data : ", data)
+	//	fmt.Println("method : ", method)
+	//	fmt.Println("event : ", event)
+	//	fmt.Println("sig : ", common.ToHex(sig))
+	//	fmt.Println("value : ", params)
+	//	fmt.Println("data : ", data)
 	fmt.Println("input : ", input)
 	// Input //
 
@@ -461,14 +487,14 @@ func SolidityTransactRaw(prvKey, addr, method string, amount *big.Int, params ..
 	msg := ethereum.CallMsg{From: opts.From, To: &aC, Value: nil, Data: data}
 	gasLimit, erg := client.EstimateGas(context.Background(), msg)
 	if erg != nil {
+		fmt.Println("Error GasLimit")
 		return ""
 	}
 
 	// Nonce //
 	nonce, ern := client.PendingNonceAt(context.Background(), addr0)
 	if ern != nil {
-		n, _ := fmt.Printf("%v", ern)
-		fmt.Println(n)
+		fmt.Println("Error Nonce", ern)
 	}
 	fmt.Println("nonce : ", nonce)
 
@@ -476,7 +502,10 @@ func SolidityTransactRaw(prvKey, addr, method string, amount *big.Int, params ..
 		txList[addr0.Hex()] = make([]uint64, 0)
 	} else {
 		max := len(txList[addr0.Hex()])
-		nonce = txList[addr0.Hex()][max-1] + 1
+		nc := txList[addr0.Hex()][max-1] + 1
+		if nc >= nonce {
+			nonce = nc
+		}
 	}
 	txList[addr0.Hex()] = append(txList[addr0.Hex()], nonce)
 
@@ -493,13 +522,15 @@ func SolidityTransactRaw(prvKey, addr, method string, amount *big.Int, params ..
 	if err != nil {
 		return ""
 	}
-	fmt.Println("rawTx : ", rawTx, rawTx.Hash().Hex())
 
 	// SendTraction to Contract //
 	ers := client.SendTransaction(context.Background(), rawTx)
 	if ers != nil {
+		fmt.Println("Error SendTraction to Contract")
 		return ""
 	}
+
+	fmt.Println("rawTx : ", rawTx, rawTx.Hash().Hex())
 
 	return rawTx.Hash().Hex()
 }
@@ -535,7 +566,10 @@ func SendTransactionRaw(prvKey, to string, value *big.Int, data []byte) string {
 		txList[addr0.Hex()] = make([]uint64, 0)
 	} else {
 		max := len(txList[addr0.Hex()])
-		nonce = txList[addr0.Hex()][max-1] + 1
+		nc := txList[addr0.Hex()][max-1] + 1
+		if nc >= nonce {
+			nonce = nc
+		}
 	}
 	txList[addr0.Hex()] = append(txList[addr0.Hex()], nonce)
 
@@ -576,14 +610,4 @@ func CodeAt(addr string) ([]byte, string) {
 	}
 
 	return code, common.ToHex(code)
-}
-
-func IsHexContract(addr string) bool {
-
-	_, codeHex := CodeAt(addr)
-	if codeHex == "0x0" {
-		return false
-	}
-
-	return true
 }

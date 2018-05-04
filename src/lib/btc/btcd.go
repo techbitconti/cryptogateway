@@ -286,7 +286,7 @@ func ValidateAddress(addr string) (acc *btcjson.ValidateAddressWalletResult, err
 func ValidateAmount(amount string) (float64, bool) {
 
 	f, err := strconv.ParseFloat(amount, 64)
-	if err != nil || len(amount) > 10 {
+	if err != nil || len(amount) > 9 {
 		log.Println("ValidateAmount ", err)
 		return float64(0), false
 	}
@@ -298,12 +298,25 @@ func ValidateAmount(amount string) (float64, bool) {
 
 func ToBTC(amount string) float64 {
 
-	value, ok := ValidateAmount(amount)
+	f, ok := ValidateAmount(amount)
 	if !ok {
 		return float64(0)
 	}
 
-	return value
+	value, _ := btcutil.NewAmount(f)
+
+	return value.ToBTC()
+}
+
+func ToSatoshi(amount string) float64 {
+	f, ok := ValidateAmount(amount)
+	if !ok {
+		return float64(0)
+	}
+
+	value, _ := btcutil.NewAmount(f)
+
+	return value.ToUnit(btcutil.AmountSatoshi)
 }
 
 func ListAccounts() (map[string]btcutil.Amount, error) {
