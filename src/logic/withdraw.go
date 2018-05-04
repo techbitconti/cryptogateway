@@ -63,80 +63,96 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 		if resp.Status == 0 {
 
 			mDeposit, ok := dbScan.HMAP_DEPOSIT[deposit_Address]
+
 			if !ok {
 				resp.Status = -4
 				resp.Error = "Invalid Deposit Address !!!"
 				fmt.Println(resp.Error)
+			}
 
-			} else {
-
-				if mDeposit["coin"] != coin {
+			if resp.Status == 0 {
+				if mDeposit.Coin != coin {
 					resp.Status = -5
 					resp.Error = "Invalid DEPOSIT Coin !!!"
 					fmt.Println(resp.Error)
 				}
 			}
-		}
 
-		// Go-3 : check deposit balance
-		if resp.Status == 0 {
+			// Go-3 : check deposit balance
+			if resp.Status == 0 {
 
-			if dbScan.HMAP_DEPOSIT[deposit_Address]["status"] != "pending" {
+				if mDeposit.Status != dbScan.STATUS_PENDING {
 
-				resp.Status = -6
-				resp.Error = "Invalid Balance Of Deposit Address = 0 !!!"
-				fmt.Println(resp.Error)
-			}
-		}
-
-		amountDespsit := dbScan.HMAP_DEPOSIT[deposit_Address]["amount"]
-
-		// Go-4 : sendTransaction
-		if resp.Status == 0 {
-
-			aMDe, _ := strconv.ParseFloat(amountDespsit, 64)
-			aMWith, _ := strconv.ParseFloat(amountWithdraw, 64)
-
-			balance := aMWith - aMDe
-
-			if balance < 0 {
-				resp.Status = -7
-				resp.Error = "Amount deposit less then withdraw !!!"
-				fmt.Println(resp.Error)
-
-			} else {
-
-				fromAdmin := getAddressAdmin(coin)
-
-				//Go-5 : sendFrom Deposit to Admin
-				mTxDeposit := map[string]string{
-					"addr":     fromAdmin,
-					"amount":   amountWithdraw,
-					"receiver": "NaN",
-				}
-				txFromDe := sendTransaction(coin, deposit_Address, mTxDeposit)
-				fmt.Println("txFromDe : ", txFromDe)
-
-				//Go-6 : sendFromAdmin toreceipt
-				mTxAdmin := map[string]string{
-					"addr":     withdraw_Address,
-					"amount":   amountWithdraw,
-					"receiver": "NaN",
-				}
-				txFromAdmin := sendTransaction(coin, fromAdmin, mTxAdmin)
-				fmt.Println("txFromAdmin : ", txFromAdmin)
-
-				resp.Data = bson.M{"tx": txFromAdmin}
-
-				//Go-7 : update HMAP_DEPOSIT
-				dbScan.HMAP_DEPOSIT[deposit_Address]["amount"] = strconv.FormatFloat(balance, 'f', -1, 64)
-				if balance <= 0 {
-					dbScan.HMAP_DEPOSIT[deposit_Address]["status"] = "waiting"
+					resp.Status = -6
+					resp.Error = "Invalid Balance Of Deposit Address = 0 !!!"
+					fmt.Println(resp.Error)
 				}
 			}
 
-		}
+			// Go-4 : sendTransaction
+			if resp.Status == 0 {
 
+				amountDespsit := mDeposit.Amount
+
+				aMDe, _ := strconv.ParseFloat(amountDespsit, 64)
+				aMWith, _ := strconv.ParseFloat(amountWithdraw, 64)
+
+				balance := aMWith - aMDe
+
+				if balance < float64(0) {
+					resp.Status = -7
+					resp.Error = "Amount deposit less then withdraw !!!"
+					fmt.Println(resp.Error)
+
+				} else {
+
+					fromAdmin := ""
+					switch coin {
+					case "BTC":
+						fromAdmin = config.BTC_SIM.Address
+					case "ETH", "ERC20":
+						fromAdmin = config.ETH_SIM.Address
+					}
+
+					//Go-5 : sendFrom Deposit to Admin
+					mTxDeposit := map[string]string{
+						"addr":     fromAdmin,
+						"amount":   amountWithdraw,
+						"receiver": "NaN",
+					}
+					txFromDe := sendCoin(coin, deposit_Address, mTxDeposit)
+					fmt.Println("txFromDe : ", txFromDe)
+
+					//Go-6 : sendFromAdmin toreceipt
+					var txFromAdmin string
+					switch coin {
+					case "BTC", "ETH":
+						{
+							mTxAdmin := map[string]string{
+								"addr":     withdraw_Address,
+								"amount":   amountWithdraw,
+								"receiver": "NaN",
+							}
+							txFromAdmin = sendCoin(coin, fromAdmin, mTxAdmin)
+							fmt.Println("txFromAdmin : ", txFromAdmin)
+						}
+					case "ERC20":
+						{
+							tokens := amountWithdraw
+							txFromAdmin = sendERC20(mDeposit.AddressContract, withdraw_Address, tokens)
+						}
+					}
+
+					//Go-7 : update HMAP_DEPOSIT
+					mDeposit.Amount = strconv.FormatFloat(balance, 'f', -1, 64)
+					if balance <= 0 {
+						mDeposit.Status = dbScan.STATUS_WAITING
+					}
+
+					resp.Data = bson.M{"tx": txFromAdmin}
+				}
+			}
+		}
 	}
 
 	data, _ := json.Marshal(resp)

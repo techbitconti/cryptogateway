@@ -72,19 +72,6 @@ func getBalanceOf(ercAddr, toAddr string) int64 {
 	return dbScan.getBalanceOf(ercAddr, toAddr)
 }
 
-func getAddressAdmin(coin string) string {
-	switch coin {
-	case "BTC":
-		return config.BTC_SIM.Address
-	case "ETH":
-		return config.ETH_SIM.Address
-	case "ERC20":
-		return config.ERC20_SIM.Address
-	}
-
-	return ""
-}
-
 func genAddress(coin string) (address string) {
 
 	switch coin {

@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"lib/btc"
 	"lib/eth"
+	"math"
 	"math/big"
-	"strconv"
-	"time"
+
+	"config"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 var HMAP_DEPOSIT = map[string]*Deposit{}

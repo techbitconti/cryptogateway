@@ -1,5 +1,11 @@
 package dbScan
 
+import (
+	"fmt"
+	"strconv"
+	"time"
+)
+
 type Deposit struct {
 	AddressDeposit  string `json:"deposit"`
 	AddressContract string `json:"contract"`
