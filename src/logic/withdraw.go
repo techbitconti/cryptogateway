@@ -114,31 +114,35 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 								fromAdmin = config.ETH_SIM.Address
 							}
 
-							//Go-5 : sendFrom Deposit to Admin
-							mTxDeposit := map[string]string{
-								"addr":     fromAdmin,
-								"amount":   amountWithdraw,
-								"receiver": "NaN",
+							if resp.Status == 0 {
+								//Go-5 : sendFrom Deposit to Admin
+								from := deposit_Address
+								to := fromAdmin
+								amount := amountWithdraw
+
+								txToAdmin := sendCoin(coin, from, to, amount)
+								fmt.Println("txToAdmin : ", txToAdmin)
+								if txToAdmin == "" {
+									resp.Status = -8
+									resp.Error = "ETH not enough txToAdmin !!!"
+									fmt.Println(resp.Error)
+								}
 							}
-							txFromDe := sendCoin(coin, deposit_Address, mTxDeposit)
-							fmt.Println("txFromDe : ", txFromDe)
 
-							//Go-6 : sendFromAdmin to Receipt
-							mTxAdmin := map[string]string{
-								"addr":     withdraw_Address,
-								"amount":   amountWithdraw,
-								"receiver": "NaN",
+							if resp.Status == 0 {
+								//Go-6 : sendFromAdmin to Receipt
+
+								txFromAdmin := sendCoin(coin, fromAdmin, withdraw_Address, amountWithdraw)
+								fmt.Println("txFromAdmin : ", txFromAdmin)
+
+								//Go-7 : update HMAP_DEPOSIT
+								mDeposit.Amount = strconv.FormatFloat(balance, 'f', -1, 64)
+								//							if balance <= 0 {
+								//								mDeposit.Status = dbScan.STATUS_WAITING
+								//							}
+
+								resp.Data = bson.M{"tx": txFromAdmin}
 							}
-							txFromAdmin := sendCoin(coin, fromAdmin, mTxAdmin)
-							fmt.Println("txFromAdmin : ", txFromAdmin)
-
-							//Go-7 : update HMAP_DEPOSIT
-							mDeposit.Amount = strconv.FormatFloat(balance, 'f', -1, 64)
-							//							if balance <= 0 {
-							//								mDeposit.Status = dbScan.STATUS_WAITING
-							//							}
-
-							resp.Data = bson.M{"tx": txFromAdmin}
 						}
 					}
 				case "ERC20":
@@ -173,15 +177,12 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 
 							if resp.Status == 0 {
 								//Go-5 : sendFrom Deposit to Admin
-								AmountWithDrawETH := strconv.FormatFloat(ethWidthDraw, 'f', -1, 64)
+								from := deposit_Address
+								to := config.ETH_SIM.Address
+								amount := strconv.FormatFloat(ethWidthDraw, 'f', -1, 64)
 
-								mTxDeposit := map[string]string{
-									"addr":     config.ETH_SIM.Address,
-									"amount":   AmountWithDrawETH,
-									"receiver": "NaN",
-								}
-								txToAdmin := sendCoin("ETH", deposit_Address, mTxDeposit)
-								fmt.Println("txFromDe : ", txToAdmin)
+								txToAdmin := sendCoin("ETH", from, to, amount)
+								fmt.Println("txToAdmin : ", txToAdmin)
 								if txToAdmin == "" {
 									resp.Status = -10
 									resp.Error = "ETH not enough txToAdmin !!!"

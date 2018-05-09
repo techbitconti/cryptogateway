@@ -158,11 +158,7 @@ func getRatingFromEtherScan(addr, net string) float64 {
 	return f
 }
 
-func sendCoin(coin, from string, obj map[string]string) (tx string) {
-
-	to := obj["addr"]
-	amount := obj["amount"]
-	//receiver := obj["receiver"]
+func sendCoin(coin, from, to, amount string) (tx string) {
 
 	switch coin {
 	case "BTC":
