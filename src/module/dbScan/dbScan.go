@@ -29,7 +29,7 @@ func GetBalance(coin, addr string) float64 {
 
 		ether := wei / math.Pow10(18)
 
-		fmt.Println("getBalance ETH : ", ether, "wei", wei)
+		fmt.Println("getBalance :", ether, "ether", " -- wei", wei)
 		return ether
 	}
 

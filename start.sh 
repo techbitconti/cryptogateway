@@ -12,17 +12,23 @@ geth  --rpc --rpccorsdomain "*" --rpcapi "net,eth,web3,miner,personal"  console 
 
 bitcoind -rpcuser="123" -rpcpassword="123" -txindex -debug=1 -server -rest  -daemon 
 -testnet 
+-regtest
+
+-datadir=/Users/A/bitcoin/bitcoind/simnet
 -datadir=/Users/A/bitcoin/bitcoind/testnet
 -datadir=/Users/A/bitcoin/bitcoind/mainnet
+
+-datadir=/home/ubuntu/bitcoin/bitcoind/simnet
 -datadir=/home/ubuntu/bitcoin/bitcoind/testnet
 -datadir=/home/ubuntu/bitcoin/bitcoind/mainnet
 
 bitcoin-cli -rpcuser="123" -rpcpassword="123"
- -testnet -datadir=/Users/A/bitcoin/bitcoind/testnet
+-regtest
 
 
-btcd --rpcuser="123" --rpcpass="123" --datadir=/Users/A/bitcoin/btcd/ --logdir=/Users/A/bitcoin/btcd/ --txindex --addrindex  --notls  --testnet 
- --generate 1 --miningaddr=2NAKhJLCi6yTM6oLjyG2U3sZJAdbcSMhgjh
+
+btcd --rpcuser="123" --rpcpass="123" --datadir=/Users/A/bitcoin/btcd/ --logdir=/Users/A/bitcoin/btcd/ --txindex --addrindex  --testnet 
+--generate 1 --miningaddr=2NAKhJLCi6yTM6oLjyG2U3sZJAdbcSMhgjh
 
 btcwallet --username="123" --password="123"  --appdata=/Users/A/bitcoin/btcwallet/  --logdir=/Users/A/bitcoin/btcwallet/ --testnet
  --experimentalrpclisten=127.0.0.1:18332

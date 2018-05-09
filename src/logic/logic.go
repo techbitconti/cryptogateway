@@ -17,7 +17,6 @@ import (
 	"module/dbScan"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
@@ -188,14 +187,15 @@ func sendCoin(coin, from string, obj map[string]string) (tx string) {
 	case "ETH":
 		{
 			amETH, _ := strconv.ParseFloat(amount, 64)
-			wei := amETH * math.Pow10(18)
 
-			if getBalance(coin, from) < float64(wei) {
-				fmt.Println("ETH not enough !!!")
+			if getBalance(coin, from) < float64(amETH) {
+				fmt.Println("ETH not enough !!!", amETH)
 				return ""
 			}
 
 			//tx = eth.SendTransactionRaw(config.ETH_SIM.PrivKey, to, aMountETH, []byte{})
+
+			wei := amETH * math.Pow10(18)
 
 			weiBig := big.NewInt(int64(wei))
 			b := hexutil.Big(*weiBig)
@@ -216,22 +216,25 @@ func sendCoin(coin, from string, obj map[string]string) (tx string) {
 	return tx
 }
 
-func sendERC20(contract, to, amount string) (tx string) {
+func sendERC20(contract, receiver, amount string) (tx string) {
 
-	if getBalance("ETH", config.ETH_SIM.Address) < float64(21000) {
-		fmt.Println("ERC20 not enough !!!")
+	amETH := getBalance("ETH", config.ETH_SIM.Address)
+	wei := amETH * math.Pow10(18)
+
+	if wei < float64(21000) {
+		fmt.Println("ERC20 not enough gas!!!")
 		return ""
 	}
 
-	tokens, _ := strconv.ParseInt(amount, 0, 64)
+	token, _ := strconv.ParseInt(amount, 0, 64)
 	balance := getBalanceOf(contract, config.ETH_SIM.Address)
 
-	if balance < tokens {
-		fmt.Println("ERC20 Token not enough !!!")
+	if balance < token {
+		fmt.Println("ERC20 Token not enough !!!", balance, token)
 		return ""
 	}
 
-	tx = eth.SolidityTransactRaw(config.ETH_SIM.PrivKey, contract, `transfer(address,uint256)`, nil, common.HexToAddress(to), tokens)
+	tx = eth.SolidityTransactRaw(config.ETH_SIM.PrivKey, contract, `transfer(address,uint256)`, nil, receiver, big.NewInt(token))
 	fmt.Println("tx ERC20 : ", tx)
 
 	return tx

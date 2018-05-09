@@ -80,15 +80,13 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 			}
 
 			// Go-3 : check deposit balance
-			if resp.Status == 0 {
-
-				if mDeposit.Status != dbScan.STATUS_PENDING {
-
-					resp.Status = -6
-					resp.Error = "Invalid Balance Of Deposit Address = 0 !!!"
-					fmt.Println(resp.Error)
-				}
-			}
+			//			if resp.Status == 0 {
+			//				if mDeposit.Status != dbScan.STATUS_PENDING {
+			//					resp.Status = -6
+			//					resp.Error = "Invalid Balance Of Deposit Address = 0 !!!"
+			//					fmt.Println(resp.Error)
+			//				}
+			//			}
 
 			// Go-4 : sendTransaction
 			if resp.Status == 0 {
@@ -100,7 +98,7 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 						aMDe, _ := strconv.ParseFloat(amountDespsit, 64)
 						aMWith, _ := strconv.ParseFloat(amountWithdraw, 64)
 
-						balance := aMWith - aMDe
+						balance := aMDe - aMWith
 
 						if balance < float64(0) {
 							resp.Status = -7
@@ -136,9 +134,9 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 
 							//Go-7 : update HMAP_DEPOSIT
 							mDeposit.Amount = strconv.FormatFloat(balance, 'f', -1, 64)
-							if balance <= 0 {
-								mDeposit.Status = dbScan.STATUS_WAITING
-							}
+							//							if balance <= 0 {
+							//								mDeposit.Status = dbScan.STATUS_WAITING
+							//							}
 
 							resp.Data = bson.M{"tx": txFromAdmin}
 						}
@@ -155,44 +153,63 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 						if resp.Status == 0 {
 							ethDeposit, _ := strconv.ParseFloat(mDeposit.Amount, 64)
 							tokenDeposit := int64(ethDeposit / rating)
+							fmt.Println("ethDeposit : ", ethDeposit, "tokenDeposit :", tokenDeposit)
 
 							tokenWidthDraw, _ := strconv.ParseInt(amountWithdraw, 0, 64)
 							ethWidthDraw := float64(tokenWidthDraw) * rating
+							fmt.Println("ethWidthDraw : ", ethWidthDraw, "tokenWidthDraw :", tokenWidthDraw)
 
-							ethBalance := ethWidthDraw - ethDeposit
-							tokenBalance := tokenWidthDraw - tokenDeposit
+							ethBalance := ethDeposit - ethWidthDraw
+							tokenBalance := tokenDeposit - tokenWidthDraw
 
-							if tokenBalance <= int64(0) || tokenBalance < 0 {
+							fmt.Println("ethBalance : ", ethBalance)
+							fmt.Println("tokenBalance : ", tokenBalance)
+
+							if tokenBalance <= int64(0) || ethBalance < float64(0) {
 								resp.Status = -9
 								resp.Error = "Token deposit less then Token Withdraw !!!"
 								fmt.Println(resp.Error)
 							}
 
 							if resp.Status == 0 {
-
+								//Go-5 : sendFrom Deposit to Admin
 								AmountWithDrawETH := strconv.FormatFloat(ethWidthDraw, 'f', -1, 64)
 
-								//Go-5 : sendFrom Deposit to Admin
 								mTxDeposit := map[string]string{
 									"addr":     config.ETH_SIM.Address,
 									"amount":   AmountWithDrawETH,
 									"receiver": "NaN",
 								}
-								txFromDe := sendCoin("ETH", deposit_Address, mTxDeposit)
-								fmt.Println("txFromDe : ", txFromDe)
+								txToAdmin := sendCoin("ETH", deposit_Address, mTxDeposit)
+								fmt.Println("txFromDe : ", txToAdmin)
+								if txToAdmin == "" {
+									resp.Status = -10
+									resp.Error = "ETH not enough txToAdmin !!!"
+									fmt.Println(resp.Error)
+								}
+							}
 
+							if resp.Status == 0 {
 								//Go-6 : sendFromAdmin to Receipt
 								tokens := strconv.FormatInt(tokenWidthDraw, 10)
 								txFromAdmin := sendERC20(mDeposit.AddressContract, withdraw_Address, tokens)
-
-								//Go-7 : update HMAP_DEPOSIT
-								mDeposit.Amount = strconv.FormatFloat(ethBalance, 'f', -1, 64)
-								if ethBalance <= 0 {
-									mDeposit.Status = dbScan.STATUS_WAITING
+								fmt.Println("txFromAdmin : ", txFromAdmin)
+								if txFromAdmin == "" {
+									resp.Status = -10
+									resp.Error = "ERC20 not enough txFromAdmin !!!"
+									fmt.Println(resp.Error)
 								}
-
 								resp.Data = bson.M{"tx": txFromAdmin}
 							}
+
+							if resp.Status == 0 {
+								//Go-7 : update HMAP_DEPOSIT
+								mDeposit.Amount = strconv.FormatFloat(ethBalance, 'f', -1, 64)
+								//								if ethBalance <= 0 {
+								//									mDeposit.Status = dbScan.STATUS_WAITING
+								//								}
+							}
+
 						}
 					}
 				}

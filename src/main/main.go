@@ -13,7 +13,7 @@ func main() {
 	config.SetPATH("local")
 
 	startETH()
-	startBTC()
+	//startBTC()
 
 	http.Create(":8082")
 

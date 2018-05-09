@@ -9,9 +9,9 @@ import (
 type Deposit struct {
 	AddressDeposit  string `json:"deposit"`
 	AddressContract string `json:"contract"`
-	Status          string `json:"status"`
-	Coin            string `json:"coin"`
-	Amount          string `json:"amount"`
+	//Status          string `json:"status"`
+	Coin   string `json:"coin"`
+	Amount string `json:"amount"`
 }
 
 type Receipt struct {
@@ -30,7 +30,7 @@ func NewDepositCoin(deposit, coin string) *Deposit {
 
 	de := &Deposit{}
 	de.AddressDeposit = deposit
-	de.Status = STATUS_WAITING
+	//de.Status = STATUS_WAITING
 	de.Coin = coin
 
 	go de.run()
@@ -43,7 +43,7 @@ func NewDepositERC20(depositAddr, contractAddr, coin string) *Deposit {
 	de := &Deposit{}
 	de.AddressDeposit = depositAddr
 	de.AddressContract = contractAddr
-	de.Status = STATUS_WAITING
+	//de.Status = STATUS_WAITING
 	de.Coin = coin
 
 	go de.run()
@@ -54,12 +54,15 @@ func NewDepositERC20(depositAddr, contractAddr, coin string) *Deposit {
 func (de *Deposit) run() {
 
 	for {
-		switch de.Status {
-		case STATUS_WAITING:
-			de.waiting()
-		}
 
-		time.Sleep(5 * time.Second)
+		//		switch de.Status {
+		//		case STATUS_WAITING:
+		//			de.waiting()
+		//		}
+
+		de.waiting()
+
+		time.Sleep(10 * time.Second)
 	}
 }
 
@@ -67,22 +70,35 @@ func (de *Deposit) notify() {
 
 }
 
+func (de *Deposit) checkBalance() (balance float64) {
+
+	// GO-0 : check balance
+	fmt.Println("GO-0 : check balance", de)
+
+	cCoin := ""
+	if de.Coin == "ERC20" {
+		cCoin = "ETH"
+	}
+	balance = GetBalance(cCoin, de.AddressDeposit)
+
+	// Go-1 : Notify
+	de.notify()
+
+	return
+}
+
 func (de *Deposit) waiting() {
 
 	fmt.Println("................waiting...................")
 
-	// GO-0 : check balance
-	fmt.Println("GO-0 : check balance")
-	balance := GetBalance(de.Coin, de.AddressDeposit)
-	if balance <= float64(0) {
-		de.Status = STATUS_WAITING
-		return
-	}
-
-	de.notify()
+	balance := de.checkBalance()
+	//	if balance <= float64(0) {
+	//		de.Status = STATUS_WAITING
+	//		return
+	//	}
 
 	// GO-1 : status pending
-	fmt.Println("GO-1 : status pending")
-	de.Status = STATUS_PENDING
+	//fmt.Println("GO-1 : status pending")
+	//de.Status = STATUS_PENDING
 	de.Amount = strconv.FormatFloat(balance, 'f', -1, 64)
 }

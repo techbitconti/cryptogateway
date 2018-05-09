@@ -86,7 +86,7 @@ func Do_GetBalance(ip string, w http.ResponseWriter, params []byte) {
 
 func check_getBalance(request map[string]interface{}) bool {
 
-	if len(request) != 4 {
+	if len(request) != 3 {
 		return false
 	}
 
@@ -94,7 +94,7 @@ func check_getBalance(request map[string]interface{}) bool {
 		return false
 	}
 
-	if addr, ok := request["address"]; !ok || !reflectString(addr) {
+	if address, ok := request["address"]; !ok || !reflectString(address) {
 		return false
 	}
 
