@@ -79,15 +79,6 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 				}
 			}
 
-			// Go-3 : check deposit balance
-			//			if resp.Status == 0 {
-			//				if mDeposit.Status != dbScan.STATUS_PENDING {
-			//					resp.Status = -6
-			//					resp.Error = "Invalid Balance Of Deposit Address = 0 !!!"
-			//					fmt.Println(resp.Error)
-			//				}
-			//			}
-
 			// Go-4 : sendTransaction
 			if resp.Status == 0 {
 
@@ -101,7 +92,7 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 						balance := aMDe - aMWith
 
 						if balance < float64(0) {
-							resp.Status = -7
+							resp.Status = -6
 							resp.Error = "Amount deposit less then withdraw !!!"
 							fmt.Println(resp.Error)
 						} else {
@@ -123,25 +114,28 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 								txToAdmin := sendCoin(coin, from, to, amount)
 								fmt.Println("txToAdmin : ", txToAdmin)
 								if txToAdmin == "" {
-									resp.Status = -8
-									resp.Error = "ETH not enough txToAdmin !!!"
+									resp.Status = -7
+									resp.Error = "Not enough txToAdmin !!!" + coin
 									fmt.Println(resp.Error)
 								}
 							}
 
 							if resp.Status == 0 {
 								//Go-6 : sendFromAdmin to Receipt
-
 								txFromAdmin := sendCoin(coin, fromAdmin, withdraw_Address, amountWithdraw)
 								fmt.Println("txFromAdmin : ", txFromAdmin)
-
-								//Go-7 : update HMAP_DEPOSIT
-								mDeposit.Amount = strconv.FormatFloat(balance, 'f', -1, 64)
-								//							if balance <= 0 {
-								//								mDeposit.Status = dbScan.STATUS_WAITING
-								//							}
+								if txFromAdmin == "" {
+									resp.Status = -8
+									resp.Error = "Not enough txFromAdmin !!!" + coin
+									fmt.Println(resp.Error)
+								}
 
 								resp.Data = bson.M{"tx": txFromAdmin}
+							}
+
+							if resp.Status == 0 {
+								//Go-7 : update HMAP_DEPOSIT
+								mDeposit.Amount = strconv.FormatFloat(balance, 'f', -1, 64)
 							}
 						}
 					}
@@ -149,16 +143,18 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 					{
 						rating := getRatingFromEtherScan(mDeposit.AddressContract, "test")
 						if rating <= float64(0) {
-							resp.Status = -8
+							resp.Status = -9
 							resp.Error = "Contract Not On EtherScan !!!" + mDeposit.AddressContract
 							fmt.Println(resp.Error)
 						}
 
 						if resp.Status == 0 {
+							// GO : convert deposit ETH to Token
 							ethDeposit, _ := strconv.ParseFloat(mDeposit.Amount, 64)
 							tokenDeposit := int64(ethDeposit / rating)
 							fmt.Println("ethDeposit : ", ethDeposit, "tokenDeposit :", tokenDeposit)
 
+							// GO : convert withdraw Token to ETH
 							tokenWidthDraw, _ := strconv.ParseInt(amountWithdraw, 0, 64)
 							ethWidthDraw := float64(tokenWidthDraw) * rating
 							fmt.Println("ethWidthDraw : ", ethWidthDraw, "tokenWidthDraw :", tokenWidthDraw)
@@ -170,7 +166,7 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 							fmt.Println("tokenBalance : ", tokenBalance)
 
 							if tokenBalance <= int64(0) || ethBalance < float64(0) {
-								resp.Status = -9
+								resp.Status = -10
 								resp.Error = "Token deposit less then Token Withdraw !!!"
 								fmt.Println(resp.Error)
 							}
@@ -184,7 +180,7 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 								txToAdmin := sendCoin("ETH", from, to, amount)
 								fmt.Println("txToAdmin : ", txToAdmin)
 								if txToAdmin == "" {
-									resp.Status = -10
+									resp.Status = -11
 									resp.Error = "ETH not enough txToAdmin !!!"
 									fmt.Println(resp.Error)
 								}
@@ -196,19 +192,17 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 								txFromAdmin := sendERC20(mDeposit.AddressContract, withdraw_Address, tokens)
 								fmt.Println("txFromAdmin : ", txFromAdmin)
 								if txFromAdmin == "" {
-									resp.Status = -10
+									resp.Status = -12
 									resp.Error = "ERC20 not enough txFromAdmin !!!"
 									fmt.Println(resp.Error)
 								}
+
 								resp.Data = bson.M{"tx": txFromAdmin}
 							}
 
 							if resp.Status == 0 {
 								//Go-7 : update HMAP_DEPOSIT
 								mDeposit.Amount = strconv.FormatFloat(ethBalance, 'f', -1, 64)
-								//								if ethBalance <= 0 {
-								//									mDeposit.Status = dbScan.STATUS_WAITING
-								//								}
 							}
 
 						}

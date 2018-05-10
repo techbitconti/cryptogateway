@@ -43,7 +43,6 @@ func NewDepositERC20(depositAddr, contractAddr, coin string) *Deposit {
 	de := &Deposit{}
 	de.AddressDeposit = depositAddr
 	de.AddressContract = contractAddr
-	//de.Status = STATUS_WAITING
 	de.Coin = coin
 
 	go de.run()
@@ -55,18 +54,13 @@ func (de *Deposit) run() {
 
 	for {
 
-		//		switch de.Status {
-		//		case STATUS_WAITING:
-		//			de.waiting()
-		//		}
-
 		de.waiting()
 
 		time.Sleep(10 * time.Second)
 	}
 }
 
-func (de *Deposit) notify() {
+func (de *Deposit) notify(balance float64) {
 
 }
 
@@ -81,9 +75,6 @@ func (de *Deposit) checkBalance() (balance float64) {
 	}
 	balance = GetBalance(cCoin, de.AddressDeposit)
 
-	// Go-1 : Notify
-	de.notify()
-
 	return
 }
 
@@ -91,14 +82,16 @@ func (de *Deposit) waiting() {
 
 	fmt.Println("................waiting...................")
 
+	// Go-0 : getBalance
 	balance := de.checkBalance()
-	//	if balance <= float64(0) {
-	//		de.Status = STATUS_WAITING
-	//		return
-	//	}
 
-	// GO-1 : status pending
-	//fmt.Println("GO-1 : status pending")
-	//de.Status = STATUS_PENDING
-	de.Amount = strconv.FormatFloat(balance, 'f', -1, 64)
+	// GO-1 : update new balance for deposit address
+	amount := strconv.FormatFloat(balance, 'f', -1, 64)
+	de.Amount = amount
+
+	// Go-2 : Notify
+	if amount != de.Amount {
+		de.notify(balance)
+	}
+
 }
