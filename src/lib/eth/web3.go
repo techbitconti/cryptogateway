@@ -244,6 +244,33 @@ func AddressFromEvent(s string) string {
 	return hex
 }
 
+func SuggestGasPrice() (gasPrice *big.Int, err error) {
+
+	if client == nil {
+		return
+	}
+
+	gasPrice, err = client.SuggestGasPrice(context.Background())
+
+	return
+}
+
+func EstimateGas(_from, _to string, value *big.Int, data []byte) (gasLimit uint64, err error) {
+
+	if client == nil {
+		return
+	}
+
+	var from common.Address = common.HexToAddress(_from)
+	var to common.Address = common.HexToAddress(_to)
+
+	msg := ethereum.CallMsg{From: from, To: &to, Value: value, Data: data}
+
+	gasLimit, err = client.EstimateGas(context.Background(), msg)
+
+	return
+}
+
 func SolidityCompile(path string) (mContracts map[string]map[string]string) {
 
 	if _, err := exec.LookPath("solc"); err != nil {
@@ -484,7 +511,7 @@ func SolidityTransactRaw(prvKey, addr, method string, amount *big.Int, params ..
 
 	// gasLimit //
 	var aC common.Address = common.HexToAddress(addr)
-	msg := ethereum.CallMsg{From: opts.From, To: &aC, Value: nil, Data: data}
+	msg := ethereum.CallMsg{From: opts.From, To: &aC, Value: amount, Data: data}
 	gasLimit, erg := client.EstimateGas(context.Background(), msg)
 	if erg != nil {
 		fmt.Println("Error GasLimit")

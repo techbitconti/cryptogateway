@@ -183,17 +183,26 @@ func sendCoin(coin, from, to, amount string) (tx string) {
 	case "ETH":
 		{
 			amETH, _ := strconv.ParseFloat(amount, 64)
+			valueWei := amETH * math.Pow10(18)
 
-			if getBalance(coin, from) < float64(amETH) {
-				fmt.Println("ETH not enough !!!", amETH)
+			gasWei := float64(21000)
+			gasPriceBigI, _ := eth.SuggestGasPrice()
+			gasPriceWei := gasPriceBigI.Int64()
+
+			// Cost returns amount + gasprice * gaslimit.
+			fundWei := gasWei*float64(gasPriceWei) + valueWei
+			fundETH := fundWei / math.Pow10(18)
+
+			fmt.Println("gasWei : ", gasWei, "gasPriceWei : ", gasPriceWei, "fundWei : ", fundWei)
+
+			balanceETH := getBalance(coin, from)
+			fmt.Println("balanceETH : ", balanceETH, "fundETH : ", fundETH)
+			if balanceETH < fundETH {
+				fmt.Println("ETH not enough balance !!!", balance, "funds : ", fundETH)
 				return ""
 			}
 
-			//tx = eth.SendTransactionRaw(config.ETH_SIM.PrivKey, to, aMountETH, []byte{})
-
-			wei := amETH * math.Pow10(18)
-
-			weiBig := big.NewInt(int64(wei))
+			weiBig := big.NewInt(int64(valueWei))
 			b := hexutil.Big(*weiBig)
 			value := b.String()
 
