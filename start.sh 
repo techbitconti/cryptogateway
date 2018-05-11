@@ -1,26 +1,27 @@
 geth  --rpc --rpccorsdomain "*" --rpcapi "net,eth,web3,miner,personal"  console 2>>geth.log 
---fast --cache=512 --networkid=14 
---rinkeby --networkid=4 
---datadir=/Users/A/ethereum/private/ 
---datadir=/Users/A/ethereum/rinkeby/ 
---datadir=/Users/A/ethereum/mainnet/  
+ --fast --cache=512 --networkid=14 
+ --rinkeby --networkid=4 
 
---datadir=/home/ramost/ethereum/private
---datadir=/home/ramost/ethereum/rinkeby
---datadir=/home/ramost/ethereum/mainnet
+ --datadir=/Users/A/ethereum/private/ 
+ --datadir=/Users/A/ethereum/rinkeby/ 
+ --datadir=/Users/A/ethereum/mainnet/  
+
+ --datadir=/home/ramost/ethereum/private
+ --datadir=/home/ramost/ethereum/rinkeby
+ --datadir=/home/ramost/ethereum/mainnet
 
 
 bitcoind -rpcuser="123" -rpcpassword="123" -txindex -debug=1 -server -rest  -daemon 
--testnet 
--regtest
+ -testnet 
+ -regtest
 
--datadir=/Users/A/bitcoin/bitcoind/simnet
--datadir=/Users/A/bitcoin/bitcoind/testnet
--datadir=/Users/A/bitcoin/bitcoind/mainnet
+ -datadir=/Users/A/bitcoin/bitcoind/simnet
+ -datadir=/Users/A/bitcoin/bitcoind/testnet
+ -datadir=/Users/A/bitcoin/bitcoind/mainnet
 
--datadir=/home/ramost/bitcoin/bitcoind/simnet
--datadir=/home/ramost/bitcoin/bitcoind/testnet
--datadir=/home/ramost/bitcoin/bitcoind/mainnet
+ -datadir=/home/ramost/bitcoin/bitcoind/simnet
+ -datadir=/home/ramost/bitcoin/bitcoind/testnet
+ -datadir=/home/ramost/bitcoin/bitcoind/mainnet
 
 bitcoin-cli -rpcuser="123" -rpcpassword="123"
 -regtest
