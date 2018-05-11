@@ -271,6 +271,40 @@ func EstimateGas(_from, _to string, value *big.Int, data []byte) (gasLimit uint6
 	return
 }
 
+func GetByteCode(addr, method string, amount *big.Int, params ...interface{}) []byte {
+
+	event := Sha3FromEvent(method)
+
+	sig := common.FromHex(event)[:4]
+
+	data := make([]byte, 0)
+	data = append(data, sig...)
+
+	for _, value := range params {
+
+		r := reflect.ValueOf(value)
+
+		if r.Kind() == reflect.String {
+			v := common.HexToAddress(value.(string)).Bytes()
+			data = append(data, common.BytesToHash(v).Bytes()...)
+		} else {
+			v := common.BigToHash(value.(*big.Int)).Bytes()
+			data = append(data, v...)
+		}
+	}
+
+	input := common.ToHex(data)
+
+	fmt.Println("method : ", method)
+	fmt.Println("event : ", event)
+	fmt.Println("sig : ", common.ToHex(sig))
+	fmt.Println("value : ", params)
+	fmt.Println("data : ", data)
+	fmt.Println("input : ", input)
+
+	return data
+}
+
 func SolidityCompile(path string) (mContracts map[string]map[string]string) {
 
 	if _, err := exec.LookPath("solc"); err != nil {

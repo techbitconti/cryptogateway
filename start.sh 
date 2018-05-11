@@ -5,9 +5,9 @@ geth  --rpc --rpccorsdomain "*" --rpcapi "net,eth,web3,miner,personal"  console 
 --datadir=/Users/A/ethereum/rinkeby/ 
 --datadir=/Users/A/ethereum/mainnet/  
 
---datadir=/home/ubuntu/ethereum/private
---datadir=/home/ubuntu/ethereum/rinkeby
---datadir=/home/ubuntu/ethereum/mainnet
+--datadir=/home/ramost/ethereum/private
+--datadir=/home/ramost/ethereum/rinkeby
+--datadir=/home/ramost/ethereum/mainnet
 
 
 bitcoind -rpcuser="123" -rpcpassword="123" -txindex -debug=1 -server -rest  -daemon 
@@ -18,9 +18,9 @@ bitcoind -rpcuser="123" -rpcpassword="123" -txindex -debug=1 -server -rest  -dae
 -datadir=/Users/A/bitcoin/bitcoind/testnet
 -datadir=/Users/A/bitcoin/bitcoind/mainnet
 
--datadir=/home/ubuntu/bitcoin/bitcoind/simnet
--datadir=/home/ubuntu/bitcoin/bitcoind/testnet
--datadir=/home/ubuntu/bitcoin/bitcoind/mainnet
+-datadir=/home/ramost/bitcoin/bitcoind/simnet
+-datadir=/home/ramost/bitcoin/bitcoind/testnet
+-datadir=/home/ramost/bitcoin/bitcoind/mainnet
 
 bitcoin-cli -rpcuser="123" -rpcpassword="123"
 -regtest

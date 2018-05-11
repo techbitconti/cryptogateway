@@ -198,7 +198,7 @@ func sendCoin(coin, from, to, amount string) (tx string) {
 			balanceETH := getBalance(coin, from)
 			fmt.Println("balanceETH : ", balanceETH, "fundETH : ", fundETH)
 			if balanceETH < fundETH {
-				fmt.Println("ETH not enough balance !!!", balance, "funds : ", fundETH)
+				fmt.Println("ETH not enough balance !!!", balanceETH, "funds : ", fundETH)
 				return ""
 			}
 
@@ -223,10 +223,28 @@ func sendCoin(coin, from, to, amount string) (tx string) {
 
 func sendERC20(contract, receiver, amount string) (tx string) {
 
+	// Go : get balance of sender
 	amETH := getBalance("ETH", config.ETH_SIM.Address)
-	wei := amETH * math.Pow10(18)
+	valueWei := int64(amETH * math.Pow10(18))
 
-	if wei < float64(21000) {
+	// GO : convert
+	weiBigI := big.NewInt(valueWei)
+	amountBigI, _ := strconv.ParseInt(amount, 0, 64)
+
+	//GO : get bytecode of contract function
+	byteCode := eth.GetByteCode(contract, "transfer", weiBigI, receiver, big.NewInt(amountBigI))
+	gasUsed, _ := eth.EstimateGas(config.ETH_SIM.Address, contract, nil, byteCode)
+	fmt.Println("gasUsed : ", gasUsed, "byteCode : ", byteCode)
+
+	gasWei := int64(gasUsed)
+	gasPriceBigI, _ := eth.SuggestGasPrice()
+	gasPriceWei := gasPriceBigI.Int64()
+	// Cost returns amount + gasprice * gaslimit.
+	fundWei := gasWei*gasPriceWei + valueWei
+
+	fmt.Println("gasWei : ", gasWei, "gasPriceWei : ", gasPriceWei, "fundWei : ", fundWei)
+
+	if valueWei < fundWei {
 		fmt.Println("ERC20 not enough gas!!!")
 		return ""
 	}
