@@ -166,7 +166,10 @@ func sendCoin(coin, from, to, amount string) (tx string) {
 			aMountBTC := btc.ToBTC(amount)
 			//satoshi := btc.ToSatoshi(amount)
 
-			if getBalance(coin, from) < aMountBTC {
+			fee := float64(0.001)
+			fund := aMountBTC + fee
+
+			if getBalance(coin, from) < fund {
 				fmt.Println("BTC not enough !!!")
 				return ""
 			}
@@ -234,7 +237,7 @@ func sendERC20(contract, receiver, amount string) (tx string) {
 	amountBigI, _ := strconv.ParseInt(amount, 0, 64)
 
 	//GO : get bytecode of contract function
-	byteCode := eth.GetByteCode(contract, "transfer", receiver, big.NewInt(amountBigI))
+	byteCode := eth.GetByteCode(contract, "transfer", big.NewInt(amountBigI))
 	gasUsed, _ := eth.EstimateGas(config.ETH_SIM.Address, contract, nil, byteCode)
 	fmt.Println("gasUsed : ", gasUsed, "byteCode : ", byteCode)
 
