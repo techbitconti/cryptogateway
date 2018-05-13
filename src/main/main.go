@@ -13,14 +13,14 @@ func main() {
 	config.SetPATH("local")
 
 	startETH()
-	//startBTC()
+	startBTC()
 
 	http.Create(":8082")
 
 }
 
 func startBTC() {
-	btc.Connect_bitcoind("testnet")
+	btc.Connect_bitcoind("simnet")
 }
 
 func startETH() {
