@@ -64,7 +64,7 @@ func (de *Deposit) run() {
 	}
 }
 
-func (de *Deposit) notify(balance float64) {
+func (de *Deposit) notify(balance string) {
 
 	if config.IP_ALLOW == "" || config.PORT_ALLOW == "" || config.NOTIFY_BALANCE == "" {
 
@@ -74,7 +74,7 @@ func (de *Deposit) notify(balance float64) {
 	url := "http://" + config.IP_ALLOW + ":" + config.PORT_ALLOW + "/" + config.NOTIFY_BALANCE
 
 	var params string
-	m := map[string]interface{}{"deposit": de.AddressDeposit, "balance": balance}
+	m := map[string]string{"deposit": de.AddressDeposit, "balance": balance}
 	b, _ := json.Marshal(m)
 
 	json.Unmarshal(b, &params)
@@ -114,7 +114,7 @@ func (de *Deposit) waiting() {
 
 	// Go-2 : Notify
 	if amount != de.Amount {
-		de.notify(balance)
+		de.notify(amount)
 	}
 
 }
