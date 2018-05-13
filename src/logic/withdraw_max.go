@@ -4,7 +4,10 @@ import (
 	"api"
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
+
+	"lib/eth"
 
 	"gopkg.in/mgo.v2/bson"
 )
@@ -50,18 +53,27 @@ func Do_WithdrawMax(ip string, w http.ResponseWriter, params []byte) {
 			} else {
 
 				balance := getBalance(coin, addr)
-
 				max := float64(0)
 
 				switch coin {
 				case "BTC":
 					{
-
+						fee := float64(0.001)
+						max = balance - fee //BTC
 					}
 
 				case "ETH", "ERC20":
 					{
+						wei := balance * math.Pow10(18)
 
+						gas := float64(21000)
+
+						gasPriceBigI, _ := eth.SuggestGasPrice()
+						gasPriceWei := gasPriceBigI.Int64()
+						gasPrice := float64(gasPriceWei)
+
+						max = wei - gas*gasPrice
+						max /= math.Pow10(18) //ETH
 					}
 				}
 
