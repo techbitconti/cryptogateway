@@ -4,7 +4,12 @@ import (
 	"api"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
+
+	"config"
+
+	"gopkg.in/mgo.v2/bson"
 )
 
 func Do_RegisApp(ip string, w http.ResponseWriter, params []byte) {
@@ -21,6 +26,26 @@ func Do_RegisApp(ip string, w http.ResponseWriter, params []byte) {
 		resp.Error = "Invalid input !!!"
 		fmt.Println(resp.Error)
 	} else {
+
+		url := request["url"].(string)
+		notify_balance := request["notify_balance"].(string)
+		pass_wallet := request["pass_wallet"].(string)
+
+		host, port, err := net.SplitHostPort(url)
+		if err != nil {
+			resp.Status = -2
+			resp.Error = "Error SplitHostPort !!!"
+			fmt.Println(resp.Error)
+		}
+
+		if resp.Status == 0 {
+			config.IP_ALLOW = host
+			config.PORT_ALLOW = port
+			config.NOTIFY_BALANCE = notify_balance
+			config.PASS_WALLET = pass_wallet
+
+			resp.Data = bson.M{"IP_ALLOW": config.IP_ALLOW}
+		}
 
 	}
 

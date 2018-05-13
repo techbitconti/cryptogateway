@@ -4,11 +4,16 @@ import (
 	"api"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
+
+	"config"
+
+	"gopkg.in/mgo.v2/bson"
 )
 
 func Do_ChangeIP(ip string, w http.ResponseWriter, params []byte) {
-	fmt.Println("Do_ChangeIP : ", string(params)) // {"old" : "ip:port", "new" : "ip_port"}
+	fmt.Println("Do_ChangeIP : ", string(params)) // {"url" : "ip_port"}
 
 	resp := Writer{Api: api.CHANGE_IP}
 
@@ -22,6 +27,28 @@ func Do_ChangeIP(ip string, w http.ResponseWriter, params []byte) {
 		fmt.Println(resp.Error)
 	} else {
 
+		url := request["url"].(string)
+
+		host, port, err := net.SplitHostPort(url)
+		if err != nil {
+			resp.Status = -2
+			resp.Error = "Error SplitHostPort !!!"
+			fmt.Println(resp.Error)
+		}
+
+		if resp.Status == 0 {
+
+			if host != config.IP_ALLOW || port != config.PORT_ALLOW {
+				resp.Status = -3
+				resp.Error = "Error LAST IP Not Same !!!"
+				fmt.Println(resp.Error)
+			}
+		}
+
+		if resp.Status == 0 {
+			resp.Data = bson.M{"host": host, "port": "port"}
+		}
+
 	}
 
 	data, _ := json.Marshal(resp)
@@ -30,15 +57,11 @@ func Do_ChangeIP(ip string, w http.ResponseWriter, params []byte) {
 
 func check_changeIP(request map[string]interface{}) bool {
 
-	if len(request) != 2 {
+	if len(request) != 1 {
 		return false
 	}
 
-	if old, ok := request["old"]; !ok || !reflectString(old) {
-		return false
-	}
-
-	if nnew, ok := request["new"]; !ok || !reflectString(nnew) {
+	if url, ok := request["url"]; !ok || !reflectString(url) {
 		return false
 	}
 

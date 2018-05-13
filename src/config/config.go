@@ -1,5 +1,10 @@
 package config
 
+var IP_ALLOW = ""
+var PORT_ALLOW = ""
+var NOTIFY_BALANCE = ""
+var PASS_WALLET = ""
+
 var PATH_ETH = "/Users/A/ethereum/private/keystore"
 var PATH_BTC = "/Users/A/bitcoin/btcwallet"
 
