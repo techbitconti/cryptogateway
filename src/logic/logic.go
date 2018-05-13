@@ -164,7 +164,7 @@ func sendCoin(coin, from, to, amount string) (tx string) {
 	case "BTC":
 		{
 			aMountBTC := btc.ToBTC(amount)
-			satoshi := btc.ToSatoshi(amount)
+			//satoshi := btc.ToSatoshi(amount)
 
 			if getBalance(coin, from) < aMountBTC {
 				fmt.Println("BTC not enough !!!")
@@ -172,7 +172,9 @@ func sendCoin(coin, from, to, amount string) (tx string) {
 			}
 
 			//btc.WalletPassphrase("123456", 10)
-			txHash, err := btc.SendFrom(from, to, satoshi)
+			//txHash, err := btc.SendFrom(from, to, satoshi)
+			txHash, err := btc.SendFrom(from, to, aMountBTC)
+
 			if err != nil {
 				return ""
 			}
