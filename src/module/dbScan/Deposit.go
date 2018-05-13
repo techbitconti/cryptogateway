@@ -69,8 +69,8 @@ func (de *Deposit) checkBalance() (balance float64) {
 	// GO-0 : check balance
 	fmt.Println("GO-0 : check balance", de)
 
-	cCoin := ""
-	if de.Coin == "ERC20" {
+	cCoin := de.Coin
+	if cCoin == "ERC20" {
 		cCoin = "ETH"
 	}
 	balance = GetBalance(cCoin, de.AddressDeposit)

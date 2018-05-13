@@ -230,11 +230,11 @@ func sendERC20(contract, receiver, amount string) (tx string) {
 	valueWei := int64(amETH * math.Pow10(18))
 
 	// GO : convert
-	weiBigI := big.NewInt(valueWei)
+	//weiBigI := big.NewInt(valueWei)
 	amountBigI, _ := strconv.ParseInt(amount, 0, 64)
 
 	//GO : get bytecode of contract function
-	byteCode := eth.GetByteCode(contract, "transfer", weiBigI, receiver, big.NewInt(amountBigI))
+	byteCode := eth.GetByteCode(contract, "transfer", receiver, big.NewInt(amountBigI))
 	gasUsed, _ := eth.EstimateGas(config.ETH_SIM.Address, contract, nil, byteCode)
 	fmt.Println("gasUsed : ", gasUsed, "byteCode : ", byteCode)
 
