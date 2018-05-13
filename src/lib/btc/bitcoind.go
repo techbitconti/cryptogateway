@@ -19,7 +19,7 @@ func Connect_bitcoind(net string) {
 	case "testnet":
 		host = "localhost:18332"
 	case "simnet":
-		host = "localhost:18554"
+		host = "localhost:18443"
 	}
 
 	// Connect to local bitcoin core RPC server using HTTP POST mode.

@@ -10,7 +10,7 @@ import (
 
 func main() {
 
-	config.SetPATH("server")
+	config.SetPATH("local")
 
 	startETH()
 	//startBTC()

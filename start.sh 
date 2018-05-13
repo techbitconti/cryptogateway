@@ -44,9 +44,9 @@ btcwallet --username="123" --password="123"  --appdata=/Users/A/bitcoin/btcwalle
 ############################################
 #				BTC Simnet					#
 ############################################
-# addres 	: ShGn19iCHHhGjy7huZeQ2T8vtBo7DFpA9U 								
+# addres 	: 2N3eERqK57DRqqmjb3KzzapJUK7odJhNFZT 								
 # pub 		: 								
-# prv 		: FwMCdKjGEMYe1VPL2tXEqH7ecXhZXshqzpBoxQieCXDG5yGQvGuZ								
+# prv 		: cMv8y9jz9wemtsjbLx5e2zn8MFRf6MruP3Agq8ifaQQ8ipbZw44B								
 # pass 		: 123456						
 ############################################
 
