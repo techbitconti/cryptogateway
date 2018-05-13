@@ -1,9 +1,13 @@
 package dbScan
 
 import (
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"strconv"
 	"time"
+
+	"config"
 )
 
 type Deposit struct {
@@ -61,6 +65,25 @@ func (de *Deposit) run() {
 }
 
 func (de *Deposit) notify(balance float64) {
+
+	if config.IP_ALLOW == "" || config.PORT_ALLOW == "" || config.NOTIFY_BALANCE == "" {
+
+		return
+	}
+
+	url := "http://" + config.IP_ALLOW + ":" + config.PORT_ALLOW + "/" + config.NOTIFY_BALANCE
+
+	var params string
+	m := map[string]interface{}{"deposit": de.AddressDeposit, "balance": balance}
+	b, _ := json.Marshal(m)
+
+	json.Unmarshal(b, &params)
+
+	res, err := http.Get(url + params)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer res.Body.Close()
 
 }
 

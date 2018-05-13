@@ -5,10 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"config"
+
+	"gopkg.in/mgo.v2/bson"
 )
 
 func Do_ChangeNofify(ip string, w http.ResponseWriter, params []byte) {
-	fmt.Println("Do_ChangeNofify : ", string(params)) // {"old" : "notify" , "new" : "notity"}
+	fmt.Println("Do_ChangeNofify : ", string(params)) // {"notify" : ""}
 
 	resp := Writer{Api: api.CHANGE_NOTIFY}
 
@@ -22,6 +26,11 @@ func Do_ChangeNofify(ip string, w http.ResponseWriter, params []byte) {
 		fmt.Println(resp.Error)
 	} else {
 
+		notify := request["notify"].(string)
+
+		config.NOTIFY_BALANCE = notify
+
+		resp.Data = bson.M{"result": "success", "notify": notify}
 	}
 
 	data, _ := json.Marshal(resp)
@@ -30,15 +39,11 @@ func Do_ChangeNofify(ip string, w http.ResponseWriter, params []byte) {
 
 func check_changeNofify(request map[string]interface{}) bool {
 
-	if len(request) != 2 {
+	if len(request) != 1 {
 		return false
 	}
 
-	if old, ok := request["old"]; !ok || !reflectString(old) {
-		return false
-	}
-
-	if nnew, ok := request["new"]; !ok || !reflectString(nnew) {
+	if notity, ok := request["notity"]; !ok || !reflectString(notity) {
 		return false
 	}
 
