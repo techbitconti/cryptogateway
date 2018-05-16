@@ -229,7 +229,7 @@ func sendCoin(coin, from, to, amount string) (tx string) {
 func sendERC20(contract, receiver, amount string) (tx string) {
 
 	// Go : get balance of sender
-	amETH := getBalance("ETH", config.ETH_SIM.Address)
+	amETH := getBalance("ETH", config.ETH_ADDR)
 	valueWei := int64(amETH * math.Pow10(18))
 
 	// GO : convert
@@ -238,7 +238,7 @@ func sendERC20(contract, receiver, amount string) (tx string) {
 
 	//GO : get bytecode of contract function
 	byteCode := eth.GetByteCode(contract, "transfer", big.NewInt(amountBigI))
-	gasUsed, _ := eth.EstimateGas(config.ETH_SIM.Address, contract, nil, byteCode)
+	gasUsed, _ := eth.EstimateGas(config.ETH_ADDR, contract, nil, byteCode)
 	fmt.Println("gasUsed : ", gasUsed, "byteCode : ", byteCode)
 
 	gasWei := int64(gasUsed)
@@ -255,14 +255,14 @@ func sendERC20(contract, receiver, amount string) (tx string) {
 	}
 
 	token, _ := strconv.ParseInt(amount, 0, 64)
-	balance := getBalanceOf(contract, config.ETH_SIM.Address)
+	balance := getBalanceOf(contract, config.ETH_ADDR)
 
 	if balance < token {
 		fmt.Println("ERC20 Token not enough !!!", balance, token)
 		return ""
 	}
 
-	tx = eth.SolidityTransactRaw(config.ETH_SIM.PrivKey, contract, `transfer(address,uint256)`, nil, receiver, big.NewInt(token))
+	tx = eth.SolidityTransactRaw(config.ETH_PRIV, contract, `transfer(address,uint256)`, nil, receiver, big.NewInt(token))
 	fmt.Println("tx ERC20 : ", tx)
 
 	return tx

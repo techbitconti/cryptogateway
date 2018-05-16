@@ -43,7 +43,7 @@ func check_changeNofify(request map[string]interface{}) bool {
 		return false
 	}
 
-	if notity, ok := request["notity"]; !ok || !reflectString(notity) {
+	if notity, ok := request["notify"]; !ok || !reflectString(notity) {
 		return false
 	}
 

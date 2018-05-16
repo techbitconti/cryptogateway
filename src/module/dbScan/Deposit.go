@@ -71,7 +71,8 @@ func (de *Deposit) notify(balance string) {
 		return
 	}
 
-	url := "http://" + config.IP_ALLOW + ":" + config.PORT_ALLOW + "/" + config.NOTIFY_BALANCE
+	//"/api/notify"
+	url := "http://" + config.IP_ALLOW + ":" + config.PORT_ALLOW + config.NOTIFY_BALANCE
 
 	var params string
 	m := map[string]string{"deposit": de.AddressDeposit, "balance": balance}

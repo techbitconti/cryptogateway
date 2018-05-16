@@ -1,62 +1,57 @@
 package config
 
+//var IP_ALLOW = "192.168.1.80, 192.168.1.10"
+//var PORT_ALLOW = "80"
+//var NOTIFY_BALANCE = "/api/notify"
+//var PASS_WALLET = "@oopXT&2018"
+
 var IP_ALLOW = ""
 var PORT_ALLOW = ""
 var NOTIFY_BALANCE = ""
 var PASS_WALLET = ""
 
-var PATH_ETH = "/Users/A/ethereum/private/keystore"
-var PATH_BTC = "/Users/A/bitcoin/btcwallet"
+var PATH_ETH string
+var PATH_BTC string
+
+var ETH_PRIV string
+var ETH_ADDR string
+var BTC_PRV string
+var BTC_ADDR string
 
 func SetPATH(net string) {
 	switch net {
 	case "local":
-		PATH_ETH = "/Users/A/ethereum/private/keystore"
-		PATH_BTC = "/Users/A/bitcoin/btcwallet"
+		{
+			PATH_ETH = "/Users/A/ethereum/private/keystore"
+			PATH_BTC = "/Users/A/bitcoin/btcwallet"
+
+			BTC_ADDR = "cMv8y9jz9wemtsjbLx5e2zn8MFRf6MruP3Agq8ifaQQ8ipbZw44B"
+			BTC_PRV = "2N3eERqK57DRqqmjb3KzzapJUK7odJhNFZT"
+
+			ETH_ADDR = "0x8dd75f7c03a048c0a66a53dbf9ed76d04e9a9ea3"
+			ETH_PRIV = "47de15108b35169c4aff4826d5c413fe117e361a900325f6d3df1f0e04cbd706"
+		}
+
 	case "server":
-		PATH_ETH = "/home/ramost/ethereum/private/keystore"
-		PATH_BTC = "/home/ramost/bitcoin/btcwallet"
+		{
+			PATH_ETH = "/home/ubuntu/ethereum/private/keystore"
+			PATH_BTC = "/home/ubuntu/bitcoin/btcwallet"
+
+			BTC_ADDR = "2NAKhJLCi6yTM6oLjyG2U3sZJAdbcSMhgjh"
+			BTC_PRV = "cQJYynSnzuUbNisDb7FsM2tpKi7Hu3HKtxegWohemwf8YU1EDduD"
+
+			ETH_ADDR = "0x99aa996ade9150137f537f15ed40b1f742ca7fd6"
+			ETH_PRIV = "4d113fab8b518c9baf72e54984a20b996c38d9a858c917576eb511ac6d1ca45e"
+		}
 	}
 }
 
-var BTC_SIM = struct {
-	PrivKey string
-	Address string
-}{
-	`FwMCdKjGEMYe1VPL2tXEqH7ecXhZXshqzpBoxQieCXDG5yGQvGuZ`,
-	`ShGn19iCHHhGjy7huZeQ2T8vtBo7DFpA9U`,
-}
-
-var BTC_TEST = struct {
-	PrivKey string
-	Address string
-}{
-	`cQJYynSnzuUbNisDb7FsM2tpKi7Hu3HKtxegWohemwf8YU1EDduD`,
-	`2NAKhJLCi6yTM6oLjyG2U3sZJAdbcSMhgjh`,
-}
-
-var ETH_SIM = struct {
-	PrivKey string
-	Address string
-}{
-	`47de15108b35169c4aff4826d5c413fe117e361a900325f6d3df1f0e04cbd706`,
-	`0x8dD75F7c03A048C0a66a53dbf9ED76d04E9a9eA3`,
-}
-
-var ETH_TEST = struct {
-	PrivKey string
-	Address string
-}{
-	`4d113fab8b518c9baf72e54984a20b996c38d9a858c917576eb511ac6d1ca45e`,
-	`0x99aa996ade9150137f537f15ed40b1f742ca7fd6`,
-}
-
-var ERC20_SIM = struct {
+var ERC20 = struct {
 	PrivKey string
 	Address string
 	Abi     string
 }{
-	ETH_SIM.PrivKey,
+	ETH_PRIV,
 	`0x1da98ecccd7fca0e38d8b0732b53a1ce6a382ce7`,
 	`[
 	{
@@ -418,14 +413,4 @@ var ERC20_SIM = struct {
 		"type": "event"
 	}
 ]`,
-}
-
-var ERC20_TEST = struct {
-	PrivKey string
-	Address string
-	Abi     string
-}{
-	ETH_TEST.PrivKey,
-	``,
-	``,
 }

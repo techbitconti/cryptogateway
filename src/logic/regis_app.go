@@ -44,7 +44,7 @@ func Do_RegisApp(ip string, w http.ResponseWriter, params []byte) {
 			config.NOTIFY_BALANCE = notify_balance
 			config.PASS_WALLET = pass_wallet
 
-			resp.Data = bson.M{"IP_ALLOW": config.IP_ALLOW}
+			resp.Data = bson.M{"IP_ALLOW": config.IP_ALLOW, "PORT_ALLOW": config.PORT_ALLOW, "NOTIFY_BALANCE": config.NOTIFY_BALANCE}
 		}
 
 	}

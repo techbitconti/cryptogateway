@@ -74,7 +74,7 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 			if resp.Status == 0 {
 				if mDeposit.Coin != coin {
 					resp.Status = -5
-					resp.Error = "Invalid DEPOSIT Coin !!!"
+					resp.Error = "Invalid DEPOSIT Coin !!!" + mDeposit.Coin + coin
 					fmt.Println(resp.Error)
 				}
 			}
@@ -100,9 +100,9 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 							fromAdmin := ""
 							switch coin {
 							case "BTC":
-								fromAdmin = config.BTC_SIM.Address
+								fromAdmin = config.BTC_ADDR
 							case "ETH":
-								fromAdmin = config.ETH_SIM.Address
+								fromAdmin = config.ETH_ADDR
 							}
 
 							if resp.Status == 0 {
@@ -174,7 +174,7 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 							if resp.Status == 0 {
 								//Go-5 : sendFrom Deposit to Admin
 								from := deposit_Address
-								to := config.ETH_SIM.Address
+								to := config.ETH_ADDR
 								amount := strconv.FormatFloat(ethWidthDraw, 'f', -1, 64)
 
 								txToAdmin := sendCoin("ETH", from, to, amount)

@@ -38,7 +38,7 @@ func GetBalance(coin, addr string) float64 {
 
 func GetBalanceOf(ercAddr, toAddr string) int64 {
 
-	hex, err := eth.SolidityCallRaw(config.ETH_SIM.Address, ercAddr, `balanceOf(address)`, toAddr)
+	hex, err := eth.SolidityCallRaw(config.ETH_ADDR, ercAddr, `balanceOf(address)`, toAddr)
 	if err != nil {
 		fmt.Println("ERC20 Token not enough !!!")
 		return int64(0)

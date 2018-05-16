@@ -38,7 +38,7 @@ func Do_ChangeIP(ip string, w http.ResponseWriter, params []byte) {
 
 		if resp.Status == 0 {
 
-			if host != config.IP_ALLOW || port != config.PORT_ALLOW {
+			if ip != config.IP_ALLOW {
 				resp.Status = -3
 				resp.Error = "Error LAST IP Not Same !!!"
 				fmt.Println(resp.Error)
@@ -46,7 +46,11 @@ func Do_ChangeIP(ip string, w http.ResponseWriter, params []byte) {
 		}
 
 		if resp.Status == 0 {
-			resp.Data = bson.M{"host": host, "port": "port"}
+
+			config.IP_ALLOW = host
+			config.PORT_ALLOW = port
+
+			resp.Data = bson.M{"IP_ALLOW": config.IP_ALLOW, "PORT_ALLOW": config.PORT_ALLOW}
 		}
 
 	}
