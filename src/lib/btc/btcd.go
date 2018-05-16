@@ -12,7 +12,6 @@ import (
 	//"time"
 	"config"
 	"encoding/json"
-	"net/http"
 
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/chaincfg"
@@ -22,6 +21,8 @@ import (
 	"github.com/btcsuite/btcutil"
 	"github.com/davecgh/go-spew/spew"
 )
+
+var NET string
 
 var Btcd *rpcclient.Client
 var Chaincfg chaincfg.Params
@@ -37,6 +38,7 @@ func Connect_btcd(net string) {
 
 	host := ""
 	Chaincfg = chaincfg.SimNetParams
+	NET = net
 
 	switch net {
 	case "mainnet":
@@ -189,6 +191,14 @@ func NewHashFromStr(hex string) (hash *chainhash.Hash, err error) {
 	hash, err = chainhash.NewHashFromStr(hex)
 	log.Println("NewHashFromStr : ", hash, err)
 	return
+}
+
+func Generate(num uint32) ([]*chainhash.Hash, error) {
+	tx, err := Btcd.Generate(num)
+
+	log.Println("Generate", err, tx)
+
+	return tx, err
 }
 
 // GetGenerate returns true if the server is set to mine, otherwise false.
@@ -375,35 +385,6 @@ func GetBalance(addr string) float64 {
 	log.Println("GetBalanceX ", addr, amount.ToBTC())
 
 	return amount.ToBTC()
-}
-
-func GetBalanceExplore(addr string) float64 {
-
-	// GetBalance
-	//account, _ := GetAccount(addr)
-	//amount, err = GetBalanceAccount(account)
-
-	api := "https://testnet.blockexplorer.com/api/addr/"
-	url := api + addr
-	resp, err := http.Get(url)
-	if err != nil {
-		log.Println("Error GetBalance", err)
-		return 0
-	}
-	defer resp.Body.Close()
-
-	result := map[string]interface{}{}
-	body, rr := ioutil.ReadAll(resp.Body)
-	if rr != nil {
-		log.Println("Error GetBalance", rr)
-		return 0
-	}
-	json.Unmarshal(body, &result)
-
-	amount := result["balance"].(float64)
-	log.Println("GetBalance ", addr, amount)
-
-	return amount
 }
 
 func GetNewAddress(account string) (address btcutil.Address, err error) {
@@ -613,6 +594,10 @@ func SendFrom(fromAddress string, toAddress string, value float64) (tx *chainhas
 
 	log.Println("SendFrom: ", tx)
 
+	if NET == "simnet" {
+		Generate(uint32(1))
+	}
+
 	return
 }
 
@@ -625,6 +610,10 @@ func SendMany(fromAccount string, amounts map[btcutil.Address]btcutil.Amount) (t
 	}
 
 	log.Println("SendMany: ", tx)
+
+	if NET == "simnet" {
+		Generate(uint32(1))
+	}
 
 	return tx, nil
 
@@ -648,6 +637,10 @@ func SendToAddress(addr string, value float64) (tx *chainhash.Hash, err error) {
 	tx, err = Btcd.SendToAddress(address, amount)
 
 	log.Println("SendToAddress: ", tx)
+
+	if NET == "simnet" {
+		Generate(uint32(1))
+	}
 
 	return
 }

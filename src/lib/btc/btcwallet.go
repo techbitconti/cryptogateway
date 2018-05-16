@@ -18,6 +18,8 @@ var c pb.WalletServiceClient
 
 func Connect_btcwallet_gRPC(net string) {
 
+	NET = net
+
 	ip := "localhost"
 	port := "18554"
 

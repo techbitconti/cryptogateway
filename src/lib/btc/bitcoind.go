@@ -13,6 +13,8 @@ func Connect_bitcoind(net string) {
 	}
 
 	host := ""
+	NET = net
+
 	switch net {
 	case "mainnet":
 		host = "localhost:8332"

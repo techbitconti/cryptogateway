@@ -24,26 +24,20 @@ func SetPATH(net string) {
 		{
 			PATH_ETH = "/Users/A/ethereum/private/keystore"
 			PATH_BTC = "/Users/A/bitcoin/btcwallet"
-
-			BTC_ADDR = "cMv8y9jz9wemtsjbLx5e2zn8MFRf6MruP3Agq8ifaQQ8ipbZw44B"
-			BTC_PRV = "2N3eERqK57DRqqmjb3KzzapJUK7odJhNFZT"
-
-			ETH_ADDR = "0x8dd75f7c03a048c0a66a53dbf9ed76d04e9a9ea3"
-			ETH_PRIV = "47de15108b35169c4aff4826d5c413fe117e361a900325f6d3df1f0e04cbd706"
 		}
 
 	case "server":
 		{
-			PATH_ETH = "/home/ubuntu/ethereum/private/keystore"
-			PATH_BTC = "/home/ubuntu/bitcoin/btcwallet"
-
-			BTC_ADDR = "2NAKhJLCi6yTM6oLjyG2U3sZJAdbcSMhgjh"
-			BTC_PRV = "cQJYynSnzuUbNisDb7FsM2tpKi7Hu3HKtxegWohemwf8YU1EDduD"
-
-			ETH_ADDR = "0x99aa996ade9150137f537f15ed40b1f742ca7fd6"
-			ETH_PRIV = "4d113fab8b518c9baf72e54984a20b996c38d9a858c917576eb511ac6d1ca45e"
+			PATH_ETH = "/home/ramost/ethereum/private/keystore"
+			PATH_BTC = "/home/ramost/bitcoin/btcwallet"
 		}
 	}
+
+	BTC_ADDR = "cMv8y9jz9wemtsjbLx5e2zn8MFRf6MruP3Agq8ifaQQ8ipbZw44B"
+	BTC_PRV = "2N3eERqK57DRqqmjb3KzzapJUK7odJhNFZT"
+
+	ETH_ADDR = "0x8dd75f7c03a048c0a66a53dbf9ed76d04e9a9ea3"
+	ETH_PRIV = "47de15108b35169c4aff4826d5c413fe117e361a900325f6d3df1f0e04cbd706"
 }
 
 var ERC20 = struct {
