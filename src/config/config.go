@@ -33,8 +33,8 @@ func SetPATH(net string) {
 		}
 	}
 
-	BTC_ADDR = "cMv8y9jz9wemtsjbLx5e2zn8MFRf6MruP3Agq8ifaQQ8ipbZw44B"
-	BTC_PRV = "2N3eERqK57DRqqmjb3KzzapJUK7odJhNFZT"
+	BTC_ADDR = "2N3eERqK57DRqqmjb3KzzapJUK7odJhNFZT"
+	BTC_PRV = "cMv8y9jz9wemtsjbLx5e2zn8MFRf6MruP3Agq8ifaQQ8ipbZw44B"
 
 	ETH_ADDR = "0x8dd75f7c03a048c0a66a53dbf9ed76d04e9a9ea3"
 	ETH_PRIV = "47de15108b35169c4aff4826d5c413fe117e361a900325f6d3df1f0e04cbd706"

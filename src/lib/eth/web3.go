@@ -271,7 +271,7 @@ func EstimateGas(_from, _to string, value *big.Int, data []byte) (gasLimit uint6
 	return
 }
 
-func GetByteCode(addr, method string, amount *big.Int, params ...interface{}) []byte {
+func GetByteCode(method string, params ...interface{}) []byte {
 
 	event := Sha3FromEvent(method)
 
