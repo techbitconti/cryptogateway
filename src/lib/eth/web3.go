@@ -174,8 +174,17 @@ func GetFilterChanges(number interface{}) map[string]interface{} {
 }
 
 func GetTransactions(number interface{}) []interface{} {
-	txs := GetBlockByNumber(number)["result"].(map[string]interface{})["transactions"].([]interface{})
-	return txs
+	result := GetBlockByNumber(number)["result"]
+	if result == nil {
+		return nil
+	}
+
+	txs, ok := result.(map[string]interface{})["transactions"]
+	if !ok {
+		return nil
+	}
+
+	return txs.([]interface{})
 }
 
 func GetTransactionCount(addr, block interface{}) interface{} {

@@ -47,7 +47,7 @@ func Do_ListAddress(ip string, w http.ResponseWriter, params []byte) {
 
 func check_listAddress(request map[string]interface{}) bool {
 
-	if len(request) != 4 {
+	if len(request) != 1 {
 		return false
 	}
 
