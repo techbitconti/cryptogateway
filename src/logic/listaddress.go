@@ -28,21 +28,34 @@ func Do_ListAddress(ip string, w http.ResponseWriter, params []byte) {
 
 		coin := request["coin"].(string)
 
-		list := make([]string, 0)
+		// GO-0 : check coin type
+		if coin != "BTC" && coin != "ETH" {
+			resp.Status = -2
+			resp.Error = "Error Coin !!!"
 
-		switch coin {
-		case "BTC":
-			listAddr := btc.ListAddress()
-			for _, v := range listAddr {
-				list = append(list, v.String())
-			}
-		case "ETH":
-			list = eth.GetAccounts()
+			fmt.Println(resp.Error)
 		}
 
-		resp.Data = list
+		if resp.Status == 0 {
+			list := make([]string, 0)
 
+			switch coin {
+			case "BTC":
+				listAddr := btc.ListAddress()
+				for _, v := range listAddr {
+					list = append(list, v.String())
+				}
+			case "ETH":
+				arr := eth.GetAccounts()
+				list = append(list, arr...)
+			}
+
+			resp.Data = list
+		}
 	}
+
+	data, _ := json.Marshal(resp)
+	w.Write(data)
 }
 
 func check_listAddress(request map[string]interface{}) bool {

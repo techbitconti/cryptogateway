@@ -53,8 +53,10 @@ func Do_Transfer(ip string, w http.ResponseWriter, params []byte) {
 				resp.Data = bson.M{"tx": tx}
 			}
 		}
-
 	}
+
+	data, _ := json.Marshal(resp)
+	w.Write(data)
 }
 
 func check_transfer(request map[string]interface{}) bool {

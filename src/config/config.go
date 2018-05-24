@@ -1,12 +1,7 @@
 package config
 
-//var IP_ALLOW = "192.168.1.80, 192.168.1.10"
-//var PORT_ALLOW = "80"
-//var NOTIFY_BALANCE = "/api/notify"
-//var PASS_WALLET = "@oopXT&2018"
-
-var IP_ALLOW = "192.168.1.80"
-var PORT_ALLOW = "80"
+var IP_ALLOW = "14.161.40.26"
+var PORT_ALLOW = "8000"
 var NOTIFY_BALANCE = "/api/notify"
 var PASS_WALLET = "@oopXT&2018"
 
