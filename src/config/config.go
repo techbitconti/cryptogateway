@@ -5,10 +5,10 @@ package config
 //var NOTIFY_BALANCE = "/api/notify"
 //var PASS_WALLET = "@oopXT&2018"
 
-var IP_ALLOW = ""
-var PORT_ALLOW = ""
-var NOTIFY_BALANCE = ""
-var PASS_WALLET = ""
+var IP_ALLOW = "192.168.1.80"
+var PORT_ALLOW = "80"
+var NOTIFY_BALANCE = "/api/notify"
+var PASS_WALLET = "@oopXT&2018"
 
 var PATH_ETH string
 var PATH_BTC string

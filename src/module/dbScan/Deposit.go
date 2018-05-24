@@ -1,6 +1,7 @@
 package dbScan
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -60,11 +61,11 @@ func (de *Deposit) run() {
 
 		de.waiting()
 
-		time.Sleep(10 * time.Second)
+		time.Sleep(5 * time.Second)
 	}
 }
 
-func (de *Deposit) notify(balance string) {
+func (de *Deposit) Notify() {
 
 	if config.IP_ALLOW == "" || config.PORT_ALLOW == "" || config.NOTIFY_BALANCE == "" {
 
@@ -73,14 +74,12 @@ func (de *Deposit) notify(balance string) {
 
 	//"/api/notify"
 	url := "http://" + config.IP_ALLOW + ":" + config.PORT_ALLOW + config.NOTIFY_BALANCE
+	fmt.Println(url)
 
-	var params string
-	m := map[string]string{"deposit": de.AddressDeposit, "balance": balance}
+	m := map[string]string{"deposit": de.AddressDeposit, "balance": de.Amount}
 	b, _ := json.Marshal(m)
 
-	json.Unmarshal(b, &params)
-
-	res, err := http.Get(url + params)
+	res, err := http.Post(url, "application/json", bytes.NewBuffer(b))
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -111,11 +110,10 @@ func (de *Deposit) waiting() {
 
 	// GO-1 : update new balance for deposit address
 	amount := strconv.FormatFloat(balance, 'f', -1, 64)
-	de.Amount = amount
-
-	// Go-2 : Notify
 	if amount != de.Amount {
-		de.notify(amount)
-	}
 
+		// Go-2 : Notify
+		de.Notify()
+	}
+	de.Amount = amount
 }
