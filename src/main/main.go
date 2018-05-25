@@ -6,6 +6,7 @@ import (
 	"config"
 	"lib/btc"
 	"lib/eth"
+	//"module/etherScan"
 )
 
 func main() {
@@ -25,4 +26,5 @@ func startBTC() {
 
 func startETH() {
 	eth.Connect("http://localhost:8545")
+	//etherScan.Start()
 }

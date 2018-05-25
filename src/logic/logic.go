@@ -60,15 +60,15 @@ func verityTX(coin, tx string) (interface{}, bool) {
 			}
 
 			data := make(map[string]interface{})
-			data["txid"] = result.TxID
-			data["blockhash"] = result.BlockHash
-			data["fee"] = result.Fee
+			data["token"] = "BTC"
+			data["transaction_id"] = result.TxID
+			data["transaction_fee"] = result.Fee
 
 			for _, obj := range result.Details {
 				if obj.Category == "send" {
-					data["from"] = obj.Address
+					data["from_address"] = obj.Address
 				} else if obj.Category == "receive" {
-					data["to"] = obj.Address
+					data["to_address"] = obj.Address
 					data["amount"] = obj.Amount
 				}
 			}
@@ -80,19 +80,34 @@ func verityTX(coin, tx string) (interface{}, bool) {
 	case "ETH":
 		{
 			//receipt := eth.GetTransactionReceipt(tx)
-			result := eth.GetTransactionByHash(tx)
-			if result["result"] == nil {
+			parsed := eth.GetTransactionByHash(tx)
+			if parsed["result"] == nil {
 				return nil, false
 			}
-			receipt = result["result"]
+			result := parsed["result"].(map[string]interface{})
 
-			blockHash := receipt.(map[string]interface{})["blockHash"].(string)
+			blockHash := result["blockHash"].(string)
 			blockNum, _ := strconv.ParseInt(blockHash, 0, 64)
 
 			if blockNum == int64(0) {
 				return nil, false
 			}
 
+			data := make(map[string]interface{})
+			data["token"] = "ETH"
+			data["transaction_id"] = result["hash"]
+			data["from_address"] = result["from"]
+			data["to_address"] = result["to"]
+
+			value, _ := strconv.ParseInt(result["value"].(string), 0, 64)
+			data["amount"] = float64(value) / math.Pow10(18)
+
+			gas, _ := strconv.ParseInt(result["gas"].(string), 0, 64)
+			gasPrice, _ := strconv.ParseInt(result["gasPrice"].(string), 0, 64)
+			fee := float64(gas*gasPrice) / math.Pow10(18)
+			data["transaction_fee"] = fee
+
+			receipt = data
 			fmt.Println("receipt : ", receipt)
 
 		}
