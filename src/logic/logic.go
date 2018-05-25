@@ -43,26 +43,63 @@ func verifyAddress(coin string, addr string) bool {
 	return true
 }
 
-func verityTX(coin, tx string) bool {
+func verityTX(coin, tx string) (interface{}, bool) {
+
+	var receipt interface{}
 
 	switch coin {
 	case "BTC":
-		receipt, err := btc.GetRawTransactionVerbose(tx)
-		if err != nil {
-			return false
-		}
-		fmt.Println("receipt tx : ", tx, "  result : ", receipt)
+		{
+			result, err := btc.GetTransaction(tx)
+			if err != nil {
+				return nil, false
+			}
 
-	case "ETH", "ERC20":
-		receipt := eth.GetTransactionReceipt(tx)
-		if receipt["result"] == nil {
-			return false
+			if result.BlockHash == "" {
+				return nil, false
+			}
+
+			data := make(map[string]interface{})
+			data["txid"] = result.TxID
+			data["blockhash"] = result.BlockHash
+			data["fee"] = result.Fee
+
+			for _, obj := range result.Details {
+				if obj.Category == "send" {
+					data["from"] = obj.Address
+				} else if obj.Category == "receive" {
+					data["to"] = obj.Address
+					data["amount"] = obj.Amount
+				}
+			}
+
+			receipt = data
+			fmt.Println("receipt : ", receipt)
 		}
-		fmt.Println("receipt tx : ", tx, "  result : ", receipt)
+
+	case "ETH":
+		{
+			//receipt := eth.GetTransactionReceipt(tx)
+			result := eth.GetTransactionByHash(tx)
+			if result["result"] == nil {
+				return nil, false
+			}
+			receipt = result["result"]
+
+			blockHash := receipt.(map[string]interface{})["blockHash"].(string)
+			blockNum, _ := strconv.ParseInt(blockHash, 0, 64)
+
+			if blockNum == int64(0) {
+				return nil, false
+			}
+
+			fmt.Println("receipt : ", receipt)
+
+		}
 
 	}
 
-	return true
+	return receipt, true
 }
 
 func getBalance(coin string, addr string) float64 {

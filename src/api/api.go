@@ -10,4 +10,5 @@ const (
 	CHANGE_NOTIFY = "change_notify"
 	TRANSFER      = "transfer"
 	LIST_ADDRESS  = "listaddress"
+	VERIFY        = "verify"
 )
