@@ -6,7 +6,8 @@ import (
 	"config"
 	"lib/btc"
 	"lib/eth"
-	//"module/etherScan"
+	"module/btcScan"
+	"module/etherScan"
 )
 
 func main() {
@@ -22,9 +23,10 @@ func main() {
 
 func startBTC() {
 	btc.Connect_bitcoind("simnet")
+	btcScan.Start()
 }
 
 func startETH() {
 	eth.Connect("http://localhost:8545")
-	//etherScan.Start()
+	etherScan.Start()
 }

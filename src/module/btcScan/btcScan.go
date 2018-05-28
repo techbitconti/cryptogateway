@@ -1,12 +1,17 @@
 package btcScan
 
 import (
-	"fmt"
+	"bytes"
+	"encoding/json"
 	"lib/btc"
 	"time"
-	//"db/redis"
+
+	"module/dbScan"
+
 	"github.com/btcsuite/btcd/wire"
 )
+
+var MapBlock = map[string]interface{}{}
 
 func Start() {
 
@@ -18,7 +23,9 @@ func update() {
 	go func() {
 		for {
 
-			time.Sleep(1 * time.Millisecond)
+			getBlock()
+
+			time.Sleep(10000 * time.Millisecond)
 
 		}
 	}()
@@ -26,14 +33,27 @@ func update() {
 
 func getBlock() {
 
-	blockHeight, _ := btc.GetBlockCount()
-	blockHash, _ := btc.GetBlockHash(blockHeight)
+	blockHeight := btc.GetBlockCount()
+	blockHash, err1 := btc.GetBlockHash(blockHeight)
+	if err1 != nil {
+		return
+	}
 
-	block, _ := btc.GetBlock(blockHash)
+	block, err2 := btc.GetBlock(blockHash)
+	if err2 != nil {
+		return
+	}
 
-	fmt.Println(".............block.................", block)
+	blockOld, exist := MapBlock[blockHash.String()]
+	bytesOld, _ := json.Marshal(blockOld)
+	bytesNew, _ := json.Marshal(block)
 
-	parse(block)
+	if !exist || !bytes.Equal(bytesOld, bytesNew) {
+
+		MapBlock[blockHash.String()] = block
+
+		parse(block)
+	}
 
 }
 
@@ -41,6 +61,34 @@ func parse(block *wire.MsgBlock) {
 
 	hashList, _ := block.TxHashes()
 
-	fmt.Println("hashList :  ", hashList)
+	for _, txObj := range hashList {
+
+		tx := txObj.String()
+		result, err := btc.GetTransaction(tx)
+		if err != nil {
+			return
+		}
+
+		data := make(map[string]interface{})
+		data["token"] = "BTC"
+		data["transaction_id"] = result.TxID
+		data["transaction_fee"] = result.Fee
+
+		for _, obj := range result.Details {
+
+			if obj.Category == "send" {
+				data["from_address"] = obj.Address
+
+			} else if obj.Category == "receive" {
+
+				data["to_address"] = obj.Address
+				data["amount"] = obj.Amount
+
+				if de, ok := dbScan.HMAP_DEPOSIT[data["to_address"].(string)]; ok {
+					go de.Notify(data)
+				}
+			}
+		}
+	}
 
 }

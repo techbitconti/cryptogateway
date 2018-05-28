@@ -65,20 +65,20 @@ func (de *Deposit) run() {
 	}
 }
 
-func (de *Deposit) Notify() {
+func (de *Deposit) Notify(data map[string]interface{}) {
 
-	if config.IP_ALLOW == "" || config.PORT_ALLOW == "" || config.NOTIFY_BALANCE == "" {
-
+	if data["to_address"].(string) != de.AddressDeposit {
 		return
 	}
 
-	//"/api/notify"
+	if config.IP_ALLOW == "" || config.PORT_ALLOW == "" || config.NOTIFY_BALANCE == "" {
+		return
+	}
+
 	url := "http://" + config.IP_ALLOW + ":" + config.PORT_ALLOW + config.NOTIFY_BALANCE
-	fmt.Println(url)
+	fmt.Println(".......notify........", url)
 
-	m := map[string]string{"deposit": de.AddressDeposit, "balance": de.Amount}
-	b, _ := json.Marshal(m)
-
+	b, _ := json.Marshal(data)
 	res, err := http.Post(url, "application/json", bytes.NewBuffer(b))
 	if err != nil {
 		fmt.Println(err)
@@ -111,9 +111,8 @@ func (de *Deposit) waiting() {
 	// GO-1 : update new balance for deposit address
 	amount := strconv.FormatFloat(balance, 'f', -1, 64)
 	if amount != de.Amount {
-
 		// Go-2 : Notify
-		de.Notify()
+		//de.Notify()
 	}
 	de.Amount = amount
 }

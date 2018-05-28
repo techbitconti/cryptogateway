@@ -56,14 +56,14 @@ func Connect(url string) {
 
 func call_RPC(method string, paramsIn ...interface{}) map[string]interface{} {
 
-	fmt.Println("method : ", method, "  params : ", paramsIn)
+	//fmt.Println("method : ", method, "  params : ", paramsIn)
 
 	values := map[string]interface{}{"jsonrpc": "2.0", "method": method, "params": paramsIn, "id": 1}
 	jsonStr, _ := json.Marshal(values)
 
 	resp, err := http.Post(Url, "application/json", bytes.NewBuffer(jsonStr))
 	if err != nil {
-		fmt.Println("Error web3 call ", err)
+		//fmt.Println("Error web3 call ", err)
 		return nil
 	}
 	defer resp.Body.Close()
@@ -71,7 +71,7 @@ func call_RPC(method string, paramsIn ...interface{}) map[string]interface{} {
 	result := map[string]interface{}{}
 	body, err := ioutil.ReadAll(resp.Body)
 
-	fmt.Println(method, string(body))
+	//fmt.Println(method, string(body))
 
 	json.Unmarshal(body, &result)
 

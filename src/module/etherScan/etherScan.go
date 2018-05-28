@@ -1,12 +1,18 @@
 package etherScan
 
 import (
+	"bytes"
 	"encoding/json"
-	"fmt"
+	//"fmt"
 	"lib/eth"
+	"math"
 	"strconv"
 	"time"
+
+	"module/dbScan"
 )
+
+var MapBlock = map[string]interface{}{}
 
 func Start() {
 
@@ -20,7 +26,7 @@ func update() {
 
 			getBlock()
 
-			time.Sleep(1 * time.Second)
+			time.Sleep(1000 * time.Millisecond)
 		}
 	}()
 }
@@ -28,17 +34,26 @@ func update() {
 func getBlock() {
 
 	numHash := eth.GetBlockNumber()
-	numInt, _ := strconv.ParseInt(numHash, 0, 64)
+	//numInt, _ := strconv.ParseInt(numHash, 0, 64)
 
 	block := eth.GetBlockByNumber(numHash)
-	bBytes, _ := json.MarshalIndent(block, " ", "")
+	//bBytes, _ := json.MarshalIndent(block, " ", "")
 
-	fmt.Println("..............................................................")
-	fmt.Println("blockNumber: ", numHash, numInt)
-	fmt.Println(string(bBytes))
-	fmt.Println("..............................................................")
+	//	fmt.Println("..............................................................")
+	//	fmt.Println("blockNumber: ", numHash, numInt)
+	//	fmt.Println(string(bBytes))
+	//	fmt.Println("..............................................................")
 
-	parse(block)
+	blockOld, exist := MapBlock[numHash]
+	bytesOld, _ := json.Marshal(blockOld)
+	bytesNew, _ := json.Marshal(block)
+
+	if !exist || !bytes.Equal(bytesOld, bytesNew) {
+
+		MapBlock[numHash] = block
+
+		parse(block)
+	}
 }
 
 func parse(block map[string]interface{}) {
@@ -50,9 +65,22 @@ func parse(block map[string]interface{}) {
 
 	for _, txObj := range trans {
 
-		tx := txObj["hash"].(string)
-		b, _ := json.MarshalIndent(txObj, "", " ")
-		fmt.Println(tx, string(b))
+		data := make(map[string]interface{})
+		data["token"] = "ETH"
+		data["transaction_id"] = txObj["hash"]
+		data["from_address"] = txObj["from"]
+		data["to_address"] = txObj["to"]
 
+		value, _ := strconv.ParseInt(txObj["value"].(string), 0, 64)
+		data["amount"] = float64(value) / math.Pow10(18)
+
+		gas, _ := strconv.ParseInt(txObj["gas"].(string), 0, 64)
+		gasPrice, _ := strconv.ParseInt(txObj["gasPrice"].(string), 0, 64)
+		fee := float64(gas*gasPrice) / math.Pow10(18)
+		data["transaction_fee"] = fee
+
+		if de, ok := dbScan.HMAP_DEPOSIT[txObj["to"].(string)]; ok {
+			go de.Notify(data)
+		}
 	}
 }
