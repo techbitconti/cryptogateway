@@ -63,7 +63,7 @@ func call_RPC(method string, paramsIn ...interface{}) map[string]interface{} {
 
 	resp, err := http.Post(Url, "application/json", bytes.NewBuffer(jsonStr))
 	if err != nil {
-		//fmt.Println("Error web3 call ", err)
+		fmt.Println("Error web3 call ", err)
 		return nil
 	}
 	defer resp.Body.Close()
@@ -261,25 +261,49 @@ func SuggestGasPrice() (gasPrice *big.Int, err error) {
 
 	gasPrice, err = client.SuggestGasPrice(context.Background())
 
+	fmt.Println("SuggestGasPrice : ", gasPrice)
+
 	return
 }
 
-func EstimateGas(_from, _to string, value *big.Int, data []byte) (gasLimit uint64, err error) {
+func EstimateGasWeb3(to, data string) int64 {
+
+	obj := map[string]string{
+		"to":   to,
+		"data": data,
+	}
+
+	result := call_RPC("eth_estimateGas", obj)
+	if _, ok := result["result"]; !ok {
+		return int64(0)
+	}
+
+	str := result["result"].(string)
+
+	gasUsed, _ := strconv.ParseInt(str, 0, 64)
+
+	return gasUsed
+}
+
+func EstimateGas(_to string, value *big.Int, data []byte) (gasLimit uint64, err error) {
 
 	if client == nil {
 		return
 	}
 
-	var from common.Address = common.HexToAddress(_from)
+	//var from common.Address = common.HexToAddress(_from)
 	var to common.Address = common.HexToAddress(_to)
 
-	msg := ethereum.CallMsg{From: from, To: &to, Value: value, Data: data}
+	msg := ethereum.CallMsg{To: &to, Value: value, Data: data}
 
 	gasLimit, err = client.EstimateGas(context.Background(), msg)
+
+	fmt.Println("EstimateGas : ", gasLimit)
 
 	return
 }
 
+//transfer(address,uint256)
 func GetByteCode(method string, params ...interface{}) []byte {
 
 	event := Sha3FromEvent(method)
@@ -296,6 +320,23 @@ func GetByteCode(method string, params ...interface{}) []byte {
 		if r.Kind() == reflect.String {
 			v := common.HexToAddress(value.(string)).Bytes()
 			data = append(data, common.BytesToHash(v).Bytes()...)
+
+		} else if r.Kind() == reflect.Slice {
+
+			if arrStr, okStr := value.([]string); okStr {
+				for _, str := range arrStr {
+					v := common.HexToAddress(str).Bytes()
+					data = append(data, common.BytesToHash(v).Bytes()...)
+				}
+			}
+
+			if arrBig, okBig := value.([]*big.Int); okBig {
+				for _, b := range arrBig {
+					v := common.BigToHash(b).Bytes()
+					data = append(data, v...)
+				}
+			}
+
 		} else {
 			v := common.BigToHash(value.(*big.Int)).Bytes()
 			data = append(data, v...)
@@ -351,7 +392,7 @@ func SolidityCompile(path string) (mContracts map[string]map[string]string) {
 	return
 }
 
-func SolidityDeploy(prvKey, abi, codeHex string, params ...interface{}) (string, string) {
+func SolidityDeploy(prvKey, abi, codeHex string, value, gasPrice *big.Int, gasLimit uint64, params ...interface{}) (string, string) {
 
 	if client == nil {
 		fmt.Println("Error SolidityDeploy Client")
@@ -368,7 +409,13 @@ func SolidityDeploy(prvKey, abi, codeHex string, params ...interface{}) (string,
 
 	key, _ := crypto.HexToECDSA(prvKey)
 	opts := bind.NewKeyedTransactor(key)
+
+	opts.Value = value
+	opts.GasPrice = gasPrice
+	opts.GasLimit = gasLimit
+
 	fmt.Println("params........", len(params), params)
+
 	addr, tx, contract, err := bind.DeployContract(opts, parsed, common.FromHex(codeHex), client, params...)
 	if err != nil {
 		fmt.Println("Error SolidityDeploy Bind", err)
@@ -429,6 +476,23 @@ func SolidityCallRaw(_from, _to, method string, params ...interface{}) (hexutil.
 		if r.Kind() == reflect.String {
 			v := common.HexToAddress(value.(string)).Bytes()
 			data = append(data, common.BytesToHash(v).Bytes()...)
+
+		} else if r.Kind() == reflect.Slice {
+
+			if arrStr, okStr := value.([]string); okStr {
+				for _, str := range arrStr {
+					v := common.HexToAddress(str).Bytes()
+					data = append(data, common.BytesToHash(v).Bytes()...)
+				}
+			}
+
+			if arrBig, okBig := value.([]*big.Int); okBig {
+				for _, b := range arrBig {
+					v := common.BigToHash(b).Bytes()
+					data = append(data, v...)
+				}
+			}
+
 		} else {
 			v := common.BigToHash(value.(*big.Int)).Bytes()
 			data = append(data, v...)
@@ -460,7 +524,7 @@ func SolidityCallRaw(_from, _to, method string, params ...interface{}) (hexutil.
 	return hex, err
 }
 
-func SolidityTransact(prvKey, addr, abi, method string, params ...interface{}) string {
+func SolidityTransact(prvKey, addr, abi, method string, value, gasPrice *big.Int, gasLimit uint64, params ...interface{}) string {
 
 	if client == nil {
 		return ""
@@ -495,6 +559,9 @@ func SolidityTransact(prvKey, addr, abi, method string, params ...interface{}) s
 	txList[addr0.Hex()] = append(txList[addr0.Hex()], nonce)
 
 	opts.Nonce = big.NewInt(int64(nonce))
+	opts.Value = value
+	opts.GasPrice = gasPrice
+	opts.GasLimit = gasLimit
 
 	contract := bind.NewBoundContract(common.HexToAddress(addr), parsed, nil, client)
 	tx, err := contract.Transact(opts, method, params...)
@@ -536,6 +603,23 @@ func SolidityTransactRaw(prvKey, addr, method string, amount *big.Int, params ..
 		if r.Kind() == reflect.String {
 			v := common.HexToAddress(value.(string)).Bytes()
 			data = append(data, common.BytesToHash(v).Bytes()...)
+
+		} else if r.Kind() == reflect.Slice {
+
+			if arrStr, okStr := value.([]string); okStr {
+				for _, str := range arrStr {
+					v := common.HexToAddress(str).Bytes()
+					data = append(data, common.BytesToHash(v).Bytes()...)
+				}
+			}
+
+			if arrBig, okBig := value.([]*big.Int); okBig {
+				for _, b := range arrBig {
+					v := common.BigToHash(b).Bytes()
+					data = append(data, v...)
+				}
+			}
+
 		} else {
 			v := common.BigToHash(value.(*big.Int)).Bytes()
 			data = append(data, v...)

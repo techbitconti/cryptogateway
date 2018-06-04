@@ -2,7 +2,7 @@ package config
 
 var IP_ALLOW = "14.161.40.26"
 var PORT_ALLOW = "8000"
-var NOTIFY_BALANCE = "/api/notify"
+var NOTIFY_BALANCE = "/api/transaction/notify"
 var PASS_WALLET = "@oopXT&2018"
 
 var PATH_ETH string

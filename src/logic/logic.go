@@ -260,14 +260,24 @@ func sendCoin(coin, from, to, amount string) (tx string) {
 			}
 
 			weiBig := big.NewInt(int64(valueWei))
-			b := hexutil.Big(*weiBig)
-			value := b.String()
+			b1 := hexutil.Big(*weiBig)
+			valueAM := b1.String()
+
+			gasBig := big.NewInt(int64(gasWei))
+			b2 := hexutil.Big(*gasBig)
+			valueGAS := b2.String()
+
+			gasPrBig := big.NewInt(int64(gasPriceWei))
+			b3 := hexutil.Big(*gasPrBig)
+			valueGASPr := b3.String()
 
 			eth.UnlockAccount(from, "123456", uint64(10))
 			msg := map[string]interface{}{
-				"from":  from,
-				"to":    to,
-				"value": value,
+				"from":     from,
+				"to":       to,
+				"value":    valueAM,
+				"gas":      valueGAS,
+				"gasPrice": valueGASPr,
 			}
 			tx = eth.SendTransaction(msg)
 
@@ -290,7 +300,7 @@ func sendERC20(contract, receiver, amount string) (tx string) {
 
 	//GO : get bytecode of contract function
 	byteCode := eth.GetByteCode(contract, "transfer", big.NewInt(amountBigI))
-	gasUsed, _ := eth.EstimateGas(config.ETH_ADDR, contract, nil, byteCode)
+	gasUsed, _ := eth.EstimateGas(contract, nil, byteCode)
 	fmt.Println("gasUsed : ", gasUsed, "byteCode : ", byteCode)
 
 	gasWei := int64(gasUsed)

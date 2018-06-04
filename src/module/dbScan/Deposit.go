@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"time"
@@ -76,15 +77,21 @@ func (de *Deposit) Notify(data map[string]interface{}) {
 	}
 
 	url := "http://" + config.IP_ALLOW + ":" + config.PORT_ALLOW + config.NOTIFY_BALANCE
-	fmt.Println(".......notify........", url)
-
 	b, _ := json.Marshal(data)
+
 	res, err := http.Post(url, "application/json", bytes.NewBuffer(b))
 	if err != nil {
 		fmt.Println(err)
 	}
-	defer res.Body.Close()
 
+	//	res, err := http.Get(url + "/" + string(b))
+	//	if err != nil {
+	//		fmt.Println(err)
+	//	}
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	fmt.Println(".......notify........", url, data, string(body))
 }
 
 func (de *Deposit) checkBalance() (balance float64) {
