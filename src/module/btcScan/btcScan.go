@@ -85,7 +85,7 @@ func parse(block *wire.MsgBlock) {
 				data["amount"] = obj.Amount
 
 				if de, ok := dbScan.HMAP_DEPOSIT[data["to_address"].(string)]; ok {
-					go de.Notify(data)
+					de.Notify(data)
 				}
 			}
 		}
