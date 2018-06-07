@@ -6,9 +6,6 @@ import (
 	"net/http"
 	"sync"
 
-	//"config"
-	//"db/mgodb"
-	"db/redis"
 	"net"
 	"network"
 )
@@ -78,18 +75,6 @@ func FromRequest(req *http.Request) (net.IP, error) {
 }
 
 func Create(host string) {
-
-	//	mgodb.Connect()
-	//	fmt.Println("MongoDB connect")
-
-	redis.Connect()
-	fmt.Println("Redis ................")
-
-	//	config.Load()
-	//	fmt.Println("Load Config ...............")
-
-	//	network.Threading()
-	//	fmt.Println("Thread Ranking.............")
 
 	dispatcher := NewDispatcher()
 	dispatcher.Run()

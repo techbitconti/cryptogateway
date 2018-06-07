@@ -19,20 +19,26 @@ func SetPATH(net string) {
 		{
 			PATH_ETH = "/Users/A/ethereum/private/keystore"
 			PATH_BTC = "/Users/A/bitcoin/btcwallet"
+
+			ETH_ADDR = "0x8dd75f7c03a048c0a66a53dbf9ed76d04e9a9ea3"
+			ETH_PRIV = "47de15108b35169c4aff4826d5c413fe117e361a900325f6d3df1f0e04cbd706"
 		}
 
 	case "server":
 		{
-			PATH_ETH = "/home/ramost/ethereum/private/keystore"
+			//PATH_ETH = "/home/ramost/ethereum/private/keystore"
+			PATH_ETH = "/home/ramost/.ethereum/rinkeby/keystore"
+
 			PATH_BTC = "/home/ramost/bitcoin/btcwallet"
+
+			ETH_ADDR = "0x5c9c8eea0e17a08c7b27b72174b35bdd49990e00"
+			ETH_PRIV = "49072852e438f883f32a9543dffc4cbcaa99f0f51d0fb55699da1de41194cc82"
 		}
 	}
 
 	BTC_ADDR = "2N3eERqK57DRqqmjb3KzzapJUK7odJhNFZT"
 	BTC_PRV = "cMv8y9jz9wemtsjbLx5e2zn8MFRf6MruP3Agq8ifaQQ8ipbZw44B"
 
-	ETH_ADDR = "0x8dd75f7c03a048c0a66a53dbf9ed76d04e9a9ea3"
-	ETH_PRIV = "47de15108b35169c4aff4826d5c413fe117e361a900325f6d3df1f0e04cbd706"
 }
 
 var ERC20 = struct {

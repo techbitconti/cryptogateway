@@ -63,7 +63,7 @@ func call_RPC(method string, paramsIn ...interface{}) map[string]interface{} {
 
 	resp, err := http.Post(Url, "application/json", bytes.NewBuffer(jsonStr))
 	if err != nil {
-		fmt.Println("Error web3 call ", err)
+		//fmt.Println("Error web3 call ", err)
 		return nil
 	}
 	defer resp.Body.Close()
@@ -224,7 +224,18 @@ func UnlockAccount(addr, pass string, sec uint64) {
 }
 
 func SendTransaction(message map[string]interface{}) string {
-	return call_RPC("eth_sendTransaction", message)["result"].(string)
+
+	result := call_RPC("eth_sendTransaction", message)
+
+	fmt.Println("send tx : ", result)
+
+	if _, ok := result["result"]; !ok {
+		return ""
+	}
+
+	tx := result["result"].(string)
+
+	return tx
 }
 
 func SendRawTransaction(message interface{}) interface{} {

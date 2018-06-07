@@ -39,6 +39,9 @@ func NewDepositCoin(deposit, coin string) *Deposit {
 	//de.Status = STATUS_WAITING
 	de.Coin = coin
 
+	//DB
+	saveDeposit(*de)
+
 	go de.run()
 
 	return de
@@ -50,6 +53,9 @@ func NewDepositERC20(depositAddr, contractAddr, coin string) *Deposit {
 	de.AddressDeposit = depositAddr
 	de.AddressContract = contractAddr
 	de.Coin = coin
+
+	//DB
+	saveDeposit(*de)
 
 	go de.run()
 

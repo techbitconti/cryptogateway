@@ -3,7 +3,7 @@ package etherScan
 import (
 	"bytes"
 	"encoding/json"
-	//"fmt"
+	"fmt"
 	"lib/eth"
 	"math"
 	"strconv"
@@ -34,15 +34,15 @@ func update() {
 func getBlock() {
 
 	numHash := eth.GetBlockNumber()
-	//numInt, _ := strconv.ParseInt(numHash, 0, 64)
+	numInt, _ := strconv.ParseInt(numHash, 0, 64)
 
 	block := eth.GetBlockByNumber(numHash)
-	//bBytes, _ := json.MarshalIndent(block, " ", "")
+	bBytes, _ := json.MarshalIndent(block, " ", "")
 
-	//	fmt.Println("..............................................................")
-	//	fmt.Println("blockNumber: ", numHash, numInt)
-	//	fmt.Println(string(bBytes))
-	//	fmt.Println("..............................................................")
+	fmt.Println("..............................................................")
+	fmt.Println("blockNumber: ", numHash, numInt)
+	fmt.Println(string(bBytes))
+	fmt.Println("..............................................................")
 
 	blockOld, exist := MapBlock[numHash]
 	bytesOld, _ := json.Marshal(blockOld)
@@ -79,8 +79,11 @@ func parse(block map[string]interface{}) {
 		fee := float64(gas*gasPrice) / math.Pow10(18)
 		data["transaction_fee"] = fee
 
-		if de, ok := dbScan.HMAP_DEPOSIT[txObj["to"].(string)]; ok {
-			go de.Notify(data)
+		if txObj["to"] != nil {
+			if de, ok := dbScan.HMAP_DEPOSIT[txObj["to"].(string)]; ok {
+				go de.Notify(data)
+			}
 		}
+
 	}
 }

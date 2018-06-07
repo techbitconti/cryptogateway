@@ -77,7 +77,7 @@ func verityTX(coin, tx string) (interface{}, bool) {
 			fmt.Println("receipt : ", receipt)
 		}
 
-	case "ETH":
+	case "ETH", "ERC20":
 		{
 			//receipt := eth.GetTransactionReceipt(tx)
 			parsed := eth.GetTransactionByHash(tx)

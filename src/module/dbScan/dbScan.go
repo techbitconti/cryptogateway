@@ -1,6 +1,7 @@
 package dbScan
 
 import (
+	"encoding/json"
 	"fmt"
 	"lib/btc"
 	"lib/eth"
@@ -8,11 +9,60 @@ import (
 	"math/big"
 
 	"config"
+	"db/redis"
 
 	"github.com/ethereum/go-ethereum/common"
 )
 
 var HMAP_DEPOSIT = map[string]*Deposit{}
+
+var REDIS_KEYS_DEPOSIT = "keys_deposit"
+
+func Start() {
+
+	loadDeposit()
+}
+
+func loadDeposit() {
+
+	bKeys, _ := redis.Session.Get(REDIS_KEYS_DEPOSIT).Bytes()
+
+	var keys []string
+	json.Unmarshal(bKeys, &keys)
+
+	for _, key := range keys {
+
+		deStr := redis.Session.Get(key).Val()
+
+		if deStr != "" {
+
+			b, _ := json.Marshal(deStr)
+			var de Deposit
+			json.Unmarshal(b, &de)
+
+			HMAP_DEPOSIT[key] = &de
+
+			fmt.Println("REDIS_KEYS_DEPOSIT: ", key, string(b))
+		}
+	}
+}
+
+func saveDeposit(de Deposit) {
+
+	data, _ := json.Marshal(de)
+	redis.Session.Set(de.AddressDeposit, data, 0).Err()
+
+	arr, _ := redis.Session.Get(REDIS_KEYS_DEPOSIT).Result()
+	var keys []string
+	json.Unmarshal([]byte(arr), &keys)
+	keys = append(keys, de.AddressDeposit)
+
+	bKeys, _ := json.Marshal(keys)
+
+	redis.Session.Set(REDIS_KEYS_DEPOSIT, bKeys, 0).Err()
+
+	fmt.Println("saveDeposit : ", de.AddressDeposit)
+}
 
 func GetBalance(coin, addr string) float64 {
 

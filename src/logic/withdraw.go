@@ -97,40 +97,55 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 							fmt.Println(resp.Error)
 						} else {
 
-							fromAdmin := ""
-							switch coin {
-							case "BTC":
-								fromAdmin = config.BTC_ADDR
-							case "ETH":
-								fromAdmin = config.ETH_ADDR
-							}
-
-							if resp.Status == 0 {
-								//Go-5 : sendFrom Deposit to Admin
-								from := deposit_Address
-								to := fromAdmin
-								amount := amountWithdraw
-
-								txToAdmin := sendCoin(coin, from, to, amount)
-								fmt.Println("txToAdmin : ", txToAdmin)
-								if txToAdmin == "" {
-									resp.Status = -7
-									resp.Error = "Not enough txToAdmin !!!" + coin
-									fmt.Println(resp.Error)
+							/*
+								fromAdmin := ""
+								switch coin {
+								case "BTC":
+									fromAdmin = config.BTC_ADDR
+								case "ETH":
+									fromAdmin = config.ETH_ADDR
 								}
-							}
+
+								if resp.Status == 0 {
+									//Go-5 : sendFrom Deposit to Admin
+									from := deposit_Address
+									to := fromAdmin
+									amount := amountWithdraw
+
+									txToAdmin := sendCoin(coin, from, to, amount)
+									fmt.Println("txToAdmin : ", txToAdmin)
+									if txToAdmin == "" {
+										resp.Status = -7
+										resp.Error = "Not enough txToAdmin !!!" + coin
+										fmt.Println(resp.Error)
+									}
+								}
+
+								if resp.Status == 0 {
+									//Go-6 : sendFromAdmin to Receipt
+									txFromAdmin := sendCoin(coin, fromAdmin, withdraw_Address, amountWithdraw)
+									fmt.Println("txFromAdmin : ", txFromAdmin)
+									if txFromAdmin == "" {
+										resp.Status = -8
+										resp.Error = "Not enough txFromAdmin !!!" + coin
+										fmt.Println(resp.Error)
+									}
+
+									resp.Data = bson.M{"tx": txFromAdmin}
+								}
+							*/
 
 							if resp.Status == 0 {
-								//Go-6 : sendFromAdmin to Receipt
-								txFromAdmin := sendCoin(coin, fromAdmin, withdraw_Address, amountWithdraw)
-								fmt.Println("txFromAdmin : ", txFromAdmin)
-								if txFromAdmin == "" {
+								//Go-6 : sendto Receipt
+								tx := sendCoin(coin, deposit_Address, withdraw_Address, amountWithdraw)
+								fmt.Println("tx : ", tx)
+								if tx == "" {
 									resp.Status = -8
-									resp.Error = "Not enough txFromAdmin !!!" + coin
+									resp.Error = "Not enough tx !!!" + coin
 									fmt.Println(resp.Error)
 								}
 
-								resp.Data = bson.M{"tx": txFromAdmin}
+								resp.Data = bson.M{"tx": tx}
 							}
 
 							if resp.Status == 0 {
