@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"config"
@@ -74,7 +75,15 @@ func (de *Deposit) run() {
 
 func (de *Deposit) Notify(data map[string]interface{}) {
 
-	if data["to_address"].(string) != de.AddressDeposit {
+	addr_deposit := data["to_address"].(string)
+
+	if de.Coin == "ETH" || de.Coin == "ERC20" {
+		addr_deposit = strings.ToLower(addr_deposit)
+	}
+
+	fmt.Println("notify deposit : ", addr_deposit, de.AddressDeposit)
+
+	if addr_deposit != de.AddressDeposit {
 		return
 	}
 
