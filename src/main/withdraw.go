@@ -77,13 +77,26 @@ func withdraw() {
 	}
 
 	if total < amount {
-		fmt.Println("Error Total : ", total, "  Amount Withdraw : ", amount)
+		fmt.Println(".........Failed..........")
+		fmt.Println("Total : ", total, "  Amount Withdraw : ", amount)
 		return
 	}
 
+	count := 0
+	list := make([]string, 0)
 	for _, de := range arr_withdraw {
 
-		sendCoin(de.Coin, de.AddressDeposit, to, de.Amount)
+		tx := sendCoin(de.Coin, de.AddressDeposit, to, de.Amount)
+
+		if tx != "" {
+			count++
+			list = append(list, tx)
+		}
+	}
+
+	if count >= len(arr_withdraw) {
+		fmt.Println(".........Success..........")
+		fmt.Println(list)
 	}
 }
 
