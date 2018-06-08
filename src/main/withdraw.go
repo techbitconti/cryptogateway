@@ -42,7 +42,7 @@ func withdraw() {
 	for _, de := range dbScan.HMAP_DEPOSIT {
 
 		if coin == de.Coin {
-			arr_de = append(arr_deposit, *de)
+			arr_deposit = append(arr_deposit, *de)
 		}
 	}
 
@@ -69,7 +69,7 @@ func withdraw() {
 			}
 		}
 
-		arr_withdraw = append(arr_withdraw, *de)
+		arr_withdraw = append(arr_withdraw, de)
 
 		if total >= amount {
 			break
@@ -80,11 +80,17 @@ func withdraw() {
 		fmt.Println("Error Total : ", total, "  Amount Withdraw : ", amount)
 		return
 	}
+
+	for _, de := range arr_withdraw {
+
+		sendCoin(de.Coin, de.AddressDeposit, to, de.Amount)
+	}
 }
 
-func sendCoin(coin, from, to string, balance float64) (tx string) {
+func sendCoin(coin, from, to, amount string) (tx string) {
 
 	max := float64(0)
+	balance, _ := strconv.ParseFloat(amount, 64)
 
 	switch coin {
 	case "BTC":
@@ -110,9 +116,9 @@ func sendCoin(coin, from, to string, balance float64) (tx string) {
 
 	fmt.Println("withdraw input : ", balance, "withdraw max : ", max)
 
-	amount := strconv.FormatFloat(max, 'f', -1, 64)
+	value := strconv.FormatFloat(max, 'f', -1, 64)
 
-	tx = dbScan.SendCoin(coin, from, to, amount)
+	tx = dbScan.SendCoin(coin, from, to, value)
 	fmt.Println("Tx : ", tx)
 
 	return
