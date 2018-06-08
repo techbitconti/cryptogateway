@@ -58,7 +58,7 @@ func Do_WithdrawMax(ip string, w http.ResponseWriter, params []byte) {
 				switch coin {
 				case "BTC":
 					{
-						fee := float64(0.001)
+						fee := float64(0.0001)
 						max = balance - fee //BTC
 					}
 
