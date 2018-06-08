@@ -76,12 +76,14 @@ func withdraw() {
 		}
 	}
 
+	// G0-4 : check total
 	if total < amount {
 		fmt.Println(".........Failed..........")
 		fmt.Println("Total : ", total, "  Amount Withdraw : ", amount)
 		return
 	}
 
+	// GO-5 : Send Withdraw
 	count := 0
 	list := make([]string, 0)
 	for _, de := range arr_withdraw {
