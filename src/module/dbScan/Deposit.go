@@ -134,7 +134,7 @@ func (de *Deposit) waiting() {
 	amount := strconv.FormatFloat(balance, 'f', -1, 64)
 	if amount != de.Amount {
 		// Go-2 : Notify
-		//de.Notify()
+		saveDeposit(*de)
 	}
 	de.Amount = amount
 }

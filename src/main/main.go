@@ -14,6 +14,21 @@ import (
 	"db/redis"
 )
 
+func main1() {
+	// GO-0 : load config
+	startconfig()
+
+	// GO-1 : start mongod-redis
+	startDB()
+
+	// G0-2: start module
+	startETH()
+	startBTC()
+
+	//
+	withdraw()
+}
+
 func main() {
 
 	// GO-0 : load config

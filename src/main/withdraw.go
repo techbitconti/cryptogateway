@@ -12,13 +12,16 @@ import (
 
 func withdraw() {
 
-	if len(os.Args) != 3 {
+	if len(os.Args) != 4 {
+
+		fmt.Println("not enough length : ", len(os.Args))
+
 		return
 	}
 
-	coin := os.Args[0]
-	to := os.Args[1]
-	amountStr := os.Args[2]
+	coin := os.Args[1]
+	to := os.Args[2]
+	amountStr := os.Args[3]
 	amount, aerr := strconv.ParseFloat(amountStr, 64)
 	if aerr != nil {
 		fmt.Println("Invalid amount")
@@ -40,11 +43,12 @@ func withdraw() {
 	// G0-2 : split ETH vs BTC
 	arr_deposit := make([]dbScan.Deposit, 0)
 	for _, de := range dbScan.HMAP_DEPOSIT {
-
 		if coin == de.Coin {
 			arr_deposit = append(arr_deposit, *de)
 		}
 	}
+
+	fmt.Println("arr_deposit : ", arr_deposit)
 
 	// G0-3 : split array to send
 	arr_withdraw := make([]dbScan.Deposit, 0)
@@ -60,14 +64,15 @@ func withdraw() {
 		de.Amount = strconv.FormatFloat(balance, 'f', -1, 64)
 
 		total += balance
-
 		if total >= amount {
 
-			if i < max-1 {
+			if i == max-1 {
 				sub := balance - (total - amount)
 				de.Amount = strconv.FormatFloat(sub, 'f', -1, 64)
 			}
 		}
+
+		fmt.Println(de.AddressDeposit, de.Amount)
 
 		arr_withdraw = append(arr_withdraw, de)
 
@@ -75,6 +80,8 @@ func withdraw() {
 			break
 		}
 	}
+
+	fmt.Println("arr_withdraw : ", arr_withdraw)
 
 	// G0-4 : check total
 	if total < amount {
@@ -100,6 +107,7 @@ func withdraw() {
 		fmt.Println(".........Success..........")
 		fmt.Println(list)
 	}
+
 }
 
 func sendCoin(coin, from, to, amount string) (tx string) {

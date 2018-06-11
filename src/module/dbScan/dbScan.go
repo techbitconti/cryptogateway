@@ -34,17 +34,16 @@ func loadDeposit() {
 
 	for _, key := range keys {
 
-		deStr := redis.Session.Get(key).Val()
+		value, _ := redis.Session.Get(key).Result()
 
-		if deStr != "" {
+		if value != "" {
 
-			b, _ := json.Marshal(deStr)
 			var de Deposit
-			json.Unmarshal(b, &de)
+			json.Unmarshal([]byte(value), &de)
 
 			HMAP_DEPOSIT[key] = &de
 
-			fmt.Println("REDIS_KEYS_DEPOSIT: ", key, string(b))
+			fmt.Println("REDIS_KEYS_DEPOSIT: ", key, value)
 		}
 	}
 }
@@ -54,14 +53,18 @@ func saveDeposit(de Deposit) {
 	data, _ := json.Marshal(de)
 	redis.Session.Set(de.AddressDeposit, data, 0).Err()
 
-	arr, _ := redis.Session.Get(REDIS_KEYS_DEPOSIT).Result()
-	var keys []string
-	json.Unmarshal([]byte(arr), &keys)
-	keys = append(keys, de.AddressDeposit)
+	if _, ok := HMAP_DEPOSIT[de.AddressDeposit]; !ok {
 
-	bKeys, _ := json.Marshal(keys)
+		arr, _ := redis.Session.Get(REDIS_KEYS_DEPOSIT).Result()
 
-	redis.Session.Set(REDIS_KEYS_DEPOSIT, bKeys, 0).Err()
+		var keys []string
+		json.Unmarshal([]byte(arr), &keys)
+		keys = append(keys, de.AddressDeposit)
+
+		bKeys, _ := json.Marshal(keys)
+
+		redis.Session.Set(REDIS_KEYS_DEPOSIT, bKeys, 0).Err()
+	}
 
 	fmt.Println("saveDeposit : ", de.AddressDeposit)
 }
