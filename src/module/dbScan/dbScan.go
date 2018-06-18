@@ -181,11 +181,12 @@ func Report_Deposit(coin string, de float64) {
 	case "BTC":
 		{
 			BTC_DEPOSIT += de
-
+			SaveReport_BTC_Deposit(BTC_DEPOSIT)
 		}
 	case "ETH":
 		{
 			ETH_DEPOSIT += de
+			SaveReport_ETH_Deposit(ETH_DEPOSIT)
 		}
 	}
 
@@ -197,10 +198,12 @@ func Report_Withdraw(coin string, with float64) {
 	case "BTC":
 		{
 			BTC_WITHDRAW += with
+			SaveReport_BTC_Withdraw(BTC_WITHDRAW)
 		}
 	case "ETH":
 		{
 			ETH_WITHDRAW += with
+			SaveReport_ETH_Withdraw(ETH_WITHDRAW)
 		}
 	}
 
@@ -212,10 +215,29 @@ func Report_Fees(coin string, fees float64) {
 	case "BTC":
 		{
 			BTC_FEES += fees
+			SaveReport_BTC_Fees(BTC_FEES)
 		}
 	case "ETH":
 		{
 			ETH_FEES += fees
+			SaveReport_ETH_Fees(ETH_FEES)
+		}
+	}
+
+}
+
+func Report_Current(coin string) {
+
+	switch coin {
+	case "BTC":
+		{
+			BTC_CURRENT = BTC_DEPOSIT - BTC_WITHDRAW
+			SaveReport_BTC_Current(BTC_CURRENT)
+		}
+	case "ETH":
+		{
+			ETH_CURRENT = ETH_DEPOSIT - ETH_WITHDRAW
+			SaveReport_ETH_Current(ETH_CURRENT)
 		}
 	}
 
