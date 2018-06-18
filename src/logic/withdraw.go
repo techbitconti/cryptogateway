@@ -151,6 +151,8 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 							if resp.Status == 0 {
 								//Go-7 : update HMAP_DEPOSIT
 								mDeposit.Amount = strconv.FormatFloat(balance, 'f', -1, 64)
+
+								dbScan.Report_Current(coin)
 							}
 						}
 					}

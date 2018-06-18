@@ -82,6 +82,9 @@ func parse(block map[string]interface{}) {
 		if txObj["to"] != nil {
 			if de, ok := dbScan.HMAP_DEPOSIT[txObj["to"].(string)]; ok {
 				de.Notify(data)
+
+				dbScan.Report_Deposit("ETH", data["amount"].(float64))
+				dbScan.Report_Fees("ETH", fee)
 			}
 		}
 
