@@ -14,22 +14,17 @@ import (
 	"db/redis"
 )
 
+func main() {
+
+	report()
+}
+
 func main1() {
-	// GO-0 : load config
-	startconfig()
 
-	// GO-1 : start mongod-redis
-	startDB()
-
-	// G0-2: start module
-	startETH()
-	startBTC()
-
-	//
 	withdraw()
 }
 
-func main() {
+func main2() {
 
 	// GO-0 : load config
 	startconfig()

@@ -1,7 +1,6 @@
 package dbScan
 
 import (
-	"encoding/json"
 	"fmt"
 	"lib/btc"
 	"lib/eth"
@@ -10,7 +9,6 @@ import (
 	"strconv"
 
 	"config"
-	"db/redis"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -18,55 +16,9 @@ import (
 
 var HMAP_DEPOSIT = map[string]*Deposit{}
 
-var REDIS_KEYS_DEPOSIT = "keys_deposit"
-
 func Start() {
 
-	loadDeposit()
-}
-
-func loadDeposit() {
-
-	bKeys, _ := redis.Session.Get(REDIS_KEYS_DEPOSIT).Bytes()
-
-	var keys []string
-	json.Unmarshal(bKeys, &keys)
-
-	for _, key := range keys {
-
-		value, _ := redis.Session.Get(key).Result()
-
-		if value != "" {
-
-			var de Deposit
-			json.Unmarshal([]byte(value), &de)
-
-			HMAP_DEPOSIT[key] = &de
-
-			fmt.Println("REDIS_KEYS_DEPOSIT: ", key, value)
-		}
-	}
-}
-
-func saveDeposit(de Deposit) {
-
-	data, _ := json.Marshal(de)
-	redis.Session.Set(de.AddressDeposit, data, 0).Err()
-
-	if _, ok := HMAP_DEPOSIT[de.AddressDeposit]; !ok {
-
-		arr, _ := redis.Session.Get(REDIS_KEYS_DEPOSIT).Result()
-
-		var keys []string
-		json.Unmarshal([]byte(arr), &keys)
-		keys = append(keys, de.AddressDeposit)
-
-		bKeys, _ := json.Marshal(keys)
-
-		redis.Session.Set(REDIS_KEYS_DEPOSIT, bKeys, 0).Err()
-	}
-
-	fmt.Println("saveDeposit : ", de.AddressDeposit)
+	LoadDeposit()
 }
 
 func GetBalance(coin, addr string) float64 {
@@ -221,4 +173,50 @@ func SendERC20(contract, receiver, amount string) (tx string) {
 	fmt.Println("tx ERC20 : ", tx)
 
 	return tx
+}
+
+func Report_Deposit(coin string, de float64) {
+
+	switch coin {
+	case "BTC":
+		{
+			BTC_DEPOSIT += de
+
+		}
+	case "ETH":
+		{
+			ETH_DEPOSIT += de
+		}
+	}
+
+}
+
+func Report_Withdraw(coin string, with float64) {
+
+	switch coin {
+	case "BTC":
+		{
+			BTC_WITHDRAW += with
+		}
+	case "ETH":
+		{
+			ETH_WITHDRAW += with
+		}
+	}
+
+}
+
+func Report_Fees(coin string, fees float64) {
+
+	switch coin {
+	case "BTC":
+		{
+			BTC_FEES += fees
+		}
+	case "ETH":
+		{
+			ETH_FEES += fees
+		}
+	}
+
 }

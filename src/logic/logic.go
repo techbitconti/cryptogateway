@@ -151,7 +151,8 @@ func genAddressBTC() string {
 
 func genAddressETH() string {
 
-	address, _ := eth.NewAccount(config.PATH_ETH, "123456")
+	keyHex, address, _ := eth.NewAccount()
+	eth.StoreAccount(keyHex, "123456", config.PATH_ETH)
 
 	return address
 }

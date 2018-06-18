@@ -78,20 +78,39 @@ func call_RPC(method string, paramsIn ...interface{}) map[string]interface{} {
 	return result
 }
 
-func NewAccount(path, pass string) (string, error) {
+func toWei(value interface{}) {
+
+}
+
+func fromWei(value interface{}) {
+
+}
+
+func NewAccount() (string, string, error) {
 
 	// Generate a new random account and a funded simulator
 	key, err := crypto.GenerateKey()
 	addr := crypto.PubkeyToAddress(key.PublicKey)
-	fmt.Println("prvKey Hex : ", common.Bytes2Hex(crypto.FromECDSA(key)))
-	fmt.Println("pubKey : ", common.ToHex(crypto.FromECDSAPub(&key.PublicKey)), "  addr : ", addr.Hex())
+
+	keyHex := common.Bytes2Hex(crypto.FromECDSA(key))
+	pubHex := common.ToHex(crypto.FromECDSAPub(&key.PublicKey))
+	fmt.Println("prvKey Hex : ", strings.ToLower(keyHex))
+	fmt.Println("pubKey Hex : ", strings.ToLower(pubHex))
+	fmt.Println("addr Hex : ", strings.ToLower(addr.Hex()))
+
+	return keyHex, strings.ToLower(addr.Hex()), err
+}
+
+func StoreAccount(keyHex, pass, path string) (string, error) {
+
+	key, _ := crypto.HexToECDSA(keyHex)
 
 	ks := keystore.NewKeyStore(path, keystore.StandardScryptN, keystore.StandardScryptP)
-	ks.ImportECDSA(key, pass)
+	account, err := ks.ImportECDSA(key, pass)
 
-	fmt.Println("ETH Accounts : ", ks.Accounts())
+	fmt.Println("ETH Accounts : ", account, "Error : ", err)
 
-	return strings.ToLower(addr.Hex()), err
+	return account.Address.Hex(), err
 }
 
 func IsHexAddress(address string) bool {
@@ -109,17 +128,17 @@ func IsHexContract(addr string) bool {
 	return true
 }
 
-func ValidateAmount(amount string) bool {
+func ValidateAmount(amount string) (float64, bool) {
 
 	f, err := strconv.ParseFloat(amount, 64)
 	if err != nil || len(amount) > 19 {
 		fmt.Println("ValidateAmount ", err)
-		return false
+		return 0, false
 	}
 
 	fmt.Println("ValidateAmount : ", f)
 
-	return true
+	return f, true
 }
 
 func ValidateToken(amount string) bool {
@@ -302,14 +321,12 @@ func EstimateGas(_to string, value *big.Int, data []byte) (gasLimit uint64, err 
 		return
 	}
 
-	//var from common.Address = common.HexToAddress(_from)
 	var to common.Address = common.HexToAddress(_to)
-
 	msg := ethereum.CallMsg{To: &to, Value: value, Data: data}
 
 	gasLimit, err = client.EstimateGas(context.Background(), msg)
 
-	fmt.Println("EstimateGas : ", gasLimit)
+	fmt.Println("EstimateGas : ", gasLimit, "Error : ", err)
 
 	return
 }
@@ -333,6 +350,13 @@ func GetByteCode(method string, params ...interface{}) []byte {
 			data = append(data, common.BytesToHash(v).Bytes()...)
 
 		} else if r.Kind() == reflect.Slice {
+
+			if arrAdd, okAdd := value.([]common.Address); okAdd {
+				for _, addr := range arrAdd {
+					v := addr.Bytes()
+					data = append(data, common.BytesToHash(v).Bytes()...)
+				}
+			}
 
 			if arrStr, okStr := value.([]string); okStr {
 				for _, str := range arrStr {
@@ -490,6 +514,13 @@ func SolidityCallRaw(_from, _to, method string, params ...interface{}) (hexutil.
 
 		} else if r.Kind() == reflect.Slice {
 
+			if arrAdd, okAdd := value.([]common.Address); okAdd {
+				for _, addr := range arrAdd {
+					v := addr.Bytes()
+					data = append(data, common.BytesToHash(v).Bytes()...)
+				}
+			}
+
 			if arrStr, okStr := value.([]string); okStr {
 				for _, str := range arrStr {
 					v := common.HexToAddress(str).Bytes()
@@ -616,6 +647,13 @@ func SolidityTransactRaw(prvKey, addr, method string, amount *big.Int, params ..
 			data = append(data, common.BytesToHash(v).Bytes()...)
 
 		} else if r.Kind() == reflect.Slice {
+
+			if arrAdd, okAdd := value.([]common.Address); okAdd {
+				for _, addr := range arrAdd {
+					v := addr.Bytes()
+					data = append(data, common.BytesToHash(v).Bytes()...)
+				}
+			}
 
 			if arrStr, okStr := value.([]string); okStr {
 				for _, str := range arrStr {

@@ -41,7 +41,7 @@ func NewDepositCoin(deposit, coin string) *Deposit {
 	de.Coin = coin
 
 	//DB
-	saveDeposit(*de)
+	SaveDeposit(*de)
 
 	go de.run()
 
@@ -56,7 +56,7 @@ func NewDepositERC20(depositAddr, contractAddr, coin string) *Deposit {
 	de.Coin = coin
 
 	//DB
-	saveDeposit(*de)
+	SaveDeposit(*de)
 
 	go de.run()
 
@@ -134,7 +134,7 @@ func (de *Deposit) waiting() {
 	amount := strconv.FormatFloat(balance, 'f', -1, 64)
 	if amount != de.Amount {
 		// Go-2 : Notify
-		saveDeposit(*de)
+		SaveDeposit(*de)
 	}
 	de.Amount = amount
 }

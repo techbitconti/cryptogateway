@@ -12,6 +12,16 @@ import (
 
 func withdraw() {
 
+	// GO-0 : load config
+	startconfig()
+
+	// GO-1 : start mongod-redis
+	startDB()
+
+	// G0-2: start module
+	startETH()
+	startBTC()
+
 	if len(os.Args) != 4 {
 
 		fmt.Println("not enough length : ", len(os.Args))
