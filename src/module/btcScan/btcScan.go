@@ -87,8 +87,9 @@ func parse(block *wire.MsgBlock) {
 				if de, ok := dbScan.HMAP_DEPOSIT[data["to_address"].(string)]; ok {
 					de.Notify(data)
 
-					dbScan.Report_Deposit("BTC", obj.Amount)
 					dbScan.Report_Fees("BTC", result.Fee)
+					dbScan.Report_Deposit("BTC", obj.Amount)
+					dbScan.Report_Current("BTC")
 				}
 			}
 		}

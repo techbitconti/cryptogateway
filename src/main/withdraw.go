@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 
+	"config"
 	"lib/eth"
 	"module/dbScan"
 )
@@ -128,7 +129,7 @@ func sendCoin(coin, from, to, amount string) (tx string) {
 	switch coin {
 	case "BTC":
 		{
-			fee := float64(0.0001)
+			fee := config.BTC_FEE
 			max = balance - fee //BTC
 		}
 
@@ -136,7 +137,7 @@ func sendCoin(coin, from, to, amount string) (tx string) {
 		{
 			wei := balance * math.Pow10(18)
 
-			gas := float64(21000)
+			gas := config.ETH_GAS
 
 			gasPriceBigI, _ := eth.SuggestGasPrice()
 			gasPriceWei := gasPriceBigI.Int64()

@@ -7,6 +7,7 @@ import (
 	"math"
 	"net/http"
 
+	"config"
 	"lib/eth"
 
 	"gopkg.in/mgo.v2/bson"
@@ -66,7 +67,7 @@ func Do_WithdrawMax(ip string, w http.ResponseWriter, params []byte) {
 					{
 						wei := balance * math.Pow10(18)
 
-						gas := float64(21000)
+						gas := config.ETH_GAS
 
 						gasPriceBigI, _ := eth.SuggestGasPrice()
 						gasPriceWei := gasPriceBigI.Int64()

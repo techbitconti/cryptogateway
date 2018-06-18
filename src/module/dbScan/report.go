@@ -112,7 +112,7 @@ func LoadReport_BTC() {
 	bf, _ := strconv.ParseFloat(fees, 64)
 	BTC_FEES = bf
 
-	fmt.Println("BTC Deposit : ", de, "  - Withdraw : ", with, "  - Current : ", curr, "  - Fees : ", fees)
+	fmt.Println("Redis BTC Deposit : ", de, "  - Withdraw : ", with, "  - Current : ", curr, "  - Fees : ", fees)
 }
 
 func SaveReport_BTC_Deposit(de float64) {
@@ -123,6 +123,8 @@ func SaveReport_BTC_Deposit(de float64) {
 	if err1 != nil {
 		fmt.Println("Error Save Report BTC Deposit")
 	}
+
+	fmt.Println("SaveReport_BTC_Deposit : ", REDIS_BTC_DEPOSIT, de)
 }
 
 func SaveReport_BTC_Withdraw(with float64) {
@@ -133,6 +135,8 @@ func SaveReport_BTC_Withdraw(with float64) {
 	if err2 != nil {
 		fmt.Println("Error Save Report BTC Withdraw")
 	}
+
+	fmt.Println("SaveReport_BTC_Withdraw : ", REDIS_BTC_WITHDRAW, with)
 }
 
 func SaveReport_BTC_Current(curr float64) {
@@ -143,6 +147,8 @@ func SaveReport_BTC_Current(curr float64) {
 	if err3 != nil {
 		fmt.Println("Error Save Report BTC Current")
 	}
+
+	fmt.Println("SaveReport_BTC_Current : ", REDIS_BTC_CURRENT, curr)
 }
 
 func SaveReport_BTC_Fees(fees float64) {
@@ -153,6 +159,8 @@ func SaveReport_BTC_Fees(fees float64) {
 	if err4 != nil {
 		fmt.Println("Error Save Report BTC Fees")
 	}
+
+	fmt.Println("SaveReport_BTC_Fees : ", REDIS_BTC_FEES, fees)
 }
 
 func LoadReport_ETH() {
@@ -193,7 +201,7 @@ func LoadReport_ETH() {
 	bf, _ := strconv.ParseFloat(fees, 64)
 	ETH_FEES = bf
 
-	fmt.Println("ETH Deposit : ", de, "  - Withdraw : ", with, "  - Current : ", curr, "  - Fees : ", fees)
+	fmt.Println("Redis ETH Deposit : ", de, "  - Withdraw : ", with, "  - Current : ", curr, "  - Fees : ", fees)
 }
 
 func SaveReport_ETH_Deposit(de float64) {
@@ -204,6 +212,8 @@ func SaveReport_ETH_Deposit(de float64) {
 	if err1 != nil {
 		fmt.Println("Error Save Report ETH Deposit")
 	}
+
+	fmt.Println("SaveReport_ETH_Deposit : ", REDIS_ETH_DEPOSIT, de)
 }
 
 func SaveReport_ETH_Withdraw(with float64) {
@@ -214,6 +224,8 @@ func SaveReport_ETH_Withdraw(with float64) {
 	if err2 != nil {
 		fmt.Println("Error Save Report ETH Withdraw")
 	}
+
+	fmt.Println("SaveReport_ETH_Withdraw : ", REDIS_ETH_WITHDRAW, with)
 }
 
 func SaveReport_ETH_Current(curr float64) {
@@ -224,6 +236,8 @@ func SaveReport_ETH_Current(curr float64) {
 	if err3 != nil {
 		fmt.Println("Error Save Report ETH Current")
 	}
+
+	fmt.Println("SaveReport_ETH_Current : ", REDIS_ETH_CURRENT, curr)
 }
 
 func SaveReport_ETH_Fees(fees float64) {
@@ -234,4 +248,6 @@ func SaveReport_ETH_Fees(fees float64) {
 	if err4 != nil {
 		fmt.Println("Error Save Report ETH Fees")
 	}
+
+	fmt.Println("SaveReport_ETH_Fees : ", REDIS_ETH_FEES, fees)
 }

@@ -19,6 +19,8 @@ var HMAP_DEPOSIT = map[string]*Deposit{}
 func Start() {
 
 	LoadDeposit()
+	LoadReport_BTC()
+	LoadReport_ETH()
 }
 
 func GetBalance(coin, addr string) float64 {
@@ -63,8 +65,7 @@ func SendCoin(coin, from, to, amount string) (tx string) {
 			aMountBTC := btc.ToBTC(amount)
 			//satoshi := btc.ToSatoshi(amount)
 
-			fee := float64(0.0001)
-			fund := aMountBTC + fee
+			fund := aMountBTC + config.BTC_FEE
 
 			if GetBalance(coin, from) < fund {
 				fmt.Println("BTC not enough !!!")
@@ -87,7 +88,7 @@ func SendCoin(coin, from, to, amount string) (tx string) {
 			amETH, _ := strconv.ParseFloat(amount, 64)
 			valueWei := amETH * math.Pow10(18)
 
-			gasWei := float64(21000)
+			gasWei := config.ETH_GAS
 			gasPriceBigI, _ := eth.SuggestGasPrice()
 			gasPriceWei := gasPriceBigI.Int64()
 
@@ -214,7 +215,7 @@ func Report_Fees(coin string, fees float64) {
 	switch coin {
 	case "BTC":
 		{
-			BTC_FEES += fees
+			BTC_FEES += math.Abs(fees)
 			SaveReport_BTC_Fees(BTC_FEES)
 		}
 	case "ETH":

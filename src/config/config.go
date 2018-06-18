@@ -13,6 +13,9 @@ var ETH_ADDR string
 var BTC_PRV string
 var BTC_ADDR string
 
+var BTC_FEE = float64(0.0001)
+var ETH_GAS = float64(21000)
+
 func SetPATH(net string) {
 	switch net {
 	case "local":

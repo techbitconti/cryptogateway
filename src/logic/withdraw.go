@@ -152,6 +152,15 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 								//Go-7 : update HMAP_DEPOSIT
 								mDeposit.Amount = strconv.FormatFloat(balance, 'f', -1, 64)
 
+								// GO : Report
+								fees := float64(0)
+								if coin == "BTC" {
+									fees = config.BTC_FEE
+								} else if coin == "ETH" {
+									fees = config.ETH_GAS
+								}
+								dbScan.Report_Fees(coin, fees)
+								dbScan.Report_Withdraw(coin, aMWith)
 								dbScan.Report_Current(coin)
 							}
 						}
