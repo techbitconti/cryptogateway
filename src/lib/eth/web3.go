@@ -104,12 +104,9 @@ func FromWei(value float64, to string) float64 {
 	return value
 }
 
-func ToBigNumber(number float64) (*big.Int, string) {
-	wei, _ := big.NewFloat(number).Int64()
-	weiBig := big.NewInt(wei)
-	hex := hexutil.EncodeBig(weiBig)
+func ToBigNumber(value uint64) string {
 
-	return weiBig, hex
+	return hexutil.EncodeUint64(value)
 }
 
 func NewAccount() (string, string, error) {
