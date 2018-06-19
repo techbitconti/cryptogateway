@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"math/big"
 	"net/http"
 	"os/exec"
@@ -78,12 +79,37 @@ func call_RPC(method string, paramsIn ...interface{}) map[string]interface{} {
 	return result
 }
 
-func toWei(value interface{}) {
+func ToWei(value float64, from string) float64 {
 
+	switch from {
+	case "ether":
+		value *= math.Pow10(18)
+	case "gwei":
+		value *= math.Pow10(9)
+	}
+
+	return value
 }
 
-func fromWei(value interface{}) {
+func FromWei(value float64, to string) float64 {
 
+	switch to {
+	case "ether":
+		value /= math.Pow10(18)
+	case "gwei":
+		value /= math.Pow10(9)
+
+	}
+
+	return value
+}
+
+func ToBigNumber(number float64) (*big.Int, string) {
+	wei, _ := big.NewFloat(number).Int64()
+	weiBig := big.NewInt(wei)
+	hex := hexutil.EncodeBig(weiBig)
+
+	return weiBig, hex
 }
 
 func NewAccount() (string, string, error) {
@@ -139,19 +165,6 @@ func ValidateAmount(amount string) (float64, bool) {
 	fmt.Println("ValidateAmount : ", f)
 
 	return f, true
-}
-
-func ValidateToken(amount string) bool {
-
-	f, err := strconv.ParseInt(amount, 0, 64)
-	if err != nil || len(amount) > 19 {
-		fmt.Println("ValidateToken ", err)
-		return false
-	}
-
-	fmt.Println("ValidateToken : ", f)
-
-	return true
 }
 
 func GetCoinbase() string {
@@ -813,4 +826,19 @@ func CodeAt(addr string) ([]byte, string) {
 	}
 
 	return code, common.ToHex(code)
+}
+
+func GetBalanceX(addr string) (balance *big.Int, err error) {
+
+	if client == nil {
+		return
+	}
+
+	numHash := GetBlockNumber()
+	numInt, _ := strconv.ParseInt(numHash, 0, 64)
+	numBig := big.NewInt(numInt)
+
+	balance, err = client.BalanceAt(context.Background(), common.HexToAddress(addr), numBig)
+
+	return
 }

@@ -105,17 +105,9 @@ func SendCoin(coin, from, to, amount string) (tx string) {
 				return ""
 			}
 
-			weiBig := big.NewInt(int64(valueWei))
-			b1 := hexutil.Big(*weiBig)
-			valueAM := b1.String()
-
-			gasBig := big.NewInt(int64(gasWei))
-			b2 := hexutil.Big(*gasBig)
-			valueGAS := b2.String()
-
-			gasPrBig := big.NewInt(int64(gasPriceWei))
-			b3 := hexutil.Big(*gasPrBig)
-			valueGASPr := b3.String()
+			_, valueAM := eth.ToBigNumber(valueWei)
+			_, valueGAS := eth.ToBigNumber(gasWei)
+			_, valueGASPr := eth.ToBigNumber(gasPriceWei)
 
 			eth.UnlockAccount(from, "123456", uint64(10))
 			msg := map[string]interface{}{

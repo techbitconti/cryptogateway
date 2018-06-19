@@ -43,7 +43,7 @@ func main2() {
 }
 
 func startconfig() {
-	config.SetPATH("local")
+	config.SetPATH("server")
 }
 
 func startDB() {
