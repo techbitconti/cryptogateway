@@ -22,6 +22,8 @@ func withdraw() {
 	// G0-2: start module
 	startETH()
 	startBTC()
+	startLTC()
+	startBCH()
 
 	if len(os.Args) != 4 {
 
@@ -42,7 +44,7 @@ func withdraw() {
 	fmt.Println("coin", coin, "to", to, "amount", amount)
 
 	// GO-0 : check coin type
-	if coin != "BTC" && coin != "ETH" {
+	if coin != "ETH" && coin != "BTC" && coin != "LTC" && coin != "BCH" {
 		fmt.Println("Invalid coin. Should be BTC or ETH")
 
 		return
@@ -127,7 +129,7 @@ func sendCoin(coin, from, to, amount string) (tx string) {
 	balance, _ := strconv.ParseFloat(amount, 64)
 
 	switch coin {
-	case "BTC":
+	case "BTC", "LTC", "BCH":
 		{
 			fee := config.BTC_FEE
 			max = balance - fee //BTC

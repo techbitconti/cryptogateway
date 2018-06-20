@@ -15,7 +15,11 @@ func report() {
 	// G0-2: start module
 	startETH()
 	startBTC()
+	startLTC()
+	startBCH()
 
-	dbScan.LoadReport_BTC()
 	dbScan.LoadReport_ETH()
+	dbScan.LoadReport_BTC()
+	dbScan.LoadReport_LTC()
+	dbScan.LoadReport_BCH()
 }

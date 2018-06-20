@@ -3,6 +3,7 @@ package dbScan
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"strconv"
 
 	"db/redis"
@@ -60,6 +61,16 @@ func Report_Deposit(coin string, de float64) {
 			BTC_DEPOSIT += de
 			SaveReport_BTC_Deposit(BTC_DEPOSIT)
 		}
+	case "LTC":
+		{
+			LTC_DEPOSIT += de
+			SaveReport_LTC_Deposit(LTC_DEPOSIT)
+		}
+	case "BCH":
+		{
+			BCH_DEPOSIT += de
+			SaveReport_BCH_Deposit(BCH_DEPOSIT)
+		}
 	case "ETH":
 		{
 			ETH_DEPOSIT += de
@@ -76,6 +87,16 @@ func Report_Withdraw(coin string, with float64) {
 		{
 			BTC_WITHDRAW += with
 			SaveReport_BTC_Withdraw(BTC_WITHDRAW)
+		}
+	case "LTC":
+		{
+			LTC_WITHDRAW += with
+			SaveReport_LTC_Withdraw(LTC_WITHDRAW)
+		}
+	case "BCH":
+		{
+			BCH_WITHDRAW += with
+			SaveReport_BCH_Withdraw(BCH_WITHDRAW)
 		}
 	case "ETH":
 		{
@@ -94,6 +115,16 @@ func Report_Fees(coin string, fees float64) {
 			BTC_FEES += math.Abs(fees)
 			SaveReport_BTC_Fees(BTC_FEES)
 		}
+	case "LTC":
+		{
+			LTC_FEES += math.Abs(fees)
+			SaveReport_LTC_Fees(LTC_FEES)
+		}
+	case "BCH":
+		{
+			BCH_FEES += math.Abs(fees)
+			SaveReport_BCH_Fees(BCH_FEES)
+		}
 	case "ETH":
 		{
 			ETH_FEES += fees
@@ -111,6 +142,16 @@ func Report_Current(coin string) {
 			BTC_CURRENT = BTC_DEPOSIT - BTC_WITHDRAW
 			SaveReport_BTC_Current(BTC_CURRENT)
 		}
+	case "LTC":
+		{
+			LTC_CURRENT = LTC_DEPOSIT - LTC_WITHDRAW
+			SaveReport_LTC_Current(LTC_CURRENT)
+		}
+	case "BCH":
+		{
+			BCH_CURRENT = BCH_DEPOSIT - BCH_WITHDRAW
+			SaveReport_BCH_Current(BCH_CURRENT)
+		}
 	case "ETH":
 		{
 			ETH_CURRENT = ETH_DEPOSIT - ETH_WITHDRAW
@@ -119,6 +160,8 @@ func Report_Current(coin string) {
 	}
 
 }
+
+/*---------------------------------------------------------------------------*/
 
 func LoadDeposit() {
 

@@ -3,7 +3,7 @@ package ltcScan
 import (
 	"bytes"
 	"encoding/json"
-	"lib/btc"
+	"lib/ltc"
 	"time"
 
 	"module/dbScan"
@@ -33,13 +33,13 @@ func update() {
 
 func getBlock() {
 
-	blockHeight := btc.GetBlockCount()
-	blockHash, err1 := btc.GetBlockHash(blockHeight)
+	blockHeight := ltc.GetBlockCount()
+	blockHash, err1 := ltc.GetBlockHash(blockHeight)
 	if err1 != nil {
 		return
 	}
 
-	block, err2 := btc.GetBlock(blockHash)
+	block, err2 := ltc.GetBlock(blockHash)
 	if err2 != nil {
 		return
 	}
@@ -64,7 +64,7 @@ func parse(block *wire.MsgBlock) {
 	for _, txObj := range hashList {
 
 		tx := txObj.String()
-		result, err := btc.GetTransaction(tx)
+		result, err := ltc.GetTransaction(tx)
 		if err != nil {
 			return
 		}

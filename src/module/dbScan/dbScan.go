@@ -18,8 +18,10 @@ var HMAP_DEPOSIT = map[string]*Deposit{}
 func Start() {
 
 	LoadDeposit()
-	LoadReport_BTC()
 	LoadReport_ETH()
+	LoadReport_BTC()
+	LoadReport_LTC()
+	LoadReport_BCH()
 }
 
 func GetBalance(coin, addr string) float64 {

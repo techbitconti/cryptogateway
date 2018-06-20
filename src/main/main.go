@@ -7,9 +7,11 @@ import (
 	"config"
 	"lib/btc"
 	"lib/eth"
+	"lib/ltc"
 	"module/btcScan"
 	"module/dbScan"
 	"module/etherScan"
+	"module/ltcScan"
 	//"db/mgodb"
 	"db/redis"
 )
@@ -35,6 +37,8 @@ func main2() {
 	// G0-2: start module
 	startETH()
 	startBTC()
+	startLTC()
+	startBCH()
 	startDBScan()
 
 	// Go-3 : start http server
@@ -62,6 +66,16 @@ func startDBScan() {
 func startBTC() {
 	btc.Connect_bitcoind("simnet")
 	btcScan.Start()
+}
+
+func startLTC() {
+	ltc.Connect("simnet")
+	ltcScan.Start()
+}
+
+func startBCH() {
+	//	bch.Connect("simnet")
+	//	bchScan.Start()
 }
 
 func startETH() {
