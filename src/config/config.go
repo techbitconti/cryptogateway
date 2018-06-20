@@ -5,13 +5,6 @@ var PORT_ALLOW = "8000"
 var NOTIFY_BALANCE = "/api/transaction/notify"
 var PASS_WALLET = "@oopXT&2018"
 
-var COIN_BTC = "BTC"
-var COIN_LTC = "LTC"
-var COIN_BCH = "BCH"
-var COIN_ETH = "ETH"
-var COIN_ERC20 = "ERC20"
-var COIN_XLM = "XLM"
-
 var PATH_ETH string
 var PATH_BTC string
 var PATH_LTC string
@@ -23,6 +16,15 @@ var BTC_PRV string
 var BTC_ADDR string
 var LTC_PRV string
 var LTC_ADDR string
+var BCH_PRV string
+var BCH_ADDR string
+
+var COIN_BTC = "BTC"
+var COIN_LTC = "LTC"
+var COIN_BCH = "BCH"
+var COIN_ETH = "ETH"
+var COIN_ERC20 = "ERC20"
+var COIN_XLM = "XLM"
 
 var BTC_FEE = float64(0.0001)
 var ETH_GAS = float64(21000)

@@ -12,7 +12,7 @@ import (
 )
 
 func Do_Deposit(ip string, w http.ResponseWriter, params []byte) {
-	fmt.Println("Do_Deposit : ", string(params)) // {"coin" : "ETH/BTC/ERC20", "contract" : ""}
+	fmt.Println("Do_Deposit : ", string(params)) // {"coin" : "ETH/BTC/ERC20/LTC", "contract" : ""}
 
 	resp := Writer{Api: api.DEPOSIT}
 
@@ -30,7 +30,7 @@ func Do_Deposit(ip string, w http.ResponseWriter, params []byte) {
 		coin := request["coin"].(string)
 
 		// GO-0 : check coin type
-		if coin != "BTC" && coin != "ETH" && coin != "ERC20" {
+		if coin != "BTC" && coin != "LTC" && coin != "ETH" && coin != "ERC20" {
 			resp.Status = -2
 			resp.Error = "Error Coin !!!"
 
@@ -43,7 +43,7 @@ func Do_Deposit(ip string, w http.ResponseWriter, params []byte) {
 		if resp.Status == 0 {
 
 			switch coin {
-			case "BTC", "ETH":
+			case "BTC", "LTC", "ETH":
 				{
 					deposit_Map := dbScan.NewDepositCoin(deposit_Address, coin)
 					dbScan.HMAP_DEPOSIT[deposit_Address] = deposit_Map

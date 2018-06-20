@@ -13,6 +13,7 @@ import (
 	"config"
 	"lib/btc"
 	"lib/eth"
+	"lib/ltc"
 	"module/dbScan"
 
 	"github.com/PuerkitoBio/goquery"
@@ -23,6 +24,11 @@ func verifyAddress(coin string, addr string) bool {
 	switch coin {
 	case "BTC":
 		_, err := btc.ValidateAddress(addr)
+		if err != nil {
+			return false
+		}
+	case "LTC":
+		_, err := ltc.ValidateAddress(addr)
 		if err != nil {
 			return false
 		}
@@ -59,6 +65,35 @@ func verityTX(coin, tx string) (interface{}, bool) {
 
 			data := make(map[string]interface{})
 			data["token"] = "BTC"
+			data["transaction_id"] = result.TxID
+			data["transaction_fee"] = result.Fee
+
+			for _, obj := range result.Details {
+				if obj.Category == "send" {
+					data["from_address"] = obj.Address
+				} else if obj.Category == "receive" {
+					data["to_address"] = obj.Address
+					data["amount"] = obj.Amount
+				}
+			}
+
+			receipt = data
+			fmt.Println("receipt : ", receipt)
+		}
+
+	case "LTC":
+		{
+			result, err := ltc.GetTransaction(tx)
+			if err != nil {
+				return nil, false
+			}
+
+			if result.BlockHash == "" {
+				return nil, false
+			}
+
+			data := make(map[string]interface{})
+			data["token"] = "LTC"
 			data["transaction_id"] = result.TxID
 			data["transaction_fee"] = result.Fee
 
@@ -129,6 +164,8 @@ func genAddress(coin string) (address string) {
 	switch coin {
 	case "BTC":
 		address = genAddressBTC()
+	case "LTC":
+		address = genAddressLTC()
 	case "ETH", "ERC20":
 		address = genAddressETH()
 	}
@@ -145,6 +182,17 @@ func genAddressBTC() string {
 	encode := base64.StdEncoding.EncodeToString([]byte(decode))
 
 	address, _ := btc.GetNewAddress(encode)
+
+	return address.String()
+}
+
+func genAddressLTC() string {
+
+	utc := time.Now().Unix()
+	decode := strconv.FormatInt(utc, 10)
+	encode := base64.StdEncoding.EncodeToString([]byte(decode))
+
+	address, _ := ltc.GetNewAddress(encode)
 
 	return address.String()
 }

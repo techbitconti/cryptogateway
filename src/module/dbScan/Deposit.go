@@ -99,11 +99,6 @@ func (de *Deposit) Notify(data map[string]interface{}) {
 		fmt.Println(err)
 	}
 
-	//	res, err := http.Get(url + "/" + string(b))
-	//	if err != nil {
-	//		fmt.Println(err)
-	//	}
-
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	fmt.Println(".......notify........", url, data, string(body))

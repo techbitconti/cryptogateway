@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"lib/btc"
 	"lib/eth"
+	"lib/ltc"
 	"math"
 	"math/big"
 	"strconv"
@@ -30,6 +31,11 @@ func GetBalance(coin, addr string) float64 {
 	case "BTC":
 		amount := btc.GetBalance(addr)
 		fmt.Println("getBalance BTC : ", amount)
+		return amount
+
+	case "LTC":
+		amount := ltc.GetBalance(addr)
+		fmt.Println("getBalance LTC : ", amount)
 		return amount
 
 	case "ETH":
@@ -82,6 +88,29 @@ func SendCoin(coin, from, to, amount string) (tx string) {
 			}
 			tx = txHash.String()
 			fmt.Println("tx BTC : ", tx)
+		}
+
+	case "LTC":
+		{
+			aMountLTC := ltc.ToBTC(amount)
+			//satoshi := ltc.ToSatoshi(amount)
+
+			fund := aMountLTC + config.BTC_FEE
+
+			if GetBalance(coin, from) < fund {
+				fmt.Println("BTC not enough !!!")
+				return ""
+			}
+
+			//ltc.WalletPassphrase("123456", 10)
+			//txHash, err := ltc.SendFrom(from, to, satoshi)
+			txHash, err := ltc.SendFrom(from, to, aMountLTC)
+
+			if err != nil {
+				return ""
+			}
+			tx = txHash.String()
+			fmt.Println("tx LTC : ", tx)
 		}
 
 	case "ETH":

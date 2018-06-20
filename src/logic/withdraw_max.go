@@ -4,7 +4,6 @@ import (
 	"api"
 	"encoding/json"
 	"fmt"
-	"math"
 	"net/http"
 
 	"config"
@@ -14,7 +13,7 @@ import (
 )
 
 func Do_WithdrawMax(ip string, w http.ResponseWriter, params []byte) {
-	fmt.Println("Do_WithdrawMax : ", string(params)) // {"coin" : "ETH/BTC/ERC20", "deposit" : "0x923eac92bda97a4348968a1e7d64834236319b3f"}
+	fmt.Println("Do_WithdrawMax : ", string(params)) // {"coin" : "ETH/BTC/ERC20/LTC", "deposit" : "0x923eac92bda97a4348968a1e7d64834236319b3f"}
 
 	resp := Writer{Api: api.WITHDRAW_MAX}
 
@@ -32,7 +31,7 @@ func Do_WithdrawMax(ip string, w http.ResponseWriter, params []byte) {
 		addr := request["deposit"].(string)
 
 		// GO-0 : check coin type
-		if coin != "BTC" && coin != "ETH" && coin != "ERC20" {
+		if coin != "BTC" && coin != "LTC" && coin != "ETH" && coin != "ERC20" {
 			resp.Status = -2
 			resp.Error = "Error Coin !!!"
 
@@ -57,15 +56,14 @@ func Do_WithdrawMax(ip string, w http.ResponseWriter, params []byte) {
 				max := float64(0)
 
 				switch coin {
-				case "BTC":
+				case "BTC", "LTC":
 					{
-						fee := float64(0.0001)
-						max = balance - fee //BTC
+						max = balance - config.BTC_FEE //BTC
 					}
 
 				case "ETH", "ERC20":
 					{
-						wei := balance * math.Pow10(18)
+						wei := eth.ToWei(balance, "ether") //balance * math.Pow10(18)
 
 						gas := config.ETH_GAS
 
@@ -73,8 +71,9 @@ func Do_WithdrawMax(ip string, w http.ResponseWriter, params []byte) {
 						gasPriceWei := gasPriceBigI.Int64()
 						gasPrice := float64(gasPriceWei)
 
-						max = wei - gas*gasPrice
-						max /= math.Pow10(18) //ETH
+						//max = wei - gas*gasPrice
+						//max /= math.Pow10(18) //ETH
+						max = eth.FromWei(wei-gas*gasPrice, "ether")
 					}
 				}
 

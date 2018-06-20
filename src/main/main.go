@@ -16,7 +16,7 @@ import (
 	"db/redis"
 )
 
-func main() {
+func main2() {
 
 	report()
 }
@@ -26,7 +26,7 @@ func main1() {
 	withdraw()
 }
 
-func main2() {
+func main() {
 
 	// GO-0 : load config
 	startconfig()

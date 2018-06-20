@@ -8,10 +8,11 @@ import (
 
 	"lib/btc"
 	"lib/eth"
+	"lib/ltc"
 )
 
 func Do_ListAddress(ip string, w http.ResponseWriter, params []byte) {
-	fmt.Println("Do_ListAddress : ", string(params)) // {"coin" : "ETH/BTC"}
+	fmt.Println("Do_ListAddress : ", string(params)) // {"coin" : "ETH/BTC/LTC"}
 
 	resp := Writer{Api: api.LIST_ADDRESS}
 
@@ -29,7 +30,7 @@ func Do_ListAddress(ip string, w http.ResponseWriter, params []byte) {
 		coin := request["coin"].(string)
 
 		// GO-0 : check coin type
-		if coin != "BTC" && coin != "ETH" {
+		if coin != "BTC" && coin != "LTC" && coin != "ETH" {
 			resp.Status = -2
 			resp.Error = "Error Coin !!!"
 
@@ -42,6 +43,11 @@ func Do_ListAddress(ip string, w http.ResponseWriter, params []byte) {
 			switch coin {
 			case "BTC":
 				listAddr := btc.ListAddress()
+				for _, v := range listAddr {
+					list = append(list, v.String())
+				}
+			case "LTC":
+				listAddr := ltc.ListAddress()
 				for _, v := range listAddr {
 					list = append(list, v.String())
 				}

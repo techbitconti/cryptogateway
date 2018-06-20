@@ -9,7 +9,7 @@ import (
 )
 
 func Do_VerifyTx(ip string, w http.ResponseWriter, params []byte) {
-	fmt.Println("Do_VerifyTx : ", string(params)) // {"coin" : "ETH/BTC", "tx" : ""}
+	fmt.Println("Do_VerifyTx : ", string(params)) // {"coin" : "ETH/BTC/LTC", "tx" : ""}
 
 	resp := Writer{Api: api.VERIFY}
 
@@ -28,7 +28,7 @@ func Do_VerifyTx(ip string, w http.ResponseWriter, params []byte) {
 		tx := request["tx"].(string)
 
 		// GO-0 : check coin type
-		if coin != "BTC" && coin != "ETH" {
+		if coin != "BTC" && coin != "LTC" && coin != "ETH" {
 			resp.Status = -2
 			resp.Error = "Error Coin !!!"
 

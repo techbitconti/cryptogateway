@@ -11,7 +11,7 @@ import (
 )
 
 func Do_GetBalance(ip string, w http.ResponseWriter, params []byte) {
-	fmt.Println("Do_GetBalance : ", string(params)) // {"coin" : "ETH/BTC/ERC20", "address" : "", "contract" : ""}
+	fmt.Println("Do_GetBalance : ", string(params)) // {"coin" : "ETH/BTC/ERC20/LTC", "address" : "", "contract" : ""}
 
 	resp := Writer{Api: api.BALANCE}
 
@@ -30,7 +30,7 @@ func Do_GetBalance(ip string, w http.ResponseWriter, params []byte) {
 		addr := request["address"].(string)
 
 		// GO-0 : check coin type
-		if coin != "BTC" && coin != "ETH" && coin != "ERC20" {
+		if coin != "BTC" && coin != "LTC" && coin != "ETH" && coin != "ERC20" {
 			resp.Status = -2
 			resp.Error = "Error Coin !!!"
 
@@ -40,7 +40,7 @@ func Do_GetBalance(ip string, w http.ResponseWriter, params []byte) {
 		if resp.Status == 0 {
 
 			switch coin {
-			case "BTC", "ETH":
+			case "BTC", "LTC", "ETH":
 				{
 					isValid := verifyAddress(coin, addr)
 					if !isValid {
