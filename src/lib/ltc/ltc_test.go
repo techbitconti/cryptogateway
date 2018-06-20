@@ -28,5 +28,5 @@ func Test_Litecoin(t *testing.T) {
 	//GetReceivedByAddress("mugRPuZajwD7UdAohNcwzgDG6HnuZj1cni")
 
 	//SendFrom("mgJVwHGgFjSvsRXWQ5iyUksWL6GoxbbdRs", "mq9ayFf2aZ7VmsFCYuvNGrSKP7TzEe3Ewf", float64(100))
-	GetTransaction("fdb4ab403ada197fda5a56d620833e3ecc6a8bbf402f586bed49d0dc16969e13")
+	//GetTransaction("fdb4ab403ada197fda5a56d620833e3ecc6a8bbf402f586bed49d0dc16969e13")
 }

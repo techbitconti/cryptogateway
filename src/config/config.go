@@ -5,6 +5,13 @@ var PORT_ALLOW = "8000"
 var NOTIFY_BALANCE = "/api/transaction/notify"
 var PASS_WALLET = "@oopXT&2018"
 
+var COIN_BTC = "BTC"
+var COIN_LTC = "LTC"
+var COIN_BCH = "BCH"
+var COIN_ETH = "ETH"
+var COIN_ERC20 = "ERC20"
+var COIN_XLM = "XLM"
+
 var PATH_ETH string
 var PATH_BTC string
 var PATH_LTC string
