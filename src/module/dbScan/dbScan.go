@@ -11,7 +11,6 @@ import (
 	"config"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 var HMAP_DEPOSIT = map[string]*Deposit{}
@@ -86,15 +85,14 @@ func SendCoin(coin, from, to, amount string) (tx string) {
 	case "ETH":
 		{
 			amETH, _ := strconv.ParseFloat(amount, 64)
-			valueWei := amETH * math.Pow10(18)
+			valueWei := eth.ToWei(amETH, "ether") // amETH * math.Pow10(18)
 
 			gasWei := config.ETH_GAS
 			gasPriceBigI, _ := eth.SuggestGasPrice()
 			gasPriceWei := gasPriceBigI.Int64()
 
-			// Cost returns amount + gasprice * gaslimit.
 			fundWei := gasWei*float64(gasPriceWei) + valueWei
-			fundETH := fundWei / math.Pow10(18)
+			fundETH := eth.FromWei(fundWei, "ether") // fundWei / math.Pow10(18)
 
 			fmt.Println("gasWei : ", gasWei, "gasPriceWei : ", gasPriceWei, "fundWei : ", fundWei)
 
@@ -105,9 +103,9 @@ func SendCoin(coin, from, to, amount string) (tx string) {
 				return ""
 			}
 
-			_, valueAM := eth.ToBigNumber(valueWei)
-			_, valueGAS := eth.ToBigNumber(gasWei)
-			_, valueGASPr := eth.ToBigNumber(gasPriceWei)
+			valueAM := eth.ToBigNumber(uint64(valueWei))
+			valueGAS := eth.ToBigNumber(uint64(gasWei))
+			valueGASPr := eth.ToBigNumber(uint64(gasPriceWei))
 
 			eth.UnlockAccount(from, "123456", uint64(10))
 			msg := map[string]interface{}{
@@ -130,10 +128,9 @@ func SendERC20(contract, receiver, amount string) (tx string) {
 
 	// Go : get balance of sender
 	amETH := GetBalance("ETH", config.ETH_ADDR)
-	valueWei := int64(amETH * math.Pow10(18))
+	valueWei := int64(eth.ToWei(amETH, "ether")) // int64(amETH * math.Pow10(18))
 
 	// GO : convert
-	//weiBigI := big.NewInt(valueWei)
 	amountBigI, _ := strconv.ParseInt(amount, 0, 64)
 
 	//GO : get bytecode of contract function

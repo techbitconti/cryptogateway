@@ -28,5 +28,5 @@ func Test_bitcoind(t *testing.T) {
 	//GetReceivedByAddress("2NAKhJLCi6yTM6oLjyG2U3sZJAdbcSMhgjh")
 
 	//SendFrom("2NAKhJLCi6yTM6oLjyG2U3sZJAdbcSMhgjh", "2MssTcpVUccPxTbZRAPjygF5F5sr4DBZHbz", float64(0.001))
-	//GetRawTransactionVerbose("0987d04f5ea00a54dcb606392c5bc04ccee798f8d60f44dfd789c6f0662402cd")
+	//GetTransaction("0987d04f5ea00a54dcb606392c5bc04ccee798f8d60f44dfd789c6f0662402cd")
 }

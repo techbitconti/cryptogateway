@@ -7,11 +7,15 @@ var PASS_WALLET = "@oopXT&2018"
 
 var PATH_ETH string
 var PATH_BTC string
+var PATH_LTC string
+var PATH_BCH string
 
 var ETH_PRIV string
 var ETH_ADDR string
 var BTC_PRV string
 var BTC_ADDR string
+var LTC_PRV string
+var LTC_ADDR string
 
 var BTC_FEE = float64(0.0001)
 var ETH_GAS = float64(21000)
@@ -41,6 +45,9 @@ func SetPATH(net string) {
 
 	BTC_ADDR = "2N3eERqK57DRqqmjb3KzzapJUK7odJhNFZT"
 	BTC_PRV = "cMv8y9jz9wemtsjbLx5e2zn8MFRf6MruP3Agq8ifaQQ8ipbZw44B"
+
+	LTC_ADDR = "mugRPuZajwD7UdAohNcwzgDG6HnuZj1cni"
+	LTC_PRV = "cUi5QquqY6ocxfb8o7obLy6CkKvtwwjCembmH1gYKWpu6UiG6UGX"
 
 }
 

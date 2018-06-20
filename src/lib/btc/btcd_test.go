@@ -27,5 +27,5 @@ func TestBTCD(t *testing.T) {
 	//GetBalance("2NAKhJLCi6yTM6oLjyG2U3sZJAdbcSMhgjh")
 	//GetReceivedByAddress("2NAKhJLCi6yTM6oLjyG2U3sZJAdbcSMhgjh")
 
-	//GetRawTransactionVerbose("c6b8619d339fb253cebeda1dae13312c8167c4d32c90897c85a220cc3d3240ec")
+	//GetTransaction("c6b8619d339fb253cebeda1dae13312c8167c4d32c90897c85a220cc3d3240ec")
 }

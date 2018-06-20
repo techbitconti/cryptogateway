@@ -27,6 +27,24 @@ bitcoin-cli -rpcuser="123" -rpcpassword="123"
 -regtest
 
 
+litecoind -rpcuser="123" -rpcpassword="123" -txindex -debug=1 -server -rest  -daemon 
+ -testnet 
+ -regtest
+
+ -datadir=/Users/A/litecoin/litecoind/simnet
+ -datadir=/Users/A/litecoin/litecoind/testnet
+ -datadir=/Users/A/litecoin/litecoind/mainnet
+
+ -datadir=/home/ramost/litecoin/litecoind/simnet
+ -datadir=/home/ramost/litecoin/litecoind/testnet
+ -datadir=/home/ramost/litecoin/litecoind/mainnet
+
+litecoin-cli -rpcuser="123" -rpcpassword="123"
+-regtest
+
+
+lsof -nP | grep litecoind
+
 
 btcd --rpcuser="123" --rpcpass="123" --datadir=/Users/A/bitcoin/btcd/ --logdir=/Users/A/bitcoin/btcd/ --txindex --addrindex  --testnet 
 --generate 1 --miningaddr=2NAKhJLCi6yTM6oLjyG2U3sZJAdbcSMhgjh
@@ -45,9 +63,7 @@ btcwallet --username="123" --password="123"  --appdata=/Users/A/bitcoin/btcwalle
 #				BTC Simnet					#
 ############################################
 # addres 	: 2N3eERqK57DRqqmjb3KzzapJUK7odJhNFZT 								
-# pub 		: 								
 # prv 		: cMv8y9jz9wemtsjbLx5e2zn8MFRf6MruP3Agq8ifaQQ8ipbZw44B								
-# pass 		: 123456						
 ############################################
 
 
@@ -57,11 +73,6 @@ https://testnet.manu.backend.hamburg/faucet
 ############################################
 # addres 	: 2NAKhJLCi6yTM6oLjyG2U3sZJAdbcSMhgjh 																
 # prv 		: cQJYynSnzuUbNisDb7FsM2tpKi7Hu3HKtxegWohemwf8YU1EDduD		
-# account	: bitcoin				
-############################################
-# addres 	: 2MssTcpVUccPxTbZRAPjygF5F5sr4DBZHbz 																
-# prv 		: cVLPeduQmBL8QAGj22sMn2zFSDpNxVAqqLVBavHFPdFhgyz1DvMw		
-# account	: test				
 ############################################
 
 
@@ -69,11 +80,67 @@ https://testnet.manu.backend.hamburg/faucet
 #				BTC Mainnet					#
 ############################################
 # addres 	: 35bs43XVCtFuhFAPpmi1mw7cnoB48mUvg2 								
-# pub 		: 								
 # prv 		: 													
 ############################################
 
 
+-----------------------------------------------------------------------------
+
+
+############################################
+#				LTC Simnet					#
+############################################
+# addres 	: mugRPuZajwD7UdAohNcwzgDG6HnuZj1cni 								
+# prv 		: cUi5QquqY6ocxfb8o7obLy6CkKvtwwjCembmH1gYKWpu6UiG6UGX								
+############################################
+
+
+http://testnet.litecointools.com/
+############################################
+#				LTC Testnet					#
+############################################
+# addres 	: miaewCQYjv8ja6nF9Wu1jbrmDWTzRwHj7j 																
+# prv 		: cN7tChHoYyH7v7Y8zgNGBWSE3FGYR37ECRvCLRkRCq9LDH78ycbA		
+############################################
+
+
+############################################
+#				LTC Mainnet					#
+############################################
+# addres 	:  								
+# prv 		: 													
+############################################
+
+
+-----------------------------------------------------------------------------
+
+
+############################################
+#				BCH Simnet					#
+############################################
+# addres 	:  								
+# prv 		: 								
+############################################
+
+
+https://testnet.manu.backend.hamburg/bitcoin-cash-faucet
+############################################
+#				BCH Testnet					#
+############################################
+# addres 	:  																
+# prv 		: 		
+############################################
+
+
+############################################
+#				BCH Mainnet					#
+############################################
+# addres 	:  								
+# prv 		: 													
+############################################
+
+
+-----------------------------------------------------------------------------
 
 
 ############################################
