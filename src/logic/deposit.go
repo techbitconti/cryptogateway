@@ -37,10 +37,10 @@ func Do_Deposit(ip string, w http.ResponseWriter, params []byte) {
 			fmt.Println(resp.Error)
 		}
 
-		deposit_Address := genAddress(coin)
-
 		// Go-1 : new deposit address
 		if resp.Status == 0 {
+
+			deposit_Address := genAddress(coin)
 
 			switch coin {
 			case "BTC", "LTC", "ETH":
