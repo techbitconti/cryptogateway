@@ -1,147 +1,66 @@
-// Copyright (c) 2014-2017 The btcsuite developers
-// Use of this source code is governed by an ISC
-// license that can be found in the LICENSE file.
-
-package btc
+package bch
 
 import (
-	"io/ioutil"
-	"log"
-	"path/filepath"
-	"strconv"
-	//"time"
-	"config"
 	"encoding/json"
+	"log"
+	"strconv"
 
-	"github.com/btcsuite/btcd/btcjson"
-	"github.com/btcsuite/btcd/chaincfg"
-	"github.com/btcsuite/btcd/chaincfg/chainhash"
-	"github.com/btcsuite/btcd/rpcclient"
-	"github.com/btcsuite/btcd/wire"
-	"github.com/btcsuite/btcutil"
-	"github.com/davecgh/go-spew/spew"
+	"github.com/bchsuite/bchd/bchjson"
+	"github.com/bchsuite/bchd/chaincfg"
+	"github.com/bchsuite/bchd/chaincfg/chainhash"
+	"github.com/bchsuite/bchd/rpcclient"
+	"github.com/bchsuite/bchd/wire"
+	"github.com/bchsuite/bchutil"
 )
 
 var NET string
 
-var Btcd *rpcclient.Client
+var Bch *rpcclient.Client
 var Chaincfg chaincfg.Params
 var NotifyHandlers rpcclient.NotificationHandlers
 
-var btcdHomeDir string = config.PATH_BTC
+func Connect(net string) {
 
-func Connect_btcd(net string) {
-
-	if Btcd != nil {
+	if Bch != nil {
 		return
 	}
 
 	host := ""
-	Chaincfg = chaincfg.SimNetParams
 	NET = net
 
 	switch net {
 	case "mainnet":
-		Chaincfg = chaincfg.MainNetParams
-		host = "localhost:8332"
+		host = "localhost:7332"
 	case "testnet":
-		Chaincfg = chaincfg.TestNet3Params
-		host = "localhost:18332"
+		host = "localhost:17332"
 	case "simnet":
-		Chaincfg = chaincfg.SimNetParams
-		host = "localhost:18554"
+		host = "localhost:17443"
 	}
 
-	NotifyHandlers = rpcclient.NotificationHandlers{
-		OnFilteredBlockConnected: func(height int32, header *wire.BlockHeader, txns []*btcutil.Tx) {
-			log.Printf("Block connected: %v (%d) %v", header.BlockHash(), height, header.Timestamp)
-		},
-
-		OnFilteredBlockDisconnected: func(height int32, header *wire.BlockHeader) {
-			log.Printf("Block disconnected: %v (%d) %v", header.BlockHash(), height, header.Timestamp)
-		},
-
-		OnWalletLockState: func(locked bool) {
-			log.Println("OnWalletLockState : ", locked)
-		},
-
-		OnAccountBalance: func(account string, balance btcutil.Amount, confirmed bool) {
-			log.Println("OnAccountBalance : ", "account : ", account, " balance : ", balance, " confirmed : ", confirmed)
-		},
-
-		OnRecvTx: func(transaction *btcutil.Tx, details *btcjson.BlockDetails) {
-			log.Println("OnRecvTx : ", transaction, " details : ", details)
-		},
-	}
-
-	certs, err := ioutil.ReadFile(filepath.Join(btcdHomeDir, "rpc.cert"))
-	if err != nil {
-		log.Println("btcdHomeDir : ", err)
-	}
+	// Connect to local bitcoin core RPC server using HTTP POST mode.
 	connCfg := &rpcclient.ConnConfig{
 		Host:         host,
-		Endpoint:     "ws",
 		User:         "123",
 		Pass:         "123",
-		Certificates: certs,
+		HTTPPostMode: true, // Bitcoin core only supports HTTP POST mode
+		DisableTLS:   true, // Bitcoin core does not provide TLS by default
 	}
-	client, err := rpcclient.New(connCfg, &NotifyHandlers)
+	// Notice the notification parameter is nil since notifications are
+	// not supported in HTTP POST mode.
+	client, err := rpcclient.New(connCfg, nil)
 	if err != nil {
 		log.Println(err)
 	}
-	Btcd = client
+	//defer client.Shutdown()
 
-	// Register for block connect and disconnect notifications.
-	if err := NotifyBlocks(); err != nil {
-		log.Println(err)
-	}
-	log.Println("NotifyBlocks: Registration Complete")
+	Bch = client
 
-	unspent, err := client.ListUnspent()
-	if err != nil {
-		log.Println(err)
-	}
-	log.Println("Num unspent outputs (utxos): %d", len(unspent))
-	if len(unspent) > 0 {
-		log.Println("First utxo:\n%v", spew.Sdump(unspent[0]))
-	}
-
-	/*
-		log.Println("Client shutdown in 10 seconds...")
-		time.AfterFunc(time.Second*10, func() {
-			log.Println("Client shutting down...")
-			client.Shutdown()
-			log.Println("Client shutdown complete.")
-		})
-
-		// Wait until the client either shuts down gracefully (or the user
-		// terminates the process with Ctrl+C).
-		client.WaitForShutdown()
-	*/
-
-}
-
-func NotifyBlocks() error {
-
-	return Btcd.NotifyBlocks()
-}
-
-func NotifyReceived(arr ...string) error {
-
-	addresses := []btcutil.Address{}
-
-	for _, v := range arr {
-		a, _ := DecodeAddress(v)
-		addresses = append(addresses, a)
-	}
-
-	return Btcd.NotifyReceived(addresses)
 }
 
 func GetBlockCount() int64 {
 
 	// Get the current block count.
-	blockCount, err := Btcd.GetBlockCount()
+	blockCount, err := Bch.GetBlockCount()
 	if err != nil {
 		log.Println(err)
 		return 0
@@ -153,7 +72,7 @@ func GetBlockCount() int64 {
 
 func GetBlockHash(blockHeight int64) (blockHash *chainhash.Hash, err error) {
 
-	blockHash, err = Btcd.GetBlockHash(blockHeight)
+	blockHash, err = Bch.GetBlockHash(blockHeight)
 	if err != nil {
 		log.Println("Error GetBlockHash : ", err)
 		return
@@ -172,7 +91,7 @@ func GetBlockHeader(blockHash *chainhash.Hash) (blockHeader *wire.BlockHeader, e
 
 func GetBlock(blockHash *chainhash.Hash) (block *wire.MsgBlock, err error) {
 
-	block, err = Btcd.GetBlock(blockHash)
+	block, err = Bch.GetBlock(blockHash)
 	log.Println("GetBlock : ", block)
 
 	return
@@ -194,7 +113,7 @@ func NewHashFromStr(hex string) (hash *chainhash.Hash, err error) {
 }
 
 func Generate(num uint32) ([]*chainhash.Hash, error) {
-	tx, err := Btcd.Generate(num)
+	tx, err := Bch.Generate(num)
 
 	log.Println("Generate", err, tx)
 
@@ -204,7 +123,7 @@ func Generate(num uint32) ([]*chainhash.Hash, error) {
 // GetGenerate returns true if the server is set to mine, otherwise false.
 func GetGenerate() (ok bool, err error) {
 
-	ok, err = Btcd.GetGenerate()
+	ok, err = Bch.GetGenerate()
 
 	log.Println("GetGenerate : ", ok)
 
@@ -214,7 +133,7 @@ func GetGenerate() (ok bool, err error) {
 // SetGenerate sets the server to generate coins (mine) or not.
 func SetGenerate(enable bool, numCPUs int) (err error) {
 
-	err = Btcd.SetGenerate(enable, numCPUs)
+	err = Bch.SetGenerate(enable, numCPUs)
 	log.Println("SetGenerate : ", err)
 
 	return
@@ -222,14 +141,14 @@ func SetGenerate(enable bool, numCPUs int) (err error) {
 
 func VerifyChainBlocks(checkLevel, numBlocks int32) (ok bool, err error) {
 
-	ok, err = Btcd.VerifyChainBlocks(checkLevel, numBlocks)
+	ok, err = Bch.VerifyChainBlocks(checkLevel, numBlocks)
 
 	return
 }
 
 func InvalidateBlock(blockHash *chainhash.Hash) (err error) {
 
-	err = Btcd.InvalidateBlock(blockHash)
+	err = Bch.InvalidateBlock(blockHash)
 
 	return
 }
@@ -237,7 +156,7 @@ func InvalidateBlock(blockHash *chainhash.Hash) (err error) {
 func WalletPassphrase(pass string, second int64) (bool, error) {
 
 	//  WalletPassphrase
-	err := Btcd.WalletPassphrase(pass, second)
+	err := Bch.WalletPassphrase(pass, second)
 	if err != nil {
 		log.Println("WalletPassphrase", err)
 
@@ -251,7 +170,7 @@ func WalletPassphrase(pass string, second int64) (bool, error) {
 func CreateNewAccount(account string) (string, error) {
 
 	//CreateNewAccount
-	err := Btcd.CreateNewAccount(account)
+	err := Bch.CreateNewAccount(account)
 	if err != nil {
 		log.Println("Error CreateNewAccount", err)
 		return account, err
@@ -261,16 +180,16 @@ func CreateNewAccount(account string) (string, error) {
 	return account, nil
 }
 
-func DecodeAddress(addr string) (address btcutil.Address, err error) {
+func DecodeAddress(addr string) (address bchutil.Address, err error) {
 
-	address, err = btcutil.DecodeAddress(addr, &Chaincfg)
+	address, err = bchutil.DecodeAddress(addr, &Chaincfg)
 	if err != nil {
 		log.Println("Error DecodeAddress", err)
 	}
 	return
 }
 
-func ValidateAddress(addr string) (acc *btcjson.ValidateAddressWalletResult, err error) {
+func ValidateAddress(addr string) (acc *bchjson.ValidateAddressWalletResult, err error) {
 
 	address, err := DecodeAddress(addr)
 	if err != nil {
@@ -279,7 +198,7 @@ func ValidateAddress(addr string) (acc *btcjson.ValidateAddressWalletResult, err
 	}
 
 	// ValidateAddress
-	acc, err = Btcd.ValidateAddress(address)
+	acc, err = Bch.ValidateAddress(address)
 	if err != nil {
 		log.Println("Error ValidateAddress", err)
 		return
@@ -313,9 +232,9 @@ func ToBTC(amount string) float64 {
 		return float64(0)
 	}
 
-	value, _ := btcutil.NewAmount(f)
+	value, _ := bchutil.NewAmount(f)
 
-	return value.ToBTC()
+	return value.ToBCH()
 }
 
 func ToSatoshi(amount string) float64 {
@@ -324,30 +243,31 @@ func ToSatoshi(amount string) float64 {
 		return float64(0)
 	}
 
-	value, _ := btcutil.NewAmount(f)
+	value, _ := bchutil.NewAmount(f)
 
-	return value.ToUnit(btcutil.AmountSatoshi)
+	return value.ToUnit(bchutil.AmountSatoshi)
 }
 
-func ListAccounts() (map[string]btcutil.Amount, error) {
+func ListAccounts() (map[string]bchutil.Amount, error) {
 
 	// ListAccounts
-	list, err := Btcd.ListAccounts()
+	list, err := Bch.ListAccounts()
 	if err != nil {
 		log.Println("Error ListAccounts", err)
 
 		return nil, err
 	}
-	//log.Println("ListAccounts: ", list)
+	log.Println("ListAccounts: ", list)
 
 	return list, nil
 }
 
-func ListAddress() (list []btcutil.Address) {
+func ListAddress() (list []bchutil.Address) {
 
 	accounts, _ := ListAccounts()
 
 	for acc, _ := range accounts {
+
 		arr, _ := GetAddressesByAccount(acc)
 
 		list = append(list, arr...)
@@ -357,10 +277,10 @@ func ListAddress() (list []btcutil.Address) {
 	return
 }
 
-func GetBalanceAccount(account string) (amount btcutil.Amount, err error) {
+func GetBalanceAccount(account string) (amount bchutil.Amount, err error) {
 
 	// GetBalance
-	amount, err = Btcd.GetBalance(account)
+	amount, err = Bch.GetBalance(account)
 	if err != nil {
 		log.Println("Error GetBalanceAccount", err)
 	}
@@ -382,12 +302,12 @@ func GetBalance(addr string) float64 {
 		return 0
 	}
 
-	log.Println("GetBalanceX ", addr, amount.ToBTC())
+	log.Println("GetBalanceX ", addr, amount.ToBCH())
 
-	return amount.ToBTC()
+	return amount.ToBCH()
 }
 
-func GetNewAddress(account string) (address btcutil.Address, err error) {
+func GetNewAddress(account string) (address bchutil.Address, err error) {
 
 	list, _ := ListAccounts()
 	if _, exist := list[account]; exist {
@@ -396,7 +316,7 @@ func GetNewAddress(account string) (address btcutil.Address, err error) {
 	}
 
 	// GetNewAddress
-	address, err = Btcd.GetNewAddress(account)
+	address, err = Bch.GetNewAddress(account)
 	if err != nil {
 		log.Println("Error GetNewAddress", err)
 	}
@@ -407,9 +327,9 @@ func GetNewAddress(account string) (address btcutil.Address, err error) {
 
 // GetAccountAddress returns the current Bitcoin address for receiving payments
 // to the specified account.
-func GetAccountAddress(account string) (address btcutil.Address, err error) {
+func GetAccountAddress(account string) (address bchutil.Address, err error) {
 
-	address, err = Btcd.GetAccountAddress(account)
+	address, err = Bch.GetAccountAddress(account)
 	if err != nil {
 		log.Println("Error GetAccountAddress", err)
 	}
@@ -428,7 +348,7 @@ func GetAccount(addr string) (account string, err error) {
 	}
 
 	// GetAccount
-	account, err = Btcd.GetAccount(address)
+	account, err = Bch.GetAccount(address)
 	if err != nil {
 		log.Println("Error GetAccount", err)
 	}
@@ -437,10 +357,10 @@ func GetAccount(addr string) (account string, err error) {
 	return
 }
 
-func GetAddressesByAccount(account string) (address []btcutil.Address, err error) {
+func GetAddressesByAccount(account string) (address []bchutil.Address, err error) {
 
 	// GetAddressesByAccount
-	address, err = Btcd.GetAddressesByAccount(account)
+	address, err = Bch.GetAddressesByAccount(account)
 	if err != nil {
 		log.Println("Error GetAddressesByAccount", err)
 	}
@@ -449,9 +369,9 @@ func GetAddressesByAccount(account string) (address []btcutil.Address, err error
 	return
 }
 
-func GetReceivedByAccount(account string) (amount btcutil.Amount, err error) {
+func GetReceivedByAccount(account string) (amount bchutil.Amount, err error) {
 
-	amount, err = Btcd.GetReceivedByAccount(account)
+	amount, err = Bch.GetReceivedByAccount(account)
 	if err != nil {
 		log.Println("Error GetReceivedByAccount")
 	}
@@ -460,11 +380,11 @@ func GetReceivedByAccount(account string) (amount btcutil.Amount, err error) {
 	return
 }
 
-func GetReceivedByAddress(addr string) (amount btcutil.Amount, err error) {
+func GetReceivedByAddress(addr string) (amount bchutil.Amount, err error) {
 
 	address, _ := DecodeAddress(addr)
 
-	amount, err = Btcd.GetReceivedByAddress(address)
+	amount, err = Bch.GetReceivedByAddress(address)
 	if err != nil {
 		log.Println("Error GetReceivedByAddress")
 	}
@@ -473,9 +393,9 @@ func GetReceivedByAddress(addr string) (amount btcutil.Amount, err error) {
 	return
 }
 
-func ListReceivedByAccount() (btcj []btcjson.ListReceivedByAccountResult, err error) {
+func ListReceivedByAccount() (btcj []bchjson.ListReceivedByAccountResult, err error) {
 
-	btcj, err = Btcd.ListReceivedByAccount()
+	btcj, err = Bch.ListReceivedByAccount()
 	if err != nil {
 		log.Println("Error ListReceivedByAccount")
 	}
@@ -484,9 +404,9 @@ func ListReceivedByAccount() (btcj []btcjson.ListReceivedByAccountResult, err er
 	return
 }
 
-func ListReceivedByAddress() (btcj []btcjson.ListReceivedByAddressResult, err error) {
+func ListReceivedByAddress() (btcj []bchjson.ListReceivedByAddressResult, err error) {
 
-	btcj, err = Btcd.ListReceivedByAddress()
+	btcj, err = Bch.ListReceivedByAddress()
 	if err != nil {
 		log.Println("Error ListReceivedByAddress")
 	}
@@ -496,7 +416,7 @@ func ListReceivedByAddress() (btcj []btcjson.ListReceivedByAddressResult, err er
 }
 
 // NOTE: This function requires to the wallet to be unlocked
-func DumpPrivKey(addr string) (*btcutil.WIF, error) {
+func DumpPrivKey(addr string) (*bchutil.WIF, error) {
 
 	address, rr := DecodeAddress(addr)
 	if rr != nil {
@@ -505,7 +425,7 @@ func DumpPrivKey(addr string) (*btcutil.WIF, error) {
 	}
 
 	// DumpPrivKey
-	wif, err := Btcd.DumpPrivKey(address)
+	wif, err := Bch.DumpPrivKey(address)
 	if err != nil {
 		log.Println("DumpPrivKey", err)
 		return nil, err
@@ -517,18 +437,18 @@ func DumpPrivKey(addr string) (*btcutil.WIF, error) {
 
 func ImportPrivKey(prv, label string, rescan bool) error {
 
-	wif, err := btcutil.DecodeWIF(prv)
+	wif, err := bchutil.DecodeWIF(prv)
 	if err != nil {
 		log.Println("Error ImportPrivKey")
 	}
 	log.Println("ImportPrivKey : ", wif)
 
-	return Btcd.ImportPrivKeyRescan(wif, label, rescan)
+	return Bch.ImportPrivKeyRescan(wif, label, rescan)
 }
 
 func ImportAddress(addr string) error {
 
-	err := Btcd.ImportAddress(addr)
+	err := Bch.ImportAddress(addr)
 	if err != nil {
 		log.Println("Error ImportAddress")
 	}
@@ -547,7 +467,7 @@ func SignMessage(addr, message string) (signature string, err error) {
 	}
 
 	// SignMessage
-	signature, err = Btcd.SignMessage(address, message)
+	signature, err = Bch.SignMessage(address, message)
 
 	log.Println("SignMessage: ", signature)
 
@@ -563,7 +483,7 @@ func VerifyMessage(addr, signature, message string) (signed bool, err error) {
 		return
 	}
 
-	signed, err = Btcd.VerifyMessage(address, signature, message)
+	signed, err = Bch.VerifyMessage(address, signature, message)
 
 	log.Println("VerifyMessage: ", signed)
 
@@ -589,14 +509,14 @@ func SendFrom(fromAddress string, toAddress string, value float64) (tx *chainhas
 		return
 	}
 
-	amount, vrr := btcutil.NewAmount(value)
+	amount, vrr := bchutil.NewAmount(value)
 	if vrr != nil {
 		err = vrr
 		log.Println("Error NewAmount", vrr)
 		return
 	}
 
-	tx, err = Btcd.SendFrom(fromAccount, to, amount)
+	tx, err = Bch.SendFrom(fromAccount, to, amount)
 
 	log.Println("SendFrom: ", tx)
 
@@ -608,9 +528,9 @@ func SendFrom(fromAddress string, toAddress string, value float64) (tx *chainhas
 }
 
 // NOTE: This function requires to the wallet to be unlocked.  See the
-func SendMany(fromAccount string, amounts map[btcutil.Address]btcutil.Amount) (tx *chainhash.Hash, err error) {
+func SendMany(fromAccount string, amounts map[bchutil.Address]bchutil.Amount) (tx *chainhash.Hash, err error) {
 
-	tx, err = Btcd.SendMany(fromAccount, amounts)
+	tx, err = Bch.SendMany(fromAccount, amounts)
 	if err != nil {
 		log.Println("Error SendMany", err)
 	}
@@ -635,14 +555,14 @@ func SendToAddress(addr string, value float64) (tx *chainhash.Hash, err error) {
 		return
 	}
 
-	amount, vrr := btcutil.NewAmount(value)
+	amount, vrr := bchutil.NewAmount(value)
 	if vrr != nil {
 		err = vrr
 		log.Println("Error NewAmount", vrr)
 		return
 	}
 
-	tx, err = Btcd.SendToAddress(address, amount)
+	tx, err = Bch.SendToAddress(address, amount)
 
 	log.Println("SendToAddress: ", tx)
 
@@ -662,13 +582,13 @@ func SendToAddressComment(addr string, value float64, comment, commentTo string)
 		return
 	}
 
-	amount, vrr := btcutil.NewAmount(value)
+	amount, vrr := bchutil.NewAmount(value)
 	if vrr != nil {
 		log.Println("Error NewAmount", vrr)
 		return
 	}
 
-	tx, err = Btcd.SendToAddressComment(address, amount, comment, commentTo)
+	tx, err = Bch.SendToAddressComment(address, amount, comment, commentTo)
 
 	log.Println("SendToAddress: ", tx)
 
@@ -677,36 +597,36 @@ func SendToAddressComment(addr string, value float64, comment, commentTo string)
 
 // CreateRawTransaction returns a new transaction spending the provided inputs
 // and sending to the provided addresses.
-func CreateRawTransaction(inputs []btcjson.TransactionInput,
-	amounts map[btcutil.Address]btcutil.Amount, lockTime *int64) (*wire.MsgTx, error) {
+func CreateRawTransaction(inputs []bchjson.TransactionInput,
+	amounts map[bchutil.Address]bchutil.Amount, lockTime *int64) (*wire.MsgTx, error) {
 
-	return Btcd.CreateRawTransaction(inputs, amounts, lockTime)
+	return Bch.CreateRawTransaction(inputs, amounts, lockTime)
 }
 
 // SendRawTransaction submits the encoded transaction to the server which will
 // then relay it to the network.
 func SendRawTransaction(tx *wire.MsgTx, allowHighFees bool) (*chainhash.Hash, error) {
-	return Btcd.SendRawTransaction(tx, allowHighFees)
+	return Bch.SendRawTransaction(tx, allowHighFees)
 }
 
 func SignRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) {
-	return Btcd.SignRawTransaction(tx)
+	return Bch.SignRawTransaction(tx)
 }
 
-func GetRawTransaction(txHex string) (tx *btcutil.Tx, err error) {
+func GetRawTransaction(txHex string) (tx *bchutil.Tx, err error) {
 
 	txHash, _ := NewHashFromStr(txHex)
 
-	tx, err = Btcd.GetRawTransaction(txHash)
+	tx, err = Bch.GetRawTransaction(txHash)
 	log.Println("GetRawTransaction :", tx)
 
 	return
 }
 
-func GetRawTransactionVerbose(txHex string) (btcj *btcjson.TxRawResult, err error) {
+func GetRawTransactionVerbose(txHex string) (btcj *bchjson.TxRawResult, err error) {
 
 	txHash, _ := NewHashFromStr(txHex)
-	btcj, err = Btcd.GetRawTransactionVerbose(txHash)
+	btcj, err = Bch.GetRawTransactionVerbose(txHash)
 
 	//	b, _ := json.MarshalIndent(btcj, "", " ")
 	//	log.Println("GetRawTransactionVerbose : ", string(b))
@@ -714,30 +634,30 @@ func GetRawTransactionVerbose(txHex string) (btcj *btcjson.TxRawResult, err erro
 	return
 }
 
-func GetTransaction(txHex string) (btcj *btcjson.GetTransactionResult, err error) {
+func GetTransaction(txHex string) (btcj *bchjson.GetTransactionResult, err error) {
 
 	txHash, _ := NewHashFromStr(txHex)
-	btcj, err = Btcd.GetTransaction(txHash)
+	btcj, err = Bch.GetTransaction(txHash)
 	log.Println("GetTransaction : ", btcj)
 
 	return
 }
 
-func ListTransactions(account string) (btcj []btcjson.ListTransactionsResult, err error) {
+func ListTransactions(account string) (btcj []bchjson.ListTransactionsResult, err error) {
 
-	btcj, err = Btcd.ListTransactions(account)
+	btcj, err = Bch.ListTransactions(account)
 	log.Println("ListTransactions : ", btcj)
 
 	return
 }
 
-func ListUnspent(addr string, minconf int64) ([]btcjson.ListUnspentResult, error) {
-	utxo, err := Btcd.ListUnspent()
+func ListUnspent(addr string, minconf int64) ([]bchjson.ListUnspentResult, error) {
+	utxo, err := Bch.ListUnspent()
 	if err != nil {
 		log.Println("Error ListUnspent : ", err)
 	}
 
-	unspent := make([]btcjson.ListUnspentResult, 0)
+	unspent := make([]bchjson.ListUnspentResult, 0)
 	for _, obj := range utxo {
 
 		if obj.Address != addr {
