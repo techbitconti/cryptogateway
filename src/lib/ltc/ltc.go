@@ -34,10 +34,13 @@ func Connect(net string) {
 	switch net {
 	case "mainnet":
 		host = "localhost:9332"
+		Chaincfg = chaincfg.MainNetParams
 	case "testnet":
 		host = "localhost:19332"
+		Chaincfg = chaincfg.TestNet4Params
 	case "simnet":
 		host = "localhost:19443"
+		Chaincfg = chaincfg.SimNetParams
 	}
 
 	// Connect to local bitcoin core RPC server using HTTP POST mode.

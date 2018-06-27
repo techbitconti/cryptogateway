@@ -3,6 +3,7 @@ package btc
 import (
 	"log"
 
+	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/rpcclient"
 )
 
@@ -18,10 +19,13 @@ func Connect_bitcoind(net string) {
 	switch net {
 	case "mainnet":
 		host = "localhost:8332"
+		Chaincfg = chaincfg.MainNetParams
 	case "testnet":
 		host = "localhost:18332"
+		Chaincfg = chaincfg.TestNet3Params
 	case "simnet":
 		host = "localhost:18443"
+		Chaincfg = chaincfg.SimNetParams
 	}
 
 	// Connect to local bitcoin core RPC server using HTTP POST mode.

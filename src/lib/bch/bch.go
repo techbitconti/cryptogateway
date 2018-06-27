@@ -31,10 +31,13 @@ func Connect(net string) {
 	switch net {
 	case "mainnet":
 		host = "localhost:7332"
+		Chaincfg = chaincfg.MainNetParams
 	case "testnet":
 		host = "localhost:17332"
+		Chaincfg = chaincfg.TestNet3Params
 	case "simnet":
 		host = "localhost:17443"
+		Chaincfg = chaincfg.SimNetParams
 	}
 
 	// Connect to local bitcoin core RPC server using HTTP POST mode.
@@ -186,6 +189,7 @@ func DecodeAddress(addr string) (address bchutil.Address, err error) {
 	if err != nil {
 		log.Println("Error DecodeAddress", err)
 	}
+	log.Println("DecodeAddress : ", address.EncodeAddress(), address.EncodeAddress())
 	return
 }
 
@@ -320,7 +324,7 @@ func GetNewAddress(account string) (address bchutil.Address, err error) {
 	if err != nil {
 		log.Println("Error GetNewAddress", err)
 	}
-	//log.Println("GetNewAddress: ", address)
+	log.Println("GetNewAddress: ", address)
 
 	return
 }
