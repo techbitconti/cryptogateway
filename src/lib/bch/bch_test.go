@@ -6,6 +6,7 @@ import (
 
 	"github.com/bchsuite/bchd/bchec"
 	"github.com/bchsuite/bchutil"
+	"github.com/btcsuite/btcd/chaincfg"
 )
 
 func Test_bitcash(t *testing.T) {
@@ -23,18 +24,22 @@ func Test_bitcash(t *testing.T) {
 	//ImportPrivKey("cQJYynSnzuUbNisDb7FsM2tpKi7Hu3HKtxegWohemwf8YU1EDduD", "bitcoin", true)
 	//ImportAddress("qq4gxf9fm9mgemmmx8n9u879mf3c3qmzlc3kc929xx")
 
+	addr, err := DecodeAddress("bchreg:qq4gxf9fm9mgemmmx8n9u879mf3c3qmzlc3kc929xx", &chaincfg.RegressionNetParams)
+
+	fmt.Println("xxxxxxxxxxxxxxxxxx", addr.String(), err)
+
 	priv, _ := bchec.NewPrivateKey(bchec.S256())
 
 	pubHash := bchutil.Hash160(priv.PubKey().SerializeCompressed())
 	addrHash, _ := bchutil.NewAddressPubKeyHash(pubHash, &Chaincfg)
 	fmt.Println("NewAddressPubKeyHash : ", addrHash.String(), addrHash.EncodeAddress(), addrHash.ScriptAddress())
-	DecodeAddress(addrHash.String())
+	DecodeAddressLegacy(addrHash.String())
 
 	pub := priv.PubKey().SerializeCompressed()
 	addrPub, _ := bchutil.NewAddressPubKey(pub, &Chaincfg)
 	fmt.Println("NewAddressPubKey : ", addrPub.String(), addrPub.EncodeAddress(), addrPub.ScriptAddress())
 
-	DecodeAddress(addrPub.String())
+	DecodeAddressLegacy(addrPub.String())
 
 	//	wif1, _ := bchutil.NewWIF(priv, &Chaincfg, true)
 	//	fmt.Println("wif1 : ", wif1.String(), wif1.SerializePubKey())
