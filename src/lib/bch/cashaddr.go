@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/btcsuite/btcd/chaincfg"
-	"github.com/btcsuite/btcd/txscript"
-	"github.com/btcsuite/btcutil"
+	"github.com/bchsuite/bchd/chaincfg"
+	"github.com/bchsuite/bchd/txscript"
+	"github.com/bchsuite/bchutil"
 	"golang.org/x/crypto/ripemd160"
 )
 
@@ -373,7 +373,7 @@ func encodeCashAddress(hash160 []byte, prefix string, t AddressType) string {
 // the Address if addr is a valid encoding for a known address type.
 //
 // The bitcoin cash network the address is associated with is extracted if possible.
-func DecodeAddress(addr string, defaultNet *chaincfg.Params) (btcutil.Address, error) {
+func DecodeAddress(addr string, defaultNet *chaincfg.Params) (bchutil.Address, error) {
 	pre, ok := Prefixes[defaultNet.Name]
 	if !ok {
 		return nil, errors.New("unknown network parameters")
@@ -487,7 +487,7 @@ type CashAddressScriptHash struct {
 
 // NewAddressScriptHash returns a new AddressScriptHash.
 func NewCashAddressScriptHash(serializedScript []byte, net *chaincfg.Params) (*CashAddressScriptHash, error) {
-	scriptHash := btcutil.Hash160(serializedScript)
+	scriptHash := bchutil.Hash160(serializedScript)
 	return newCashAddressScriptHashFromHash(scriptHash, net)
 }
 
@@ -556,7 +556,7 @@ func (a *CashAddressScriptHash) Hash160() *[ripemd160.Size]byte {
 
 // PayToAddrScript creates a new script to pay a transaction output to a the
 // specified address.
-func cashPayToAddrScript(addr btcutil.Address) ([]byte, error) {
+func cashPayToAddrScript(addr bchutil.Address) ([]byte, error) {
 	const nilAddrErrStr = "unable to generate payment script for nil address"
 
 	switch addr := addr.(type) {
@@ -596,7 +596,7 @@ func payToScriptHashScript(scriptHash []byte) ([]byte, error) {
 // signatures associated with the passed PkScript.  Note that it only works for
 // 'standard' transaction script types.  Any data such as public keys which are
 // invalid are omitted from the results.
-func ExtractPkScriptAddrs(pkScript []byte, chainParams *chaincfg.Params) (btcutil.Address, error) {
+func ExtractPkScriptAddrs(pkScript []byte, chainParams *chaincfg.Params) (bchutil.Address, error) {
 	// No valid addresses or required signatures if the script doesn't
 	// parse.
 	if len(pkScript) == 1+1+20+1 && pkScript[0] == 0xa9 && pkScript[1] == 0x14 && pkScript[22] == 0x87 {

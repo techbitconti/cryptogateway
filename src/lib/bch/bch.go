@@ -183,21 +183,23 @@ func CreateNewAccount(account string) (string, error) {
 	return account, nil
 }
 
-func DecodeAddressLegacy(addr string) (address bchutil.Address, err error) {
+/*
+func DecodeAddress(addr string) (address bchutil.Address, err error) {
 
 	address, err = bchutil.DecodeAddress(addr, &Chaincfg)
 	if err != nil {
-		log.Println("Error DecodeAddressLegacy", err)
+		log.Println("Error DecodeAddress", err)
 	}
-	log.Println("DecodeAddressLegacy : ", address.EncodeAddress(), address.EncodeAddress())
+	log.Println("DecodeAddress : ", address.EncodeAddress(), address.EncodeAddress())
 	return
 }
+*/
 
 func ValidateAddress(addr string) (acc *bchjson.ValidateAddressWalletResult, err error) {
 
-	address, err := DecodeAddressLegacy(addr)
+	address, err := DecodeAddress(addr, &Chaincfg)
 	if err != nil {
-		log.Println("Error  DecodeAddressLegacy", err)
+		log.Println("Error  DecodeAddress", err)
 		return
 	}
 
@@ -344,7 +346,7 @@ func GetAccountAddress(account string) (address bchutil.Address, err error) {
 
 func GetAccount(addr string) (account string, err error) {
 
-	address, rr := DecodeAddressLegacy(addr)
+	address, rr := DecodeAddress(addr, &Chaincfg)
 	if rr != nil {
 		err = rr
 		log.Println("Error GetAccount", rr)
@@ -386,7 +388,7 @@ func GetReceivedByAccount(account string) (amount bchutil.Amount, err error) {
 
 func GetReceivedByAddress(addr string) (amount bchutil.Amount, err error) {
 
-	address, _ := DecodeAddressLegacy(addr)
+	address, _ := DecodeAddress(addr, &Chaincfg)
 
 	amount, err = Bch.GetReceivedByAddress(address)
 	if err != nil {
@@ -422,9 +424,9 @@ func ListReceivedByAddress() (btcj []bchjson.ListReceivedByAddressResult, err er
 // NOTE: This function requires to the wallet to be unlocked
 func DumpPrivKey(addr string) (*bchutil.WIF, error) {
 
-	address, rr := DecodeAddressLegacy(addr)
+	address, rr := DecodeAddress(addr, &Chaincfg)
 	if rr != nil {
-		log.Println("Error DecodeAddressLegacy", rr)
+		log.Println("Error DecodeAddress", rr)
 		return nil, rr
 	}
 
@@ -464,9 +466,9 @@ func ImportAddress(addr string) error {
 // NOTE: This function requires to the wallet to be unlocked
 func SignMessage(addr, message string) (signature string, err error) {
 
-	address, rr := DecodeAddressLegacy(addr)
+	address, rr := DecodeAddress(addr, &Chaincfg)
 	if rr != nil {
-		log.Println("Error DecodeAddressLegacy", rr)
+		log.Println("Error DecodeAddress", rr)
 		return
 	}
 
@@ -481,9 +483,9 @@ func SignMessage(addr, message string) (signature string, err error) {
 // NOTE: This function requires to the wallet to be unlocked
 func VerifyMessage(addr, signature, message string) (signed bool, err error) {
 
-	address, rr := DecodeAddressLegacy(addr)
+	address, rr := DecodeAddress(addr, &Chaincfg)
 	if rr != nil {
-		log.Println("Error DecodeAddressLegacy", rr)
+		log.Println("Error DecodeAddress", rr)
 		return
 	}
 
@@ -506,7 +508,7 @@ func SendFrom(fromAddress string, toAddress string, value float64) (tx *chainhas
 		return
 	}
 
-	to, trr := DecodeAddressLegacy(toAddress)
+	to, trr := DecodeAddress(toAddress, &Chaincfg)
 	if trr != nil {
 		err = trr
 		log.Println("Error toAddress", trr)
@@ -552,10 +554,10 @@ func SendMany(fromAccount string, amounts map[bchutil.Address]bchutil.Amount) (t
 // NOTE: This function requires to the wallet to be unlocked
 func SendToAddress(addr string, value float64) (tx *chainhash.Hash, err error) {
 
-	address, rr := DecodeAddressLegacy(addr)
+	address, rr := DecodeAddress(addr, &Chaincfg)
 	if rr != nil {
 		err = rr
-		log.Println("Error DecodeAddressLegacy", rr)
+		log.Println("Error DecodeAddress", rr)
 		return
 	}
 
@@ -580,9 +582,9 @@ func SendToAddress(addr string, value float64) (tx *chainhash.Hash, err error) {
 // NOTE: This function requires to the wallet to be unlocked
 func SendToAddressComment(addr string, value float64, comment, commentTo string) (tx *chainhash.Hash, err error) {
 
-	address, rr := DecodeAddressLegacy(addr)
+	address, rr := DecodeAddress(addr, &Chaincfg)
 	if rr != nil {
-		log.Println("Error DecodeAddressLegacy", rr)
+		log.Println("Error DecodeAddress", rr)
 		return
 	}
 

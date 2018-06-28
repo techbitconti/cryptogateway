@@ -3,8 +3,8 @@ package bch
 import (
 	"testing"
 
-	"github.com/btcsuite/btcd/chaincfg"
-	"github.com/btcsuite/btcutil"
+	"github.com/bchsuite/bchd/chaincfg"
+	"github.com/bchsuite/bchutil"
 )
 
 var TestVectorsP2PKH = [][]string{
@@ -155,7 +155,7 @@ func TestCashAddressScriptHash_EncodeAddress(t *testing.T) {
 
 func TestTestVectors(t *testing.T) {
 	for _, v := range TestVectorsP2PKH {
-		addr, err := btcutil.DecodeAddress(v[0], &chaincfg.MainNetParams)
+		addr, err := bchutil.DecodeAddress(v[0], &chaincfg.MainNetParams)
 		if err != nil {
 			t.Error(err)
 			return
@@ -169,7 +169,7 @@ func TestTestVectors(t *testing.T) {
 		}
 	}
 	for _, v := range TestVectorsP2SH {
-		addr, err := btcutil.DecodeAddress(v[0], &chaincfg.MainNetParams)
+		addr, err := bchutil.DecodeAddress(v[0], &chaincfg.MainNetParams)
 		if err != nil {
 			t.Error(err)
 			return
