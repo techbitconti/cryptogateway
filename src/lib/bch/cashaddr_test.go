@@ -1,5 +1,6 @@
 package bch
 
+/*
 import (
 	"testing"
 
@@ -183,3 +184,6 @@ func TestTestVectors(t *testing.T) {
 		}
 	}
 }
+
+
+*/

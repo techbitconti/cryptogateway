@@ -5,6 +5,7 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/bchsuite/bchd/bchec"
 	"github.com/bchsuite/bchd/bchjson"
 	"github.com/bchsuite/bchd/chaincfg"
 	"github.com/bchsuite/bchd/chaincfg/chainhash"
@@ -322,11 +323,23 @@ func GetNewAddress(account string) (address bchutil.Address, err error) {
 	}
 
 	// GetNewAddress
-	address, err = Bch.GetNewAddress(account)
-	if err != nil {
-		log.Println("Error GetNewAddress", err)
-	}
-	log.Println("GetNewAddress: ", address)
+	//	address, err = Bch.GetNewAddress(account)
+	//	if err != nil {
+	//		log.Println("Error GetNewAddress", err)
+	//	}
+	//	log.Println("GetNewAddress: ", address)
+
+	priv, _ := bchec.NewPrivateKey(bchec.S256())
+
+	pubHash := bchutil.Hash160(priv.PubKey().SerializeCompressed())
+	addrHash, _ := bchutil.NewAddressPubKeyHash(pubHash, &Chaincfg)
+
+	addrCash, err := NewCashAddressPubKeyHash(addrHash.ScriptAddress(), &Chaincfg)
+
+	wif, _ := bchutil.NewWIF(priv, &Chaincfg, true)
+	ImportPrivKey(wif.String(), account, true)
+
+	log.Println("GetNewAddress", "account : ", account, "   -- addrCash : ", addrCash, "   --- privKey : ", wif.String())
 
 	return
 }
