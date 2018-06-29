@@ -2,6 +2,7 @@ package dbScan
 
 import (
 	"fmt"
+	"lib/bch"
 	"lib/btc"
 	"lib/eth"
 	"lib/ltc"
@@ -31,6 +32,11 @@ func GetBalance(coin, addr string) float64 {
 	case "BTC":
 		amount := btc.GetBalance(addr)
 		fmt.Println("getBalance BTC : ", amount)
+		return amount
+
+	case "BCH":
+		amount := bch.GetBalance(addr)
+		fmt.Println("getBalance BCH : ", amount)
 		return amount
 
 	case "LTC":
@@ -82,6 +88,29 @@ func SendCoin(coin, from, to, amount string) (tx string) {
 			//btc.WalletPassphrase("123456", 10)
 			//txHash, err := btc.SendFrom(from, to, satoshi)
 			txHash, err := btc.SendFrom(from, to, aMountBTC)
+
+			if err != nil {
+				return ""
+			}
+			tx = txHash.String()
+			fmt.Println("tx BTC : ", tx)
+		}
+
+	case "BCH":
+		{
+			aMountBCH := bch.ToBCH(amount)
+			//satoshi := bch.ToSatoshi(amount)
+
+			fund := aMountBCH + config.BTC_FEE
+
+			if GetBalance(coin, from) < fund {
+				fmt.Println("BCH not enough !!!")
+				return ""
+			}
+
+			//bch.WalletPassphrase("123456", 10)
+			//txHash, err := bch.SendFrom(from, to, satoshi)
+			txHash, err := bch.SendFrom(from, to, aMountBCH)
 
 			if err != nil {
 				return ""

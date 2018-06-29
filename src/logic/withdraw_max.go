@@ -13,7 +13,7 @@ import (
 )
 
 func Do_WithdrawMax(ip string, w http.ResponseWriter, params []byte) {
-	fmt.Println("Do_WithdrawMax : ", string(params)) // {"coin" : "ETH/BTC/ERC20/LTC", "deposit" : "0x923eac92bda97a4348968a1e7d64834236319b3f"}
+	fmt.Println("Do_WithdrawMax : ", string(params)) // {"coin" : "ETH/BTC/ERC20/LTC/BCH", "deposit" : "0x923eac92bda97a4348968a1e7d64834236319b3f"}
 
 	resp := Writer{Api: api.WITHDRAW_MAX}
 
@@ -31,7 +31,7 @@ func Do_WithdrawMax(ip string, w http.ResponseWriter, params []byte) {
 		addr := request["deposit"].(string)
 
 		// GO-0 : check coin type
-		if coin != "BTC" && coin != "LTC" && coin != "ETH" && coin != "ERC20" {
+		if coin != "BTC" && coin != "LTC" && coin != "BCH" && coin != "ETH" && coin != "ERC20" {
 			resp.Status = -2
 			resp.Error = "Error Coin !!!"
 
@@ -56,7 +56,7 @@ func Do_WithdrawMax(ip string, w http.ResponseWriter, params []byte) {
 				max := float64(0)
 
 				switch coin {
-				case "BTC", "LTC":
+				case "BTC", "LTC", "BCH":
 					{
 						max = balance - config.BTC_FEE //BTC
 					}

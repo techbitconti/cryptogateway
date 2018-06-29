@@ -10,7 +10,7 @@ import (
 )
 
 func Do_Transfer(ip string, w http.ResponseWriter, params []byte) {
-	fmt.Println("Do_Transfer : ", string(params)) // {"coin" : "ETH/BTC/LTC", "from" : "", "to" : "", "amount" : ""}
+	fmt.Println("Do_Transfer : ", string(params)) // {"coin" : "ETH/BTC/BCH/LTC", "from" : "", "to" : "", "amount" : ""}
 
 	resp := Writer{Api: api.TRANSFER}
 
@@ -31,7 +31,7 @@ func Do_Transfer(ip string, w http.ResponseWriter, params []byte) {
 		amount := request["amount"].(string)
 
 		// GO-0 : check coin type
-		if coin != "BTC" && coin != "LTC" && coin != "ETH" {
+		if coin != "BTC" && coin != "LTC" && coin != "BCH" && coin != "ETH" {
 			resp.Status = -2
 			resp.Error = "Error Coin !!!"
 

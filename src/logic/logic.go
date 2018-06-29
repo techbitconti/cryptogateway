@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"config"
+	"lib/bch"
 	"lib/btc"
 	"lib/eth"
 	"lib/ltc"
@@ -24,6 +25,11 @@ func verifyAddress(coin string, addr string) bool {
 	switch coin {
 	case "BTC":
 		_, err := btc.ValidateAddress(addr)
+		if err != nil {
+			return false
+		}
+	case "BCH":
+		_, err := bch.ValidateAddress(addr)
 		if err != nil {
 			return false
 		}
@@ -65,6 +71,35 @@ func verityTX(coin, tx string) (interface{}, bool) {
 
 			data := make(map[string]interface{})
 			data["token"] = "BTC"
+			data["transaction_id"] = result.TxID
+			data["transaction_fee"] = result.Fee
+
+			for _, obj := range result.Details {
+				if obj.Category == "send" {
+					data["from_address"] = obj.Address
+				} else if obj.Category == "receive" {
+					data["to_address"] = obj.Address
+					data["amount"] = obj.Amount
+				}
+			}
+
+			receipt = data
+			fmt.Println("receipt : ", receipt)
+		}
+
+	case "BCH":
+		{
+			result, err := bch.GetTransaction(tx)
+			if err != nil {
+				return nil, false
+			}
+
+			if result.BlockHash == "" {
+				return nil, false
+			}
+
+			data := make(map[string]interface{})
+			data["token"] = "BCH"
 			data["transaction_id"] = result.TxID
 			data["transaction_fee"] = result.Fee
 
@@ -164,6 +199,8 @@ func genAddress(coin string) (address string) {
 	switch coin {
 	case "BTC":
 		address = genAddressBTC()
+	case "BTC":
+		address = genAddressBCH()
 	case "LTC":
 		address = genAddressLTC()
 	case "ETH", "ERC20":
@@ -182,6 +219,17 @@ func genAddressBTC() string {
 	encode := base64.StdEncoding.EncodeToString([]byte(decode))
 
 	address, _ := btc.GetNewAddress(encode)
+
+	return address.String()
+}
+
+func genAddressBCH() string {
+
+	utc := time.Now().Unix()
+	decode := strconv.FormatInt(utc, 10)
+	encode := base64.StdEncoding.EncodeToString([]byte(decode))
+
+	address, _ := bch.GetNewAddress(encode)
 
 	return address.String()
 }

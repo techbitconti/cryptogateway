@@ -5,6 +5,7 @@ import (
 	"network/http"
 
 	"config"
+	"lib/bch"
 	"lib/btc"
 	"lib/eth"
 	"lib/ltc"
@@ -38,10 +39,12 @@ func main() {
 	startETH()
 	startBTC()
 	startLTC()
-	startBCH()
+	//startBCH()
+
+	// GO-3 : dbScan
 	startDBScan()
 
-	// Go-3 : start http server
+	// Go-4 : start http server
 	http.Create(":8082")
 
 }
@@ -74,8 +77,8 @@ func startLTC() {
 }
 
 func startBCH() {
-	//	bch.Connect("simnet")
-	//	bchScan.Start()
+	bch.Connect("simnet")
+	bchScan.Start()
 }
 
 func startETH() {

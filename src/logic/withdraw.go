@@ -17,7 +17,7 @@ import (
 )
 
 func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
-	fmt.Println("Do_Withdraw : ", string(params)) // {"coin" : "ETH/BTC/ERC20/LTC", "deposit" : "", "withdraw" : "", "amount" : ""}
+	fmt.Println("Do_Withdraw : ", string(params)) // {"coin" : "ETH/BTC/ERC20/LTC/BCH", "deposit" : "", "withdraw" : "", "amount" : ""}
 
 	resp := Writer{Api: api.WITHDRAW}
 
@@ -38,7 +38,7 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 		amountWithdraw := request["amount"].(string)
 
 		// GO-0 : check coin type
-		if coin != "BTC" && coin != "LTC" && coin != "ETH" && coin != "ERC20" {
+		if coin != "BTC" && coin != "LTC" && coin != "BCH" && coin != "ETH" && coin != "ERC20" {
 			resp.Status = -2
 			resp.Error = "Error Coin !!!"
 
@@ -83,7 +83,7 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 			if resp.Status == 0 {
 
 				switch coin {
-				case "BTC", "LTC", "ETH":
+				case "BTC", "BCH", "LTC", "ETH":
 					{
 						amountDespsit := mDeposit.Amount
 						aMDe, _ := strconv.ParseFloat(amountDespsit, 64)
@@ -154,7 +154,7 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 
 								// GO : Report
 								fees := float64(0)
-								if coin == "BTC" || coin == "LTC" {
+								if coin == "BTC" || coin == "LTC" || coin == "BCH" {
 									fees = config.BTC_FEE
 								} else if coin == "ETH" {
 									fees = config.ETH_GAS
