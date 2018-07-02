@@ -10,6 +10,7 @@ import (
 	"github.com/stellar/go/clients/horizon"
 	"github.com/stellar/go/hash"
 	"github.com/stellar/go/keypair"
+	"github.com/stellar/go/strkey"
 	"github.com/stellar/go/xdr"
 )
 
@@ -84,6 +85,54 @@ func KeyPairFromRaw(rawSeed [32]byte) (full *keypair.Full, err error) {
 
 func KeypairParse(addressOrSeed string) (keypair.KP, error) {
 	return keypair.Parse(addressOrSeed)
+}
+
+func VerifyAddress(addr string) bool {
+
+	// prefix : G
+	_, err := strkey.Decode(strkey.VersionByteAccountID, addr)
+	if err != nil {
+		fmt.Println("Error VerifyAddress", err)
+		return false
+	}
+
+	return true
+}
+
+func VerifySeed(seed string) bool {
+
+	// prefix : S
+	_, err := strkey.Decode(strkey.VersionByteSeed, seed)
+	if err != nil {
+		fmt.Println("Error VerifySeed", err)
+		return false
+	}
+
+	return true
+}
+
+func VerifyHashTx(tx string) bool {
+
+	// prefix : T
+	_, err := strkey.Decode(strkey.VersionByteHashTx, tx)
+	if err != nil {
+		fmt.Println("Error VerifyHashTx", err)
+		return false
+	}
+
+	return true
+}
+
+func VerifyHashX(hx string) bool {
+
+	// prefix : X
+	_, err := strkey.Decode(strkey.VersionByteHashX, hx)
+	if err != nil {
+		fmt.Println("Error VerifyHashX", err)
+		return false
+	}
+
+	return true
 }
 
 func AssestsCreate() {
