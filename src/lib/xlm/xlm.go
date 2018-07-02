@@ -1,10 +1,12 @@
 package xlm
 
 import (
+	"bytes"
 	"encoding/base64"
 	"fmt"
 	"strings"
 
+	"github.com/agl/ed25519"
 	"github.com/stellar/go/amount"
 	"github.com/stellar/go/build"
 	"github.com/stellar/go/clients/horizon"
@@ -83,8 +85,32 @@ func KeyPairFromRaw(rawSeed [32]byte) (full *keypair.Full, err error) {
 	return
 }
 
-func KeypairParse(addressOrSeed string) (keypair.KP, error) {
+func KeyPairParse(addressOrSeed string) (keypair.KP, error) {
 	return keypair.Parse(addressOrSeed)
+}
+
+func KeySignFull(kp *keypair.Full, input []byte) ([]byte, error) {
+	return kp.Sign(input)
+}
+
+func KeySignFromAddress(kp *keypair.FromAddress, input []byte) ([]byte, error) {
+	return kp.Sign(input)
+}
+
+func KeySignSeed(seed string, input []byte) ([]byte, error) {
+
+	rawSeed, err := strkey.Decode(strkey.VersionByteSeed, seed)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	reader := bytes.NewReader(rawSeed)
+	_, priv, err := ed25519.GenerateKey(reader)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return xdr.Signature(ed25519.Sign(priv, input)[:]), nil
 }
 
 func VerifyAddress(addr string) bool {
@@ -211,7 +237,7 @@ func PaymentForTx() {
 
 }
 
-func TxBuilder(net, fromSeed, toAddress, amount string) (tx *build.TransactionBuilder, err error) {
+func TxBuilderCreate(net, fromSeed, toAddress, amount string) (tx *build.TransactionBuilder, err error) {
 
 	network := HorizonNetwork(net)
 
@@ -232,7 +258,7 @@ func TxBuilder(net, fromSeed, toAddress, amount string) (tx *build.TransactionBu
 	return
 }
 
-func TxSign(seed string, tx *build.TransactionBuilder) (string, error) {
+func TxBuilderSign(seed string, tx *build.TransactionBuilder) (string, error) {
 
 	txe, err := tx.Sign(seed)
 	if err != nil {
@@ -251,7 +277,7 @@ func TxSign(seed string, tx *build.TransactionBuilder) (string, error) {
 	return txeB64, nil
 }
 
-func TxSubmit(net, txeB64 string) {
+func TxBuilderSubmit(net, txeB64 string) {
 
 	resp, err := HorizonNetwork(net).SubmitTransaction(txeB64)
 	if err != nil {
