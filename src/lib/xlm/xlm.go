@@ -31,10 +31,6 @@ func HorizonNetwork(net string) (network *horizon.Client) {
 	return
 }
 
-func AmountMustParse(v string) xdr.Int64 {
-	return amount.MustParse(v)
-}
-
 func AmountParse(v string) (xdr.Int64, error) {
 	return amount.Parse(v)
 }
@@ -45,6 +41,16 @@ func AmountStringFromInt64(v int64) string {
 
 func AmountString(v xdr.Int64) string {
 	return amount.String(v)
+}
+
+func VerifyAmount(v string) bool {
+
+	_, err := AmountParse(v)
+	if err != nil {
+		return false
+	}
+
+	return true
 }
 
 func KeyPairRandom() (full *keypair.Full, err error) {
@@ -161,8 +167,39 @@ func VerifyHashX(hx string) bool {
 	return true
 }
 
-func AssestsCreate() {
+func AccountID(addr string) (accountID xdr.AccountId, err error) {
 
+	err = accountID.SetAddress(addr)
+
+	return
+}
+
+func AssestSetCredit(code, issuer string) (asset xdr.Asset, err error) {
+
+	var accountID xdr.AccountId
+	err = accountID.SetAddress(issuer)
+	if err != nil {
+		return
+	}
+
+	err = asset.SetCredit(code, accountID)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func AssetSetNative() (asset xdr.Asset, err error) {
+
+	err = asset.SetNative()
+
+	return
+}
+
+func MemoNew(aType xdr.MemoType, value interface{}) (memo xdr.Memo, err error) {
+
+	return xdr.NewMemo(aType, value)
 }
 
 func AssetsAll() {
@@ -237,7 +274,19 @@ func PaymentForTx() {
 
 }
 
-func TxBuilderCreate(net, fromSeed, toAddress, amount string) (tx *build.TransactionBuilder, err error) {
+func TxBuilder(net, fromSeed, toAddress, amount string) (tx *build.TransactionBuilder, err error) {
+
+	if !VerifySeed(fromSeed) {
+		return
+	}
+
+	if !VerifyAddress(toAddress) {
+		return
+	}
+
+	if !VerifyAmount(amount) {
+		return
+	}
 
 	network := HorizonNetwork(net)
 
@@ -301,6 +350,133 @@ func TxDecode(data string) (tx xdr.TransactionEnvelope) {
 	}
 
 	fmt.Printf("This tx has %d operations\n", len(tx.Tx.Operations))
+
+	return
+}
+
+func TxNew(from string) (tx *xdr.Transaction) {
+
+	if !VerifyAddress(from) {
+		return
+	}
+
+	var source xdr.AccountId
+	err := source.SetAddress(from)
+	if err != nil {
+		return
+	}
+
+	tx = &xdr.Transaction{
+		SourceAccount: source,
+		SeqNum:        xdr.SequenceNumber(1),
+		Operations:    []xdr.Operation{},
+	}
+
+	return
+}
+
+func TxAddFee(tx *xdr.Transaction, fee xdr.Uint32) {
+	tx.Fee = fee
+}
+
+func TxAddMemo(tx *xdr.Transaction, memo xdr.Memo) {
+	tx.Memo = memo
+}
+
+func TxAddPaymentOp(tx *xdr.Transaction, to, amount string, asset xdr.Asset) {
+
+	var destination xdr.AccountId
+	err := destination.SetAddress(to)
+	if err != nil {
+		return
+	}
+
+	lumens, err := AmountParse(amount)
+	if err != nil {
+		return
+	}
+
+	option := xdr.PaymentOp{
+		Destination: destination,
+		Asset:       asset,
+		Amount:      lumens,
+	}
+
+	body, err := xdr.NewOperationBody(xdr.OperationTypePayment, option)
+	if err != nil {
+		return
+	}
+
+	operation := xdr.Operation{Body: body}
+
+	tx.Operations = append(tx.Operations, operation)
+}
+
+func TxAddCreateAccountOp(tx *xdr.Transaction)      {}
+func TxAddPathPaymentOp(tx *xdr.Transaction)        {}
+func TxAddManageOfferOp(tx *xdr.Transaction)        {}
+func TxAddCreatePassiveOfferOp(tx *xdr.Transaction) {}
+func TxAddSetOptionsOp(tx *xdr.Transaction)         {}
+func TxAddChangeTrustOp(tx *xdr.Transaction)        {}
+func TxAddAllowTrustOp(tx *xdr.Transaction)         {}
+func TxAddDestination(tx *xdr.Transaction)          {}
+func TxAddManageDataOp(tx *xdr.Transaction)         {}
+
+func TxEnvelopNew(tx xdr.Transaction) *xdr.TransactionEnvelope {
+
+	txe := &xdr.TransactionEnvelope{
+		Tx:         tx,
+		Signatures: []xdr.DecoratedSignature{},
+	}
+
+	return txe
+}
+
+func TxAddSignature(seed string, tx *xdr.Transaction, txe *xdr.TransactionEnvelope) {
+
+	if !VerifySeed(seed) {
+		return
+	}
+
+	skp, err := KeyPairParse(seed)
+	if err != nil {
+		return
+	}
+
+	if skp.Address() != tx.SourceAccount.Address() {
+		return
+	}
+
+	var txBytes bytes.Buffer
+	_, err1 := xdr.Marshal(&txBytes, tx)
+	if err1 != nil {
+		return
+	}
+
+	txHash := hash.Hash(txBytes.Bytes())
+	signature, err2 := skp.Sign(txHash[:])
+	if err2 != nil {
+		return
+	}
+
+	ds := xdr.DecoratedSignature{
+		Hint:      skp.Hint(),
+		Signature: xdr.Signature(signature[:]),
+	}
+
+	txe.Signatures = append(txe.Signatures, ds)
+}
+
+func TxEnvelopEncode(txe *xdr.TransactionEnvelope) (txeB64 string) {
+
+	var txeBytes bytes.Buffer
+	_, err := xdr.Marshal(&txeBytes, txe)
+	if err != nil {
+		return
+	}
+	txeB64 = base64.StdEncoding.EncodeToString(txeBytes.Bytes())
+
+	fmt.Printf("tx base64: %s", txeB64)
 
 	return
 }
