@@ -206,11 +206,34 @@ func MemoNew(aType xdr.MemoType, value interface{}) (memo xdr.Memo, err error) {
 	return xdr.NewMemo(aType, value)
 }
 
-func AccountDetails() {
+func AccountDetails(net, id string) (result horizon.Account, problem horizon.Problem) {
 
+	url := HorizonNetwork(net).URL + "/accounts/" + id
+
+	res, err := http.Get(url)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+
+	json.Unmarshal(body, &problem)
+	if problem.Type != "" {
+
+		fmt.Println("Error AccountDetails", problem.Type)
+		return
+	}
+
+	json.Unmarshal(body, &result)
+
+	fmt.Println(".......AccountDetails........")
+	fmt.Println(string(body))
+
+	return
 }
 
-func AssetCodeIssuer(net, code, issuer string, cursor string, limit uint, order string) (result map[string]interface{}) {
+func AssetCodeIssuer(net, code, issuer string, cursor string, limit uint, order string) (result map[string]interface{}, problem horizon.Problem) {
 
 	curs := "?cursor=" + cursor
 	lim := "&limit=" + strconv.Itoa(int(limit))
@@ -228,7 +251,6 @@ func AssetCodeIssuer(net, code, issuer string, cursor string, limit uint, order 
 
 	body, err := ioutil.ReadAll(res.Body)
 
-	var problem horizon.Problem
 	json.Unmarshal(body, &problem)
 	if problem.Type != "" {
 
@@ -244,7 +266,7 @@ func AssetCodeIssuer(net, code, issuer string, cursor string, limit uint, order 
 	return
 }
 
-func LedgerAll(net string, cursor string, limit uint, order string) (result horizon.TradeAggregationsPage) {
+func LedgerAll(net string, cursor string, limit uint, order string) (result horizon.TradeAggregationsPage, problem horizon.Problem) {
 
 	curs := "?cursor=" + cursor
 	lim := "&limit=" + strconv.Itoa(int(limit))
@@ -260,7 +282,6 @@ func LedgerAll(net string, cursor string, limit uint, order string) (result hori
 
 	body, err := ioutil.ReadAll(res.Body)
 
-	var problem horizon.Problem
 	json.Unmarshal(body, &problem)
 	if problem.Type != "" {
 
@@ -274,7 +295,7 @@ func LedgerAll(net string, cursor string, limit uint, order string) (result hori
 	return
 }
 
-func LedgerByID(net, id string) (result horizon.Ledger) {
+func LedgerByID(net, id string) (result horizon.Ledger, problem horizon.Problem) {
 
 	url := HorizonNetwork(net).URL + "/ledgers/" + id
 
@@ -286,7 +307,6 @@ func LedgerByID(net, id string) (result horizon.Ledger) {
 
 	body, err := ioutil.ReadAll(res.Body)
 
-	var problem horizon.Problem
 	json.Unmarshal(body, &problem)
 	if problem.Type != "" {
 
@@ -568,7 +588,7 @@ func TxEnvelopEncode(txe *xdr.TransactionEnvelope) (txeB64 string) {
 	return
 }
 
-func TxAll(net string, cursor string, limit uint, order string) (result horizon.TradeAggregationsPage) {
+func TxAll(net string, cursor string, limit uint, order string) (result horizon.TradeAggregationsPage, problem horizon.Problem) {
 
 	curs := "?cursor=" + cursor
 	lim := "&limit=" + strconv.Itoa(int(limit))
@@ -584,7 +604,6 @@ func TxAll(net string, cursor string, limit uint, order string) (result horizon.
 
 	body, err := ioutil.ReadAll(res.Body)
 
-	var problem horizon.Problem
 	json.Unmarshal(body, &problem)
 	if problem.Type != "" {
 
@@ -600,7 +619,7 @@ func TxAll(net string, cursor string, limit uint, order string) (result horizon.
 	return
 }
 
-func TxByHash(net, txHash string) (result horizon.Transaction) {
+func TxByHash(net, txHash string) (result horizon.Transaction, problem horizon.Problem) {
 
 	url := HorizonNetwork(net).URL + "/transactions/" + txHash
 
@@ -612,7 +631,6 @@ func TxByHash(net, txHash string) (result horizon.Transaction) {
 
 	body, err := ioutil.ReadAll(res.Body)
 
-	var problem horizon.Problem
 	json.Unmarshal(body, &problem)
 	if problem.Type != "" {
 
@@ -628,7 +646,7 @@ func TxByHash(net, txHash string) (result horizon.Transaction) {
 	return
 }
 
-func TxForAccount(net, id string, cursor string, limit uint, order string) (result horizon.TradeAggregationsPage) {
+func TxForAccount(net, id string, cursor string, limit uint, order string) (result horizon.TradeAggregationsPage, problem horizon.Problem) {
 
 	curs := "?cursor=" + cursor
 	lim := "&limit=" + strconv.Itoa(int(limit))
@@ -644,7 +662,6 @@ func TxForAccount(net, id string, cursor string, limit uint, order string) (resu
 
 	body, err := ioutil.ReadAll(res.Body)
 
-	var problem horizon.Problem
 	json.Unmarshal(body, &problem)
 	if problem.Type != "" {
 
@@ -661,7 +678,7 @@ func TxForAccount(net, id string, cursor string, limit uint, order string) (resu
 
 }
 
-func TxForLedger(net, id string, cursor string, limit uint, order string) (result horizon.TradeAggregationsPage) {
+func TxForLedger(net, id string, cursor string, limit uint, order string) (result horizon.TradeAggregationsPage, problem horizon.Problem) {
 
 	curs := "?cursor=" + cursor
 	lim := "&limit=" + strconv.Itoa(int(limit))
@@ -677,7 +694,6 @@ func TxForLedger(net, id string, cursor string, limit uint, order string) (resul
 
 	body, err := ioutil.ReadAll(res.Body)
 
-	var problem horizon.Problem
 	json.Unmarshal(body, &problem)
 	if problem.Type != "" {
 
