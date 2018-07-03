@@ -3,7 +3,11 @@ package xlm
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/agl/ed25519"
@@ -16,15 +20,15 @@ import (
 	"github.com/stellar/go/xdr"
 )
 
-var NET_PUBLIC = "public"
-var NET_TEST = "test"
+var ORDER_ASC = `asc`
+var ORDER_DESC = `desc`
 
 func HorizonNetwork(net string) (network *horizon.Client) {
 
 	switch net {
-	case NET_PUBLIC:
+	case "public":
 		network = horizon.DefaultPublicNetClient
-	case NET_TEST:
+	case "test":
 		network = horizon.DefaultTestNetClient
 	}
 
@@ -202,15 +206,98 @@ func MemoNew(aType xdr.MemoType, value interface{}) (memo xdr.Memo, err error) {
 	return xdr.NewMemo(aType, value)
 }
 
-func AssetsAll() {
+func AccountDetails() {
 
 }
 
-func LedgerAll() {
+func AssetCodeIssuer(net, code, issuer string, cursor string, limit uint, order string) (result map[string]interface{}) {
 
+	curs := "?cursor=" + cursor
+	lim := "&limit=" + strconv.Itoa(int(limit))
+	ordr := "&order=" + order
+	asset_code := "&asset_code=" + code
+	asset_issuer := "&asset_issuer=" + issuer
+
+	url := HorizonNetwork(net).URL + "/assets" + curs + lim + ordr + asset_code + asset_issuer
+
+	res, err := http.Get(url)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+
+	var problem horizon.Problem
+	json.Unmarshal(body, &problem)
+	if problem.Type != "" {
+
+		fmt.Println("Error AssetCodeIssuer", problem.Type)
+		return
+	}
+
+	json.Unmarshal(body, &result)
+
+	fmt.Println(".......AssetCodeIssuer........")
+	fmt.Println(string(body))
+
+	return
 }
 
-func LedgerByID() {
+func LedgerAll(net string, cursor string, limit uint, order string) (result horizon.TradeAggregationsPage) {
+
+	curs := "?cursor=" + cursor
+	lim := "&limit=" + strconv.Itoa(int(limit))
+	ordr := "&order=" + order
+
+	url := HorizonNetwork(net).URL + "/ledgers" + curs + lim + ordr
+
+	res, err := http.Get(url)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+
+	var problem horizon.Problem
+	json.Unmarshal(body, &problem)
+	if problem.Type != "" {
+
+		fmt.Println("Error LedgerAll", problem.Type)
+		return
+	}
+
+	fmt.Println(".......LedgerAll........")
+	fmt.Println(string(body))
+
+	return
+}
+
+func LedgerByID(net, id string) (result horizon.Ledger) {
+
+	url := HorizonNetwork(net).URL + "/ledgers/" + id
+
+	res, err := http.Get(url)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+
+	var problem horizon.Problem
+	json.Unmarshal(body, &problem)
+	if problem.Type != "" {
+
+		fmt.Println("Error LedgerID", problem.Type)
+		return
+	}
+
+	fmt.Println(".......LedgerID........")
+	fmt.Println(string(body))
+
+	return
 
 }
 
@@ -481,18 +568,125 @@ func TxEnvelopEncode(txe *xdr.TransactionEnvelope) (txeB64 string) {
 	return
 }
 
-func TxAll() {
+func TxAll(net string, cursor string, limit uint, order string) (result horizon.TradeAggregationsPage) {
+
+	curs := "?cursor=" + cursor
+	lim := "&limit=" + strconv.Itoa(int(limit))
+	ordr := "&order=" + order
+
+	url := HorizonNetwork(net).URL + "/transactions" + curs + lim + ordr
+
+	res, err := http.Get(url)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+
+	var problem horizon.Problem
+	json.Unmarshal(body, &problem)
+	if problem.Type != "" {
+
+		fmt.Println("Error  TxAll", problem.Type)
+		return
+	}
+
+	json.Unmarshal(body, &result)
+
+	fmt.Println(".......TxAll........")
+	fmt.Println(string(body))
+
+	return
+}
+
+func TxByHash(net, txHash string) (result horizon.Transaction) {
+
+	url := HorizonNetwork(net).URL + "/transactions/" + txHash
+
+	res, err := http.Get(url)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+
+	var problem horizon.Problem
+	json.Unmarshal(body, &problem)
+	if problem.Type != "" {
+
+		fmt.Println("Error TxByHash", problem.Type)
+		return
+	}
+
+	json.Unmarshal(body, &result)
+
+	fmt.Println(".......TxByHash........")
+	fmt.Println(string(body))
+
+	return
+}
+
+func TxForAccount(net, id string, cursor string, limit uint, order string) (result horizon.TradeAggregationsPage) {
+
+	curs := "?cursor=" + cursor
+	lim := "&limit=" + strconv.Itoa(int(limit))
+	ordr := "&order=" + order
+
+	url := HorizonNetwork(net).URL + "/accounts/" + id + "/transactions" + curs + lim + ordr
+
+	res, err := http.Get(url)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+
+	var problem horizon.Problem
+	json.Unmarshal(body, &problem)
+	if problem.Type != "" {
+
+		fmt.Println("Error  TxForAccount", problem.Type)
+		return
+	}
+
+	json.Unmarshal(body, &result)
+
+	fmt.Println(".......TxForAccount........")
+	fmt.Println(string(body))
+
+	return
 
 }
 
-func TxByHash() {
+func TxForLedger(net, id string, cursor string, limit uint, order string) (result horizon.TradeAggregationsPage) {
 
-}
+	curs := "?cursor=" + cursor
+	lim := "&limit=" + strconv.Itoa(int(limit))
+	ordr := "&order=" + order
 
-func TxForAccount() {
+	url := HorizonNetwork(net).URL + "/ledgers/" + id + "/transactions" + curs + lim + ordr
 
-}
+	res, err := http.Get(url)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer res.Body.Close()
 
-func TxForLedger() {
+	body, err := ioutil.ReadAll(res.Body)
 
+	var problem horizon.Problem
+	json.Unmarshal(body, &problem)
+	if problem.Type != "" {
+
+		fmt.Println("Error TxForLedger", problem.Type)
+		return
+	}
+
+	fmt.Println(".......TxForLedger........")
+	fmt.Println(string(body))
+
+	return
 }
