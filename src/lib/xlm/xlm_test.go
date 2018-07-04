@@ -23,4 +23,6 @@ func Test_XLM(t *testing.T) {
 
 	// order book
 
+	// trade
+
 }

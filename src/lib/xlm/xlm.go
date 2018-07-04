@@ -23,6 +23,10 @@ import (
 var ORDER_ASC = `asc`
 var ORDER_DESC = `desc`
 
+var ASSET_TYPE_NATIVE = `native`
+var ASSET_TYPE_CREDIT_ALPHANUM4 = `credit_alphanum4`
+var ASSET_TYPE_CREDIT_ALPHANUM12 = `credit_alphanum12`
+
 func HorizonNetwork(net string) (network *horizon.Client) {
 
 	switch net {
@@ -608,12 +612,57 @@ func OperationsForTx(net, txHash string, cursor string, limit uint, order string
 	return
 }
 
-func OrderBookDetails() {
+func OrderBookDetails(net, selling_asset_type, selling_asset_code, selling_asset_issuer, buying_asset_type, buying_asset_code, buying_asset_issuer, limit string) (result horizon.OrderBookSummary) {
 
+	selling_asset_type = "?selling_asset_type=" + selling_asset_type
+	selling_asset_code = "&selling_asset_code=" + selling_asset_code
+	selling_asset_issuer = "&selling_asset_issuer=" + selling_asset_issuer
+
+	buying_asset_type = "&buying_asset_type=" + buying_asset_type
+	buying_asset_code = "&buying_asset_code=" + buying_asset_code
+	buying_asset_issuer = "&buying_asset_issuer=" + buying_asset_issuer
+
+	limit = "&limit=" + limit
+
+	params := selling_asset_type + selling_asset_code + selling_asset_issuer + buying_asset_type + buying_asset_code + buying_asset_issuer + limit
+
+	url := HorizonNetwork(net).URL + "/order_book" + params
+
+	body, ok := call(url)
+	if !ok {
+		return
+	}
+	json.Unmarshal(body, &result)
+
+	fmt.Println(".......OrderBookDetails........")
+	fmt.Println(string(body))
+
+	return
 }
 
-func FindPaymentPath() {
+func FindPaymentPath(net, destination_account, destination_asset_type, destination_asset_code, destination_asset_issuer, destination_amount, source_account string) (result map[string]interface{}) {
 
+	destination_account = "?destination_account=" + destination_account
+	destination_asset_type = "&destination_asset_type=" + destination_asset_type
+	destination_asset_code = "&destination_asset_code=" + destination_asset_code
+	destination_asset_issuer = "&destination_asset_issuer=" + destination_asset_issuer
+	destination_amount = "&destination_amount=" + destination_amount
+	source_account = "&destination_amount=" + destination_amount
+
+	params := destination_account + destination_asset_type + destination_asset_code + destination_asset_issuer + destination_amount + source_account
+
+	url := HorizonNetwork(net).URL + "/paths" + params
+
+	body, ok := call(url)
+	if !ok {
+		return
+	}
+	json.Unmarshal(body, &result)
+
+	fmt.Println(".......OrderBookDetails........")
+	fmt.Println(string(body))
+
+	return
 }
 
 func TradeAggregations() {
