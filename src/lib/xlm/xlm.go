@@ -665,8 +665,39 @@ func FindPaymentPath(net, destination_account, destination_asset_type, destinati
 	return
 }
 
-func TradeAggregations() {
+func TradeAggregations(net, base_asset_type, base_asset_code, base_asset_issuer,
+	counter_asset_type, counter_asset_code, counter_asset_issuer,
+	order string,
+	limit, start_time, end_time, resolution uint64) (result map[string]interface{}) {
 
+	base_asset_type = "?base_asset_type=" + base_asset_type
+	base_asset_code = "&base_asset_code=" + base_asset_code
+	base_asset_issuer = "&base_asset_issuer=" + base_asset_issuer
+
+	counter_asset_type = "&counter_asset_type=" + counter_asset_type
+	counter_asset_code = "&counter_asset_code=" + counter_asset_code
+	counter_asset_issuer = "&counter_asset_issuer=" + counter_asset_issuer
+	order = "&order=" + order
+
+	limitStr := "&limit=" + strconv.FormatUint(limit, 10)
+	start_timeStr := "&start_time=" + strconv.FormatUint(start_time, 10)
+	end_timeStr := "&end_time=" + strconv.FormatUint(end_time, 10)
+	resolutionStr := "&resolution=" + strconv.FormatUint(resolution, 10)
+
+	params := base_asset_type + base_asset_code + base_asset_issuer + counter_asset_type + counter_asset_code + counter_asset_issuer + order + limitStr + start_timeStr + end_timeStr + resolutionStr
+
+	url := HorizonNetwork(net).URL + "/trade_aggregations" + params
+
+	body, ok := call(url)
+	if !ok {
+		return
+	}
+	json.Unmarshal(body, &result)
+
+	fmt.Println(".......OrderBookDetails........")
+	fmt.Println(string(body))
+
+	return
 }
 
 func TradeAll() {
