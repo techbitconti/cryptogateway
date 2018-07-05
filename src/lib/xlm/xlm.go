@@ -464,6 +464,23 @@ func AccountDetails(net, id string) (result horizon.Account) {
 	return
 }
 
+func GetBalance(net, id, asset_type, asset_code string) (balance string) {
+
+	info := AccountDetails(net, id)
+
+	for _, v := range info.Balances {
+
+		if asset_type == v.Type && asset_code == v.Code {
+			balance = v.Balance
+			break
+		}
+	}
+
+	fmt.Println(".........GetBalance........", balance)
+
+	return
+}
+
 func AssetCodeIssuer(net, code, issuer string, cursor string, limit uint, order string) (result map[string]interface{}) {
 
 	asset_code := "&asset_code=" + code
@@ -684,7 +701,9 @@ func TradeAggregations(net, base_asset_type, base_asset_code, base_asset_issuer,
 	end_timeStr := "&end_time=" + strconv.FormatUint(end_time, 10)
 	resolutionStr := "&resolution=" + strconv.FormatUint(resolution, 10)
 
-	params := base_asset_type + base_asset_code + base_asset_issuer + counter_asset_type + counter_asset_code + counter_asset_issuer + order + limitStr + start_timeStr + end_timeStr + resolutionStr
+	params := base_asset_type + base_asset_code + base_asset_issuer +
+		counter_asset_type + counter_asset_code + counter_asset_issuer +
+		order + limitStr + start_timeStr + end_timeStr + resolutionStr
 
 	url := HorizonNetwork(net).URL + "/trade_aggregations" + params
 
@@ -700,12 +719,54 @@ func TradeAggregations(net, base_asset_type, base_asset_code, base_asset_issuer,
 	return
 }
 
-func TradeAll() {
+func TradeAll(net, base_asset_type, base_asset_code, base_asset_issuer,
+	counter_asset_type, counter_asset_code, counter_asset_issuer,
+	offer_id, cursor, order, limit string) (result map[string]interface{}) {
+
+	base_asset_type = "?base_asset_type=" + base_asset_type
+	base_asset_code = "&base_asset_code=" + base_asset_code
+	base_asset_issuer = "&base_asset_issuer" + base_asset_issuer
+	counter_asset_type = "&counter_asset_type=" + counter_asset_type
+	counter_asset_code = "&counter_asset_code=" + counter_asset_code
+	counter_asset_issuer = "&counter_asset_issuer=" + counter_asset_issuer
+	offer_id = "&offer_id=" + offer_id
+	cursor = "&cursor=" + cursor
+	order = "&order=" + order
+	limit = "&limit=" + limit
+
+	params := base_asset_type + base_asset_code + base_asset_issuer +
+		counter_asset_type + counter_asset_code + counter_asset_issuer +
+		offer_id + cursor + order + limit
+
+	url := HorizonNetwork(net).URL + "/trades" + params
+
+	body, ok := call(url)
+	if !ok {
+		return
+	}
+	json.Unmarshal(body, &result)
+
+	fmt.Println(".......TradeAll........")
+	fmt.Println(string(body))
+
+	return
 
 }
 
-func TradeForAccount() {
+func TradeForAccount(net, id string, cursor string, limit uint, order string) (result map[string]interface{}) {
 
+	url := HorizonNetwork(net).URL + "/accounts/" + id + "/trades" + cursor_limit_order(cursor, limit, order)
+
+	body, ok := call(url)
+	if !ok {
+		return
+	}
+	json.Unmarshal(body, &result)
+
+	fmt.Println(".......TradeForAccount........")
+	fmt.Println(string(body))
+
+	return
 }
 
 func PaymentAll(net string, cursor string, limit uint, order string) (result map[string]interface{}) {
