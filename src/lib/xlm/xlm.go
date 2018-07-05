@@ -430,6 +430,8 @@ func cursor_limit_order(cursor string, limit uint, order string) string {
 
 func call(url string) ([]byte, bool) {
 
+	fmt.Println(".....url......", url)
+
 	res, err := http.Get(url)
 	if err != nil {
 		fmt.Println(err)
@@ -500,7 +502,7 @@ func AssetCodeIssuer(net, code, issuer string, cursor string, limit uint, order 
 	return
 }
 
-func LedgerAll(net string, cursor string, limit uint, order string) (result horizon.TradeAggregationsPage) {
+func LedgerAll(net string, cursor string, limit uint, order string) (result map[string]interface{}) {
 
 	url := HorizonNetwork(net).URL + "/ledgers" + cursor_limit_order(cursor, limit, order)
 
@@ -629,7 +631,8 @@ func OperationsForTx(net, txHash string, cursor string, limit uint, order string
 	return
 }
 
-func OrderBookDetails(net, selling_asset_type, selling_asset_code, selling_asset_issuer, buying_asset_type, buying_asset_code, buying_asset_issuer, limit string) (result horizon.OrderBookSummary) {
+func OrderBookDetails(net, selling_asset_type, selling_asset_code, selling_asset_issuer,
+	buying_asset_type, buying_asset_code, buying_asset_issuer, limit string) (result horizon.OrderBookSummary) {
 
 	selling_asset_type = "?selling_asset_type=" + selling_asset_type
 	selling_asset_code = "&selling_asset_code=" + selling_asset_code
@@ -833,7 +836,7 @@ func PaymentForTx(net, txHash string, cursor string, limit uint, order string) (
 	return
 }
 
-func TxAll(net string, cursor string, limit uint, order string) (result horizon.TradeAggregationsPage) {
+func TxAll(net string, cursor string, limit uint, order string) (result map[string]interface{}) {
 
 	url := HorizonNetwork(net).URL + "/transactions" + cursor_limit_order(cursor, limit, order)
 
@@ -865,7 +868,7 @@ func TxByHash(net, txHash string) (result horizon.Transaction) {
 	return
 }
 
-func TxForAccount(net, id string, cursor string, limit uint, order string) (result horizon.TradeAggregationsPage) {
+func TxForAccount(net, id string, cursor string, limit uint, order string) (result map[string]interface{}) {
 
 	url := HorizonNetwork(net).URL + "/accounts/" + id + "/transactions" + cursor_limit_order(cursor, limit, order)
 
@@ -882,7 +885,7 @@ func TxForAccount(net, id string, cursor string, limit uint, order string) (resu
 
 }
 
-func TxForLedger(net, id string, cursor string, limit uint, order string) (result horizon.TradeAggregationsPage) {
+func TxForLedger(net, id string, cursor string, limit uint, order string) (result map[string]interface{}) {
 
 	url := HorizonNetwork(net).URL + "/ledgers/" + id + "/transactions" + cursor_limit_order(cursor, limit, order)
 
