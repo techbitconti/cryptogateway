@@ -41,7 +41,6 @@ func Test_Parse(t *testing.T) {
 	net := "public"
 
 	block_embeded := LedgerAll(net, "", 1, ORDER_DESC)["_embedded"].(map[string]interface{})
-
 	block_record, _ := json.Marshal(block_embeded["records"])
 	var recordsBlock []map[string]interface{}
 	json.Unmarshal(block_record, &recordsBlock)
@@ -53,12 +52,61 @@ func Test_Parse(t *testing.T) {
 	var recordsTx []map[string]interface{}
 	json.Unmarshal(tx_record, &recordsTx)
 
-	for _, v := range recordsTx {
-		txID := v["id"].(string)
-		fmt.Println(txID)
-		PaymentForTx(net, txID, "", 200, ORDER_DESC)
+	for _, objTx := range recordsTx {
 
-		// [] native
+		txID := objTx["id"].(string)
+
+		payment_embeded := PaymentForTx(net, txID, "", 200, ORDER_DESC)["_embedded"].(map[string]interface{})
+		payment_record, _ := json.Marshal(payment_embeded["records"])
+		var recordsPay []map[string]interface{}
+		json.Unmarshal(payment_record, &recordsPay)
+
+		for _, objPay := range recordsPay {
+
+			ttype := objPay["type"].(string)
+
+			if ttype == "payment" {
+
+				if from, okF := objPay["from"]; okF {
+					fmt.Println("from : ", from)
+				}
+
+				if to, okT := objPay["to"]; okT {
+					fmt.Println("to : ", to)
+				}
+
+				if amount, okAm := objPay["amount"]; okAm {
+					fmt.Println("amount : ", amount)
+				}
+
+				if asset_type, okAt := objPay["asset_type"]; okAt {
+					fmt.Println("asset_type : ", asset_type)
+				}
+
+				if asset_code, okAc := objPay["asset_code"]; okAc {
+					fmt.Println("asset_code : ", asset_code)
+				}
+
+				if asset_issuer, okAi := objPay["asset_issuer"]; okAi {
+					fmt.Println("asset_issuer : ", asset_issuer)
+				}
+			}
+
+			if ttype == "create_account" {
+
+				if funder, okF := objPay["funder"]; okF {
+					fmt.Println("funder : ", funder)
+				}
+
+				if account, okT := objPay["account"]; okT {
+					fmt.Println("account : ", account)
+				}
+
+				if starting_balance, okAm := objPay["starting_balance"]; okAm {
+					fmt.Println("starting_balance : ", starting_balance)
+				}
+			}
+		}
 	}
 
 }
