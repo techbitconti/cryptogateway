@@ -9,6 +9,7 @@ import (
 	"lib/btc"
 	"lib/eth"
 	"lib/ltc"
+	"module/bchScan"
 	"module/btcScan"
 	"module/dbScan"
 	"module/etherScan"
@@ -50,7 +51,7 @@ func main() {
 }
 
 func startconfig() {
-	config.SetPATH("local")
+	config.SetPATH("server")
 }
 
 func startDB() {

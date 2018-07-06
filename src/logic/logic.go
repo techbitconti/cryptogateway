@@ -199,7 +199,7 @@ func genAddress(coin string) (address string) {
 	switch coin {
 	case "BTC":
 		address = genAddressBTC()
-	case "BTC":
+	case "BCH":
 		address = genAddressBCH()
 	case "LTC":
 		address = genAddressLTC()

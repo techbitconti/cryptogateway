@@ -30,7 +30,7 @@ func Do_ListAddress(ip string, w http.ResponseWriter, params []byte) {
 		coin := request["coin"].(string)
 
 		// GO-0 : check coin type
-		if coin != "BTC" && coin != "LTC" && coin != "BCH", && coin != "ETH" {
+		if coin != "BTC" && coin != "LTC" && coin != "BCH" && coin != "ETH" {
 			resp.Status = -2
 			resp.Error = "Error Coin !!!"
 

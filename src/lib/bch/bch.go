@@ -232,7 +232,7 @@ func ValidateAmount(amount string) (float64, bool) {
 	return f, true
 }
 
-func ToBTC(amount string) float64 {
+func ToBCH(amount string) float64 {
 
 	f, ok := ValidateAmount(amount)
 	if !ok {
