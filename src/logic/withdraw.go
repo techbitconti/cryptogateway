@@ -38,7 +38,12 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 		amountWithdraw := request["amount"].(string)
 
 		// GO-0 : check coin type
-		if coin != "BTC" && coin != "LTC" && coin != "BCH" && coin != "ETH" && coin != "ERC20" {
+		if coin != "BTC" &&
+			coin != "LTC" &&
+			coin != "BCH" &&
+			coin != "ETH" &&
+			coin != "ERC20" && coin != "XLM" {
+
 			resp.Status = -2
 			resp.Error = "Error Coin !!!"
 
@@ -83,7 +88,7 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 			if resp.Status == 0 {
 
 				switch coin {
-				case "BTC", "BCH", "LTC", "ETH":
+				case "BTC", "BCH", "LTC", "ETH", "XLM":
 					{
 						amountDespsit := mDeposit.Amount
 						aMDe, _ := strconv.ParseFloat(amountDespsit, 64)
@@ -158,7 +163,10 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 									fees = config.BTC_FEE
 								} else if coin == "ETH" {
 									fees = config.ETH_GAS
+								} else if coin == "XLM" {
+									fees = config.XLM_FEE
 								}
+
 								dbScan.Report_Fees(coin, fees)
 								dbScan.Report_Withdraw(coin, aMWith)
 								dbScan.Report_Current(coin)

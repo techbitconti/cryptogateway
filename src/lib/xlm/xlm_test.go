@@ -45,6 +45,9 @@ func Test_Parse(t *testing.T) {
 	var recordsBlock []map[string]interface{}
 	json.Unmarshal(block_record, &recordsBlock)
 
+	block_hash := recordsBlock[0]["hash"].(string)
+	fmt.Println("block hash : ", block_hash)
+
 	block_sequence := strconv.FormatFloat(recordsBlock[0]["sequence"].(float64), 'f', -1, 64)
 
 	tx_embeded := TxForLedger(net, block_sequence, "", 200, ORDER_ASC)["_embedded"].(map[string]interface{})
@@ -55,6 +58,7 @@ func Test_Parse(t *testing.T) {
 	for _, objTx := range recordsTx {
 
 		txID := objTx["id"].(string)
+		isTranfer := false
 
 		payment_embeded := PaymentForTx(net, txID, "", 200, ORDER_DESC)["_embedded"].(map[string]interface{})
 		payment_record, _ := json.Marshal(payment_embeded["records"])
@@ -66,6 +70,8 @@ func Test_Parse(t *testing.T) {
 			ttype := objPay["type"].(string)
 
 			if ttype == "payment" {
+
+				isTranfer = true
 
 				if from, okF := objPay["from"]; okF {
 					fmt.Println("from : ", from)
@@ -94,6 +100,8 @@ func Test_Parse(t *testing.T) {
 
 			if ttype == "create_account" {
 
+				isTranfer = true
+
 				if funder, okF := objPay["funder"]; okF {
 					fmt.Println("funder : ", funder)
 				}
@@ -106,6 +114,11 @@ func Test_Parse(t *testing.T) {
 					fmt.Println("starting_balance : ", starting_balance)
 				}
 			}
+		}
+
+		if isTranfer {
+			fee := objTx["fee_paid"].(float64)
+			fmt.Println("fee_paid : ", fee)
 		}
 	}
 

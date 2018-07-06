@@ -40,7 +40,7 @@ func Do_GetBalance(ip string, w http.ResponseWriter, params []byte) {
 		if resp.Status == 0 {
 
 			switch coin {
-			case "BTC", "LTC", "BCH", "ETH":
+			case "BTC", "LTC", "BCH", "ETH", "XLM":
 				{
 					isValid := verifyAddress(coin, addr)
 					if !isValid {

@@ -28,7 +28,11 @@ func Do_VerifyTx(ip string, w http.ResponseWriter, params []byte) {
 		tx := request["tx"].(string)
 
 		// GO-0 : check coin type
-		if coin != "BTC" && coin != "LTC" && coin != "BCH" && coin != "ETH" {
+		if coin != "BTC" &&
+			coin != "LTC" &&
+			coin != "BCH" &&
+			coin != "ETH" &&
+			coin != "XLM" {
 			resp.Status = -2
 			resp.Error = "Error Coin !!!"
 

@@ -5,20 +5,6 @@ var PORT_ALLOW = "8000"
 var NOTIFY_BALANCE = "/api/transaction/notify"
 var PASS_WALLET = "@oopXT&2018"
 
-var PATH_ETH string
-var PATH_BTC string
-var PATH_LTC string
-var PATH_BCH string
-
-var ETH_PRIV string
-var ETH_ADDR string
-var BTC_PRV string
-var BTC_ADDR string
-var LTC_PRV string
-var LTC_ADDR string
-var BCH_PRV string
-var BCH_ADDR string
-
 var COIN_BTC = "BTC"
 var COIN_LTC = "LTC"
 var COIN_BCH = "BCH"
@@ -26,8 +12,28 @@ var COIN_ETH = "ETH"
 var COIN_ERC20 = "ERC20"
 var COIN_XLM = "XLM"
 
+var PATH_ETH string
+var PATH_BTC string
+var PATH_LTC string
+var PATH_BCH string
+
+var ETH_PRIV string
+var ETH_ADDR string
+
+var BTC_PRV string
+var BTC_ADDR string
+
+var LTC_PRV string
+var LTC_ADDR string
+
+var BCH_PRV string
+var BCH_ADDR string
+
+var XLM_NET string
+
 var BTC_FEE = float64(0.0001)
 var ETH_GAS = float64(21000)
+var XLM_FEE = float64(0.00001)
 
 func SetPATH(net string) {
 	switch net {
@@ -51,6 +57,8 @@ func SetPATH(net string) {
 			ETH_PRIV = "49072852e438f883f32a9543dffc4cbcaa99f0f51d0fb55699da1de41194cc82"
 		}
 	}
+
+	XLM_NET = "test" // public
 
 	BTC_ADDR = "2N3eERqK57DRqqmjb3KzzapJUK7odJhNFZT"
 	BTC_PRV = "cMv8y9jz9wemtsjbLx5e2zn8MFRf6MruP3Agq8ifaQQ8ipbZw44B"

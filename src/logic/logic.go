@@ -3,6 +3,7 @@ package logic
 import (
 	"encoding/base64"
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
 	"math"
 	"net/http"
@@ -15,6 +16,7 @@ import (
 	"lib/btc"
 	"lib/eth"
 	"lib/ltc"
+	"lib/xlm"
 	"module/dbScan"
 
 	"github.com/PuerkitoBio/goquery"
@@ -46,6 +48,10 @@ func verifyAddress(coin string, addr string) bool {
 
 	case "ERC20":
 		if !eth.IsHexContract(addr) {
+			return false
+		}
+	case "XLM":
+		if !xlm.VerifyAddress(addr) {
 			return false
 		}
 	}
@@ -180,6 +186,40 @@ func verityTX(coin, tx string) (interface{}, bool) {
 
 		}
 
+	case "XLM":
+		{
+			result := xlm.TxByHash(config.XLM_NET, tx)
+
+			if result.ID == "" || result.Ledger == 0 {
+				return nil, false
+			}
+			data := make(map[string]interface{})
+
+			payment_embeded := xlm.PaymentForTx(config.XLM_NET, result.ID, "", 200, xlm.ORDER_DESC)["_embedded"].(map[string]interface{})
+
+			payment_record, _ := json.Marshal(payment_embeded["records"])
+			var recordsPay []map[string]interface{}
+			json.Unmarshal(payment_record, &recordsPay)
+
+			for _, objPay := range recordsPay {
+
+				ttype := objPay["type"].(string)
+
+				if ttype == "payment" {
+
+					data["token"] = "XLM"
+					data["transaction_id"] = result.ID
+					data["transaction_fee"] = result.FeePaid
+					data["from_address"] = objPay["from"].(string)
+					data["to_address"] = objPay["to"].(string)
+					data["amount"] = objPay["amount"].(string)
+				}
+			}
+
+			receipt = data
+			fmt.Println("receipt : ", receipt)
+		}
+
 	}
 
 	return receipt, true
@@ -205,6 +245,8 @@ func genAddress(coin string) (address string) {
 		address = genAddressLTC()
 	case "ETH", "ERC20":
 		address = genAddressETH()
+	case "XLM":
+		address = genAddressXLM()
 	}
 
 	fmt.Println("genAddress --- ", address)
@@ -251,6 +293,13 @@ func genAddressETH() string {
 	eth.StoreAccount(keyHex, "123456", config.PATH_ETH)
 
 	return address
+}
+
+func genAddressXLM() string {
+
+	full, _ := xlm.KeyPairRandom()
+
+	return full.Address()
 }
 
 func getRatingFromEtherScan(addr, net string) float64 {

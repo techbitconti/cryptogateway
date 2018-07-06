@@ -17,9 +17,12 @@ func report() {
 	startBTC()
 	startLTC()
 	startBCH()
+	startXLM()
 
-	dbScan.LoadReport_ETH()
 	dbScan.LoadReport_BTC()
 	dbScan.LoadReport_LTC()
 	dbScan.LoadReport_BCH()
+	dbScan.LoadReport_ETH()
+	dbScan.LoadReport_XLM()
+
 }

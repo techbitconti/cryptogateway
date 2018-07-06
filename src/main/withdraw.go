@@ -44,7 +44,11 @@ func withdraw() {
 	fmt.Println("coin", coin, "to", to, "amount", amount)
 
 	// GO-0 : check coin type
-	if coin != "ETH" && coin != "BTC" && coin != "LTC" && coin != "BCH" {
+	if coin != "ETH" &&
+		coin != "BTC" &&
+		coin != "LTC" &&
+		coin != "BCH" &&
+		coin != "XLM" {
 		fmt.Println("Invalid coin. Should be BTC or ETH")
 
 		return
@@ -147,6 +151,12 @@ func sendCoin(coin, from, to, amount string) (tx string) {
 
 			max = wei - gas*gasPrice
 			max /= math.Pow10(18) //ETH
+		}
+
+	case "XLM":
+		{
+			fee := config.XLM_FEE
+			max = balance - fee
 		}
 	}
 

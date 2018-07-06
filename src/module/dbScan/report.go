@@ -31,6 +31,13 @@ var REDIS_ETH_WITHDRAW = "eth_withdraw"
 var REDIS_ETH_CURRENT = "eth_current"
 var REDIS_ETH_FEES = "eth_fees"
 
+var REDIS_XLM_DEPOSIT = "xlm_deposit"
+var REDIS_XLM_WITHDRAW = "xlm_withdraw"
+var REDIS_XLM_CURRENT = "xlm_current"
+var REDIS_XLM_FEES = "xlm_fees"
+
+/*---------------------------------------------------------------------------*/
+
 var BTC_DEPOSIT float64
 var BTC_WITHDRAW float64
 var BTC_CURRENT float64
@@ -50,6 +57,11 @@ var ETH_DEPOSIT float64
 var ETH_WITHDRAW float64
 var ETH_CURRENT float64
 var ETH_FEES float64
+
+var XLM_DEPOSIT float64
+var XLM_WITHDRAW float64
+var XLM_CURRENT float64
+var XLM_FEES float64
 
 /*---------------------------------------------------------------------------*/
 
@@ -75,6 +87,11 @@ func Report_Deposit(coin string, de float64) {
 		{
 			ETH_DEPOSIT += de
 			SaveReport_ETH_Deposit(ETH_DEPOSIT)
+		}
+	case "XLM":
+		{
+			XLM_DEPOSIT += de
+			SaveReport_XLM_Deposit(XLM_DEPOSIT)
 		}
 	}
 
@@ -103,6 +120,11 @@ func Report_Withdraw(coin string, with float64) {
 			ETH_WITHDRAW += with
 			SaveReport_ETH_Withdraw(ETH_WITHDRAW)
 		}
+	case "XLM":
+		{
+			XLM_WITHDRAW += with
+			SaveReport_XLM_Withdraw(XLM_WITHDRAW)
+		}
 	}
 
 }
@@ -130,6 +152,11 @@ func Report_Fees(coin string, fees float64) {
 			ETH_FEES += fees
 			SaveReport_ETH_Fees(ETH_FEES)
 		}
+	case "XLM":
+		{
+			XLM_FEES += fees
+			SaveReport_XLM_Fees(XLM_FEES)
+		}
 	}
 
 }
@@ -156,6 +183,11 @@ func Report_Current(coin string) {
 		{
 			ETH_CURRENT = ETH_DEPOSIT - ETH_WITHDRAW
 			SaveReport_ETH_Current(ETH_CURRENT)
+		}
+	case "XLM":
+		{
+			XLM_CURRENT = XLM_DEPOSIT - XLM_WITHDRAW
+			SaveReport_XLM_Current(XLM_CURRENT)
 		}
 	}
 
@@ -569,4 +601,95 @@ func SaveReport_ETH_Fees(fees float64) {
 	}
 
 	fmt.Println("SaveReport_ETH_Fees : ", REDIS_ETH_FEES, fees)
+}
+
+/*---------------------------------------------------------------------------*/
+
+func LoadReport_XLM() {
+
+	de, err1 := redis.Session.Get(REDIS_XLM_DEPOSIT).Result()
+	if err1 != nil {
+		fmt.Println("Error Load Report XLM Deposit")
+		return
+	}
+
+	with, err2 := redis.Session.Get(REDIS_XLM_WITHDRAW).Result()
+	if err2 != nil {
+		fmt.Println("Error Load Report XLM Withdraw")
+		return
+	}
+
+	curr, err3 := redis.Session.Get(REDIS_XLM_CURRENT).Result()
+	if err3 != nil {
+		fmt.Println("Error Load Report XLM Current")
+		return
+	}
+
+	fees, err4 := redis.Session.Get(REDIS_XLM_FEES).Result()
+	if err4 != nil {
+		fmt.Println("Error Load Report XLM Fees")
+		return
+	}
+
+	df, _ := strconv.ParseFloat(de, 64)
+	XLM_DEPOSIT = df
+
+	wf, _ := strconv.ParseFloat(with, 64)
+	XLM_WITHDRAW = wf
+
+	cf, _ := strconv.ParseFloat(curr, 64)
+	XLM_CURRENT = cf
+
+	bf, _ := strconv.ParseFloat(fees, 64)
+	XLM_FEES = bf
+
+	fmt.Println("Redis XLM Deposit : ", de, "  - Withdraw : ", with, "  - Current : ", curr, "  - Fees : ", fees)
+}
+
+func SaveReport_XLM_Deposit(de float64) {
+
+	b, _ := json.Marshal(de)
+
+	err1 := redis.Session.Set(REDIS_XLM_DEPOSIT, b, 0).Err()
+	if err1 != nil {
+		fmt.Println("Error Save Report XLM Deposit")
+	}
+
+	fmt.Println("SaveReport_XLM_Deposit : ", REDIS_XLM_DEPOSIT, de)
+}
+
+func SaveReport_XLM_Withdraw(with float64) {
+
+	b, _ := json.Marshal(with)
+
+	err2 := redis.Session.Set(REDIS_XLM_WITHDRAW, b, 0).Err()
+	if err2 != nil {
+		fmt.Println("Error Save Report XLM Withdraw")
+	}
+
+	fmt.Println("SaveReport_XLM_Withdraw : ", REDIS_XLM_WITHDRAW, with)
+}
+
+func SaveReport_XLM_Current(curr float64) {
+
+	b, _ := json.Marshal(curr)
+
+	err3 := redis.Session.Set(REDIS_XLM_CURRENT, b, 0).Err()
+	if err3 != nil {
+		fmt.Println("Error Save Report XLM Current")
+	}
+
+	fmt.Println("SaveReport_XLM_Current : ", REDIS_XLM_CURRENT, curr)
+}
+
+func SaveReport_XLM_Fees(fees float64) {
+
+	b, _ := json.Marshal(fees)
+
+	err4 := redis.Session.Set(REDIS_XLM_FEES, b, 0).Err()
+	if err4 != nil {
+		fmt.Println("Error Save Report XLM Fees")
+	}
+
+	fmt.Println("SaveReport_XLM_Fees : ", REDIS_XLM_FEES, fees)
 }

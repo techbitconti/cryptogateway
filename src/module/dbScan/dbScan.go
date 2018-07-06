@@ -24,6 +24,7 @@ func Start() {
 	LoadReport_BTC()
 	LoadReport_LTC()
 	LoadReport_BCH()
+	LoadReport_XLM()
 }
 
 func GetBalance(coin, addr string) float64 {

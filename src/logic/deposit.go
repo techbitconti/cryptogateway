@@ -43,7 +43,7 @@ func Do_Deposit(ip string, w http.ResponseWriter, params []byte) {
 			deposit_Address := genAddress(coin)
 
 			switch coin {
-			case "BTC", "LTC", "BCH", "ETH":
+			case "BTC", "LTC", "BCH", "ETH", "XLM":
 				{
 					deposit_Map := dbScan.NewDepositCoin(deposit_Address, coin)
 					dbScan.HMAP_DEPOSIT[deposit_Address] = deposit_Map

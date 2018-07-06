@@ -175,6 +175,15 @@ func VerifyHashX(hx string) bool {
 	return true
 }
 
+func VerifyTx(net, txHash string) bool {
+	tx := TxByHash(net, txHash)
+	if tx.ID != "" && tx.Ledger != 0 {
+		return true
+	}
+
+	return false
+}
+
 func AccountID(addr string) (accountID xdr.AccountId, err error) {
 
 	err = accountID.SetAddress(addr)

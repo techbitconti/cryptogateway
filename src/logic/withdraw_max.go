@@ -31,7 +31,12 @@ func Do_WithdrawMax(ip string, w http.ResponseWriter, params []byte) {
 		addr := request["deposit"].(string)
 
 		// GO-0 : check coin type
-		if coin != "BTC" && coin != "LTC" && coin != "BCH" && coin != "ETH" && coin != "ERC20" {
+		if coin != "BTC" &&
+			coin != "LTC" &&
+			coin != "BCH" &&
+			coin != "ETH" &&
+			coin != "ERC20" &&
+			coin != "XLM" {
 			resp.Status = -2
 			resp.Error = "Error Coin !!!"
 
@@ -74,6 +79,11 @@ func Do_WithdrawMax(ip string, w http.ResponseWriter, params []byte) {
 						//max = wei - gas*gasPrice
 						//max /= math.Pow10(18) //ETH
 						max = eth.FromWei(wei-gas*gasPrice, "ether")
+					}
+				case "XLM":
+					{
+						max = balance - config.XLM_FEE //XLM
+
 					}
 				}
 

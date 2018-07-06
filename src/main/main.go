@@ -14,6 +14,7 @@ import (
 	"module/dbScan"
 	"module/etherScan"
 	"module/ltcScan"
+	"module/xlmScan"
 	//"db/mgodb"
 	"db/redis"
 )
@@ -41,6 +42,7 @@ func main() {
 	startBTC()
 	startLTC()
 	//startBCH()
+	startXLM()
 
 	// GO-3 : dbScan
 	startDBScan()
@@ -85,4 +87,8 @@ func startBCH() {
 func startETH() {
 	eth.Connect("http://localhost:8545")
 	etherScan.Start()
+}
+
+func startXLM() {
+	xlmScan.Start()
 }
