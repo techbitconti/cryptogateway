@@ -31,11 +31,7 @@ func Do_Transfer(ip string, w http.ResponseWriter, params []byte) {
 		amount := request["amount"].(string)
 
 		// GO-0 : check coin type
-		if coin != "BTC" &&
-			coin != "LTC" &&
-			coin != "BCH" &&
-			coin != "ETH" &&
-			coin != "XLM" {
+		if coin != "BTC" && coin != "LTC" && coin != "BCH" && coin != "ETH" && coin != "XLM" {
 			resp.Status = -2
 			resp.Error = "Error Coin !!!"
 

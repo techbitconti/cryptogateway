@@ -146,7 +146,7 @@ func GetBlockCount() int64 {
 		log.Println(err)
 		return 0
 	}
-	log.Println("Block count: %d", blockCount)
+	//log.Println("Block count: %d", blockCount)
 
 	return blockCount
 }
@@ -158,7 +158,7 @@ func GetBlockHash(blockHeight int64) (blockHash *chainhash.Hash, err error) {
 		log.Println("Error GetBlockHash : ", err)
 		return
 	}
-	log.Println("GetBlockHash: %d", blockHash)
+	//log.Println("GetBlockHash: %d", blockHash)
 
 	return
 }
@@ -173,7 +173,7 @@ func GetBlockHeader(blockHash *chainhash.Hash) (blockHeader *wire.BlockHeader, e
 func GetBlock(blockHash *chainhash.Hash) (block *wire.MsgBlock, err error) {
 
 	block, err = Btcd.GetBlock(blockHash)
-	log.Println("GetBlock : ", block)
+	//log.Println("GetBlock : ", block)
 
 	return
 }
@@ -189,7 +189,7 @@ func GetBlockFromStr(blockHash string) (block *wire.MsgBlock, err error) {
 func NewHashFromStr(hex string) (hash *chainhash.Hash, err error) {
 
 	hash, err = chainhash.NewHashFromStr(hex)
-	log.Println("NewHashFromStr : ", hash, err)
+	//log.Println("NewHashFromStr : ", hash, err)
 	return
 }
 

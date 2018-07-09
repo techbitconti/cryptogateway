@@ -31,12 +31,7 @@ func Do_WithdrawMax(ip string, w http.ResponseWriter, params []byte) {
 		addr := request["deposit"].(string)
 
 		// GO-0 : check coin type
-		if coin != "BTC" &&
-			coin != "LTC" &&
-			coin != "BCH" &&
-			coin != "ETH" &&
-			coin != "ERC20" &&
-			coin != "XLM" {
+		if coin != "BTC" && coin != "LTC" && coin != "BCH" && coin != "ETH" && coin != "ERC20" && coin != "XLM" {
 			resp.Status = -2
 			resp.Error = "Error Coin !!!"
 

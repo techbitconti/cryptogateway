@@ -96,7 +96,7 @@ func SendCoin(coin, from, to, amount string) (tx string) {
 			fund := aMountBTC + config.BTC_FEE
 
 			if GetBalance(coin, from) < fund {
-				fmt.Println("BTC not enough !!!")
+				fmt.Println("BTC not enough !!!", fund)
 				return ""
 			}
 
@@ -119,7 +119,7 @@ func SendCoin(coin, from, to, amount string) (tx string) {
 			fund := aMountBCH + config.BTC_FEE
 
 			if GetBalance(coin, from) < fund {
-				fmt.Println("BCH not enough !!!")
+				fmt.Println("BCH not enough !!!", fund)
 				return ""
 			}
 
@@ -142,7 +142,7 @@ func SendCoin(coin, from, to, amount string) (tx string) {
 			fund := aMountLTC + config.BTC_FEE
 
 			if GetBalance(coin, from) < fund {
-				fmt.Println("BTC not enough !!!")
+				fmt.Println("BTC not enough !!!", fund)
 				return ""
 			}
 
@@ -197,7 +197,26 @@ func SendCoin(coin, from, to, amount string) (tx string) {
 
 	case "XLM":
 		{
+			kp, errKp := xlm.KeyPairParse(from)
+			if errKp != nil {
+				return ""
+			}
 
+			fund := xlm.ToLumens(amount) + config.XLM_FEE
+
+			if GetBalance(coin, kp.Address()) < fund {
+				fmt.Println("XLM not enough !!!", strconv.FormatFloat(fund, 'f', -1, 64))
+				return ""
+			}
+
+			txBuilder, err := xlm.TxBuilder(config.XLM_NET, from, to, amount)
+			if err != nil {
+				fmt.Println("XLM send fail !!!")
+				return ""
+			}
+
+			txeB64 := xlm.TxSign(txBuilder, from)
+			tx = xlm.TxSubmit("test", txeB64)
 		}
 
 	}

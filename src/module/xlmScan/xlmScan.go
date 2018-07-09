@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"config"
 	"encoding/json"
-	"fmt"
+	//"fmt"
 	"strconv"
 	"time"
 
@@ -24,10 +24,9 @@ func update() {
 	go func() {
 		for {
 
+			time.Sleep(1000 * time.Millisecond)
+
 			getBlock()
-
-			time.Sleep(100 * time.Millisecond)
-
 		}
 	}()
 }
@@ -43,7 +42,7 @@ func getBlock() {
 	json.Unmarshal(block_record, &recordsBlock)
 
 	block_hash := recordsBlock[0]["hash"].(string)
-	fmt.Println("block hash : ", block_hash)
+	//fmt.Println("block hash : ", block_hash)
 
 	blockOld, exist := MapBlock[block_hash]
 	bytesOld, _ := json.Marshal(blockOld)

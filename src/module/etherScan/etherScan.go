@@ -24,9 +24,9 @@ func update() {
 	go func() {
 		for {
 
-			getBlock()
-
 			time.Sleep(1000 * time.Millisecond)
+
+			getBlock()
 		}
 	}()
 }

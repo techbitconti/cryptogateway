@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -62,6 +63,20 @@ func AmountStringFromInt64(v int64) string {
 
 func AmountString(v xdr.Int64) string {
 	return amount.String(v)
+}
+
+func ToLumens(v string) float64 {
+
+	stroops, err := amount.Parse(v)
+	if err != nil {
+		return 0
+	}
+
+	return float64(stroops) / math.Pow10(7)
+}
+
+func ToStroops(lumen float64) float64 {
+	return lumen * math.Pow10(7)
 }
 
 func VerifyAmount(v string) bool {
@@ -279,12 +294,12 @@ func TxSign(tx *build.TransactionBuilder, fromSeed string) string {
 		fmt.Println("Error Base64", err)
 		return ""
 	}
-	fmt.Printf("tx base64: %s", txeB64)
+	fmt.Println("tx base64: %s", txeB64)
 
 	return txeB64
 }
 
-func TxSubmit(net, txeB64 string) {
+func TxSubmit(net, txeB64 string) string {
 
 	resp, err := HorizonNetwork(net).SubmitTransaction(txeB64)
 	if err != nil {
@@ -292,6 +307,8 @@ func TxSubmit(net, txeB64 string) {
 	}
 
 	fmt.Println("transaction posted in ledger:", resp.Ledger)
+
+	return resp.Hash
 }
 
 func TxDecode(data string) (tx xdr.TransactionEnvelope) {
@@ -452,7 +469,7 @@ func cursor_limit_order(cursor string, limit uint, order string) string {
 
 func call(url string) ([]byte, bool) {
 
-	fmt.Println(".....url......", url)
+	//fmt.Println(".....url......", url)
 
 	res, err := http.Get(url)
 	if err != nil {
@@ -482,8 +499,8 @@ func AccountDetails(net, id string) (result horizon.Account) {
 	}
 	json.Unmarshal(body, &result)
 
-	fmt.Println(".......AccountDetails........")
-	fmt.Println(string(body))
+	//fmt.Println(".......AccountDetails........")
+	//fmt.Println(string(body))
 
 	return
 }
@@ -534,8 +551,8 @@ func LedgerAll(net string, cursor string, limit uint, order string) (result map[
 	}
 	json.Unmarshal(body, &result)
 
-	fmt.Println(".......LedgerAll........")
-	fmt.Println(string(body))
+	//fmt.Println(".......LedgerAll........")
+	//fmt.Println(string(body))
 
 	return
 }
@@ -852,8 +869,8 @@ func PaymentForTx(net, txHash string, cursor string, limit uint, order string) (
 	}
 	json.Unmarshal(body, &result)
 
-	fmt.Println(".......PaymentForTx........")
-	fmt.Println(string(body))
+	//fmt.Println(".......PaymentForTx........")
+	//fmt.Println(string(body))
 
 	return
 }
@@ -917,8 +934,8 @@ func TxForLedger(net, id string, cursor string, limit uint, order string) (resul
 	}
 	json.Unmarshal(body, &result)
 
-	fmt.Println(".......TxForLedger........")
-	fmt.Println(string(body))
+	//fmt.Println(".......TxForLedger........")
+	//fmt.Println(string(body))
 
 	return
 }

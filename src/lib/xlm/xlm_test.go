@@ -2,8 +2,8 @@ package xlm
 
 import (
 	//"encoding/json"
-	//"fmt"
-	//"strconv"
+	"fmt"
+	"strconv"
 	"testing"
 )
 
@@ -34,6 +34,11 @@ func Test_Qurey(t *testing.T) {
 
 	// trade
 
+	lumen := ToLumens("1")
+	fmt.Println(lumen)
+
+	stroops := ToStroops(lumen)
+	fmt.Println(strconv.FormatFloat(stroops, 'f', -1, 64))
 }
 
 func Test_Tranfer(t *testing.T) {
