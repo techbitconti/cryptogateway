@@ -1,15 +1,15 @@
 package xlm
 
 import (
-	"encoding/json"
-	"fmt"
-	"strconv"
+	//"encoding/json"
+	//"fmt"
+	//"strconv"
 	"testing"
 )
 
-func Test_XLM(t *testing.T) {
+func Test_Qurey(t *testing.T) {
 
-	// 	GetBalance("test", "GCHKKQ5VWJBRQZHNMODO5BWYZKPNM2HDSJ26T4O644CNEQBYK7IXATKM", "credit_alphanum12", "nCntGameCoin")
+	//  GetBalance("test", "GAYMTHMZCJYQCFLVRYZ4DMI4Q5B6VFFBJFQVGE2WJHIOPDC4UAG4TD3K", "native", "")
 	//	AccountDetails("test", "GCHKKQ5VWJBRQZHNMODO5BWYZKPNM2HDSJ26T4O644CNEQBYK7IXATKM")
 	//	AssetCodeIssuer("test", "EUR", "GDZQZ6YRVUKC7AJVWNT5IKNSLVJTFEKAQ35DVH3YZUSA4RNY4BKX4Q6D", "", 200, ORDER_DESC)
 	//	TxAll("test", "", 2, ORDER_DESC)
@@ -36,6 +36,15 @@ func Test_XLM(t *testing.T) {
 
 }
 
+func Test_Tranfer(t *testing.T) {
+
+	tx, _ := TxBuilder("test", "SBO3QHEVLPSI7SYFHCXFPCBWYN2WU6GL6Z7PW6FWSWY2GF67GJEK3PYJ", "GAYMTHMZCJYQCFLVRYZ4DMI4Q5B6VFFBJFQVGE2WJHIOPDC4UAG4TD3K", "9")
+	txeB64 := TxSign(tx, "SBO3QHEVLPSI7SYFHCXFPCBWYN2WU6GL6Z7PW6FWSWY2GF67GJEK3PYJ")
+	TxSubmit("test", txeB64)
+
+}
+
+/*
 func Test_Parse(t *testing.T) {
 
 	net := "public"
@@ -121,5 +130,5 @@ func Test_Parse(t *testing.T) {
 			fmt.Println("fee_paid : ", fee)
 		}
 	}
-
 }
+*/

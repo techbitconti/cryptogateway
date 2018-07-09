@@ -16,6 +16,7 @@ import (
 	"github.com/stellar/go/clients/horizon"
 	"github.com/stellar/go/hash"
 	"github.com/stellar/go/keypair"
+	networkStellar "github.com/stellar/go/network"
 	"github.com/stellar/go/strkey"
 	"github.com/stellar/go/xdr"
 )
@@ -34,6 +35,18 @@ func HorizonNetwork(net string) (network *horizon.Client) {
 		network = horizon.DefaultPublicNetClient
 	case "test":
 		network = horizon.DefaultTestNetClient
+	}
+
+	return
+}
+
+func HorizonPassPhrase(net string) (pass string) {
+
+	switch net {
+	case "public":
+		pass = networkStellar.PublicNetworkPassphrase
+	case "test":
+		pass = networkStellar.TestNetworkPassphrase
 	}
 
 	return
@@ -234,6 +247,7 @@ func TxBuilder(net, fromSeed, toAddress, amount string) (tx *build.TransactionBu
 	}
 
 	network := HorizonNetwork(net)
+	pass := HorizonPassPhrase(net)
 
 	tx, err = build.Transaction(
 		build.SourceAccount{AddressOrSeed: fromSeed},
@@ -243,39 +257,38 @@ func TxBuilder(net, fromSeed, toAddress, amount string) (tx *build.TransactionBu
 			build.NativeAmount{Amount: amount},
 		),
 	)
+	tx.NetworkPassphrase = pass
 	if err != nil {
 		fmt.Println("Error TxBuilder", err)
+		return
 	}
-
 	fmt.Println("TxBuilder", tx)
 
 	return
 }
 
-func TxBuilderSign(seed string, tx *build.TransactionBuilder) (string, error) {
-
-	txe, err := tx.Sign(seed)
+func TxSign(tx *build.TransactionBuilder, fromSeed string) string {
+	txe, err := tx.Sign(fromSeed)
 	if err != nil {
 		fmt.Println("Error TxSign", err)
-		return "", err
+		return ""
 	}
 
 	txeB64, err := txe.Base64()
 	if err != nil {
 		fmt.Println("Error Base64", err)
-		return "", err
+		return ""
 	}
-
 	fmt.Printf("tx base64: %s", txeB64)
 
-	return txeB64, nil
+	return txeB64
 }
 
-func TxBuilderSubmit(net, txeB64 string) {
+func TxSubmit(net, txeB64 string) {
 
 	resp, err := HorizonNetwork(net).SubmitTransaction(txeB64)
 	if err != nil {
-		panic(err)
+		fmt.Println("Error TxSubmit", err)
 	}
 
 	fmt.Println("transaction posted in ledger:", resp.Ledger)
@@ -475,14 +488,14 @@ func AccountDetails(net, id string) (result horizon.Account) {
 	return
 }
 
-func GetBalance(net, id, asset_type, asset_code string) (balance string) {
+func GetBalance(net, id, asset_type, asset_code string) (balance float64) {
 
 	info := AccountDetails(net, id)
 
 	for _, v := range info.Balances {
 
 		if asset_type == v.Type && asset_code == v.Code {
-			balance = v.Balance
+			balance, _ = strconv.ParseFloat(v.Balance, 64)
 			break
 		}
 	}

@@ -6,6 +6,7 @@ import (
 	"lib/btc"
 	"lib/eth"
 	"lib/ltc"
+	"lib/xlm"
 	"math"
 	"math/big"
 	"strconv"
@@ -31,29 +32,42 @@ func GetBalance(coin, addr string) float64 {
 
 	switch coin {
 	case "BTC":
-		amount := btc.GetBalance(addr)
-		fmt.Println("getBalance BTC : ", amount)
-		return amount
+		{
+			amount := btc.GetBalance(addr)
+			fmt.Println("getBalance BTC : ", amount)
+			return amount
+		}
 
 	case "BCH":
-		amount := bch.GetBalance(addr)
-		fmt.Println("getBalance BCH : ", amount)
-		return amount
+		{
+			amount := bch.GetBalance(addr)
+			fmt.Println("getBalance BCH : ", amount)
+			return amount
+		}
 
 	case "LTC":
-		amount := ltc.GetBalance(addr)
-		fmt.Println("getBalance LTC : ", amount)
-		return amount
+		{
+			amount := ltc.GetBalance(addr)
+			fmt.Println("getBalance LTC : ", amount)
+			return amount
+		}
 
 	case "ETH":
-		bigInt := eth.GetBalance(addr)
-		bigFloat := new(big.Float).SetInt(bigInt)
-		wei, _ := bigFloat.Float64()
+		{
+			bigInt := eth.GetBalance(addr)
+			bigFloat := new(big.Float).SetInt(bigInt)
+			wei, _ := bigFloat.Float64()
 
-		ether := wei / math.Pow10(18)
+			ether := wei / math.Pow10(18)
 
-		fmt.Println("getBalance :", ether, "ether", " -- wei", wei)
-		return ether
+			fmt.Println("getBalance :", ether, "ether", " -- wei", wei)
+			return ether
+		}
+
+	case "XLM":
+		{
+			return xlm.GetBalance(config.XLM_NET, addr, "native", "")
+		}
 	}
 
 	return 0
@@ -180,6 +194,12 @@ func SendCoin(coin, from, to, amount string) (tx string) {
 
 			fmt.Println("tx ETH : ", tx)
 		}
+
+	case "XLM":
+		{
+
+		}
+
 	}
 
 	return tx
