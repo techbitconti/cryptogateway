@@ -141,7 +141,7 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 
 								var tx string
 
-								if coin == "XLM" {
+								if coin == "XLM" || coin == "ETH" {
 
 									seed := dbScan.HMAP_DEPOSIT[deposit_Address].Seed
 									tx = sendCoin(coin, seed, withdraw_Address, amountWithdraw)

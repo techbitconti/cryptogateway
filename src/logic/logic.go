@@ -293,7 +293,7 @@ func genAddressLTC() (string, string) {
 func genAddressETH() (string, string) {
 
 	keyHex, address, _ := eth.NewAccount()
-	eth.StoreAccount(keyHex, "123456", config.PATH_ETH)
+	//eth.StoreAccount(keyHex, "123456", config.PATH_ETH)
 
 	return address, keyHex
 }

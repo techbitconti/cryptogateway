@@ -54,7 +54,8 @@ func GetBalance(coin, addr string) float64 {
 
 	case "ETH":
 		{
-			bigInt := eth.GetBalance(addr)
+			//bigInt := eth.GetBalance(addr)
+			bigInt, _ := eth.GetBalanceX(addr)
 			bigFloat := new(big.Float).SetInt(bigInt)
 			wei, _ := bigFloat.Float64()
 
@@ -178,20 +179,24 @@ func SendCoin(coin, from, to, amount string) (tx string) {
 				return ""
 			}
 
-			valueAM := eth.ToBigNumber(uint64(valueWei))
-			valueGAS := eth.ToBigNumber(uint64(gasWei))
-			valueGASPr := eth.ToBigNumber(uint64(gasPriceWei))
+			/*
+				valueAM := eth.ToBigNumber(uint64(valueWei))
+				valueGAS := eth.ToBigNumber(uint64(gasWei))
+				valueGASPr := eth.ToBigNumber(uint64(gasPriceWei))
 
-			eth.UnlockAccount(from, "123456", uint64(10))
-			msg := map[string]interface{}{
-				"from":     from,
-				"to":       to,
-				"value":    valueAM,
-				"gas":      valueGAS,
-				"gasPrice": valueGASPr,
-			}
-			tx = eth.SendTransaction(msg)
+				eth.UnlockAccount(from, "123456", uint64(10))
+				msg := map[string]interface{}{
+					"from":     from,
+					"to":       to,
+					"value":    valueAM,
+					"gas":      valueGAS,
+					"gasPrice": valueGASPr,
+				}
+				tx = eth.SendTransaction(msg)
+			*/
 
+			valueAM := big.NewInt(int64(valueWei))
+			tx = eth.SendTransactionRaw(from, to, valueAM, []byte{})
 			fmt.Println("tx ETH : ", tx)
 		}
 
