@@ -234,72 +234,75 @@ func getBalanceOf(ercAddr, toAddr string) int64 {
 	return dbScan.GetBalanceOf(ercAddr, toAddr)
 }
 
-func genAddress(coin string) (address string) {
+func genAddress(coin string) (address string, privKey string) {
 
 	switch coin {
 	case "BTC":
-		address = genAddressBTC()
+		address, privKey = genAddressBTC()
 	case "BCH":
-		address = genAddressBCH()
+		address, privKey = genAddressBCH()
 	case "LTC":
-		address = genAddressLTC()
+		address, privKey = genAddressLTC()
 	case "ETH", "ERC20":
-		address = genAddressETH()
+		address, privKey = genAddressETH()
 	case "XLM":
-		address = genAddressXLM()
+		address, privKey = genAddressXLM()
 	}
 
-	fmt.Println("genAddress --- ", address)
+	fmt.Println("address : ", address, " ---- privKey : ", privKey)
 
 	return
 }
 
-func genAddressBTC() string {
+func genAddressBTC() (string, string) {
 
 	utc := time.Now().Unix()
 	decode := strconv.FormatInt(utc, 10)
 	encode := base64.StdEncoding.EncodeToString([]byte(decode))
 
 	address, _ := btc.GetNewAddress(encode)
+	privKey, _ := btc.DumpPrivKey(address.String())
 
-	return address.String()
+	return address.String(), privKey.String()
 }
 
-func genAddressBCH() string {
+func genAddressBCH() (string, string) {
 
 	utc := time.Now().Unix()
 	decode := strconv.FormatInt(utc, 10)
 	encode := base64.StdEncoding.EncodeToString([]byte(decode))
 
 	address, _ := bch.GetNewAddress(encode)
+	privKey, _ := bch.DumpPrivKey(address.String())
 
-	return address.String()
+	return address.String(), privKey.String()
 }
 
-func genAddressLTC() string {
+func genAddressLTC() (string, string) {
 
 	utc := time.Now().Unix()
 	decode := strconv.FormatInt(utc, 10)
 	encode := base64.StdEncoding.EncodeToString([]byte(decode))
 
 	address, _ := ltc.GetNewAddress(encode)
+	privKey, _ := ltc.DumpPrivKey(address.String())
 
-	return address.String()
+	return address.String(), privKey.String()
 }
 
-func genAddressETH() string {
+func genAddressETH() (string, string) {
 
 	keyHex, address, _ := eth.NewAccount()
 	eth.StoreAccount(keyHex, "123456", config.PATH_ETH)
 
-	return address
+	return address, keyHex
 }
 
-func genAddressXLM() string {
+func genAddressXLM() (string, string) {
 
 	full, _ := xlm.KeyPairRandom()
 
-	return full.Address()
+	return full.Address(), full.Seed()
 }
 
 func getRatingFromEtherScan(addr, net string) float64 {

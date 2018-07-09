@@ -14,6 +14,7 @@ import (
 )
 
 type Deposit struct {
+	Seed            string //`json:"seed"`
 	AddressDeposit  string `json:"deposit"`
 	AddressContract string `json:"contract"`
 	//Status          string `json:"status"`
@@ -33,9 +34,10 @@ var STATUS_WAITING = "waiting"
 var STATUS_PENDING = "pending"
 var STATUS_SUCCESS = "success"
 
-func NewDepositCoin(deposit, coin string) *Deposit {
+func NewDepositCoin(seed, deposit, coin string) *Deposit {
 
 	de := &Deposit{}
+	de.Seed = seed
 	de.AddressDeposit = deposit
 	//de.Status = STATUS_WAITING
 	de.Coin = coin

@@ -138,7 +138,19 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 
 							if resp.Status == 0 {
 								//Go-6 : sendto Receipt
-								tx := sendCoin(coin, deposit_Address, withdraw_Address, amountWithdraw)
+
+								var tx string
+
+								if coin == "XLM" {
+
+									seed := dbScan.HMAP_DEPOSIT[deposit_Address].Seed
+									tx = sendCoin(coin, seed, withdraw_Address, amountWithdraw)
+
+								} else {
+
+									tx = sendCoin(coin, deposit_Address, withdraw_Address, amountWithdraw)
+								}
+
 								fmt.Println("tx : ", tx)
 								if tx == "" {
 									resp.Status = -8
