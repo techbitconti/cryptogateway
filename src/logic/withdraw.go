@@ -143,7 +143,7 @@ func Do_Withdraw(ip string, w http.ResponseWriter, params []byte) {
 
 								if coin == "XLM" || coin == "ETH" {
 
-									seed := dbScan.HMAP_DEPOSIT[deposit_Address].Seed
+									seed := dbScan.HMAP_DEPOSIT[deposit_Address].Decrypt()
 									tx = sendCoin(coin, seed, withdraw_Address, amountWithdraw)
 
 								} else {

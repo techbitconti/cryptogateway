@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"config"
+	"lib/cryptocy"
 )
 
 type Deposit struct {
@@ -37,10 +38,10 @@ var STATUS_SUCCESS = "success"
 func NewDepositCoin(seed, deposit, coin string) *Deposit {
 
 	de := &Deposit{}
-	de.Seed = seed
 	de.AddressDeposit = deposit
 	//de.Status = STATUS_WAITING
 	de.Coin = coin
+	de.Encrypt(seed)
 
 	//DB
 	SaveDeposit(*de)
@@ -104,6 +105,31 @@ func (de *Deposit) Notify(data map[string]interface{}) {
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	fmt.Println(".......notify........", url, data, string(body))
+}
+
+func (de *Deposit) Encrypt(msg string) {
+
+	CIPHER_KEY := cryptocy.GenKey([]byte(de.AddressDeposit))
+
+	encrypted, err := cryptocy.Encrypt(CIPHER_KEY, msg)
+	if err != nil {
+		de.Seed = msg
+	} else {
+		de.Seed = encrypted
+	}
+}
+
+func (de *Deposit) Decrypt() string {
+
+	CIPHER_KEY := cryptocy.GenKey([]byte(de.AddressDeposit))
+	encrypted := de.Seed
+
+	decrypted, err := cryptocy.Decrypt(CIPHER_KEY, encrypted)
+	if err != nil {
+		return ""
+	}
+
+	return decrypted
 }
 
 func (de *Deposit) checkBalance() (balance float64) {

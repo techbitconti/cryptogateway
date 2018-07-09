@@ -8,7 +8,15 @@ import (
 	"errors"
 	"io"
 	"log"
+
+	"github.com/ethereum/go-ethereum/crypto"
 )
+
+func GenKey(message []byte) []byte {
+	key1 := crypto.Keccak256(message)
+	key2 := crypto.Keccak256(key1)
+	return key2
+}
 
 func Encrypt(key []byte, message string) (encmess string, err error) {
 	plainText := []byte(message)
