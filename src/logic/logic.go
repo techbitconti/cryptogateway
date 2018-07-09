@@ -302,6 +302,12 @@ func genAddressXLM() (string, string) {
 
 	full, _ := xlm.KeyPairRandom()
 
+	if config.XLM_NET == "test" {
+		go func() {
+			xlm.FriendBot(full.Address())
+		}()
+	}
+
 	return full.Address(), full.Seed()
 }
 

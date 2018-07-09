@@ -2,13 +2,14 @@ package xlm
 
 import (
 	//"encoding/json"
-	"fmt"
-	"strconv"
+	//"fmt"
+	//"strconv"
 	"testing"
 )
 
 func Test_Qurey(t *testing.T) {
 
+	//	FriendBot("GDXSTJAXLY5F5ZM2XYZCLSIYNB52NL3BYH63XP5CYDZ2XIKUHNIRYRIB")
 	//  GetBalance("test", "GAYMTHMZCJYQCFLVRYZ4DMI4Q5B6VFFBJFQVGE2WJHIOPDC4UAG4TD3K", "native", "")
 	//	AccountDetails("test", "GCHKKQ5VWJBRQZHNMODO5BWYZKPNM2HDSJ26T4O644CNEQBYK7IXATKM")
 	//	AssetCodeIssuer("test", "EUR", "GDZQZ6YRVUKC7AJVWNT5IKNSLVJTFEKAQ35DVH3YZUSA4RNY4BKX4Q6D", "", 200, ORDER_DESC)
@@ -34,18 +35,20 @@ func Test_Qurey(t *testing.T) {
 
 	// trade
 
-	lumen := ToLumens("1")
-	fmt.Println(lumen)
+}
 
-	stroops := ToStroops(lumen)
-	fmt.Println(strconv.FormatFloat(stroops, 'f', -1, 64))
+func Test_Amount(t *testing.T) {
+	//	lumen := ToLumens("1")
+	//	fmt.Println(lumen)
+	//	stroops := ToStroops(lumen)
+	//	fmt.Println(strconv.FormatFloat(stroops, 'f', -1, 64))
 }
 
 func Test_Tranfer(t *testing.T) {
 
-	tx, _ := TxBuilder("test", "SBO3QHEVLPSI7SYFHCXFPCBWYN2WU6GL6Z7PW6FWSWY2GF67GJEK3PYJ", "GAYMTHMZCJYQCFLVRYZ4DMI4Q5B6VFFBJFQVGE2WJHIOPDC4UAG4TD3K", "9")
-	txeB64 := TxSign(tx, "SBO3QHEVLPSI7SYFHCXFPCBWYN2WU6GL6Z7PW6FWSWY2GF67GJEK3PYJ")
-	TxSubmit("test", txeB64)
+	//	tx, _ := TxBuilder("test", "SBO3QHEVLPSI7SYFHCXFPCBWYN2WU6GL6Z7PW6FWSWY2GF67GJEK3PYJ", "GAYMTHMZCJYQCFLVRYZ4DMI4Q5B6VFFBJFQVGE2WJHIOPDC4UAG4TD3K", "9")
+	//	txeB64 := TxSign(tx, "SBO3QHEVLPSI7SYFHCXFPCBWYN2WU6GL6Z7PW6FWSWY2GF67GJEK3PYJ")
+	//	TxSubmit("test", txeB64)
 
 }
 

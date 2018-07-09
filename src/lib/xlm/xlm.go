@@ -489,6 +489,22 @@ func call(url string) ([]byte, bool) {
 	return body, true
 }
 
+func FriendBot(addr string) (result interface{}) {
+
+	url := "https://horizon-testnet.stellar.org/friendbot?addr=" + addr
+
+	body, ok := call(url)
+	if !ok {
+		return
+	}
+	json.Unmarshal(body, &result)
+
+	fmt.Println(".......FriendBot........")
+	fmt.Println(string(body))
+
+	return
+}
+
 func AccountDetails(net, id string) (result horizon.Account) {
 
 	url := HorizonNetwork(net).URL + "/accounts/" + id
