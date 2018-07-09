@@ -164,15 +164,18 @@ func SendCoin(coin, from, to, amount string) (tx string) {
 			valueWei := eth.ToWei(amETH, "ether") // amETH * math.Pow10(18)
 
 			gasWei := config.ETH_GAS
-			gasPriceBigI, _ := eth.SuggestGasPrice()
-			gasPriceWei := gasPriceBigI.Int64()
+			//gasPriceBigI, _ := eth.SuggestGasPrice()
+			//gasPriceWei := gasPriceBigI.Int64()
+			gasPriceWei := eth.ToWei(config.GWEI, "gwei")
 
-			fundWei := gasWei*float64(gasPriceWei) + valueWei
+			fundWei := gasWei*gasPriceWei + valueWei
 			fundETH := eth.FromWei(fundWei, "ether") // fundWei / math.Pow10(18)
 
 			fmt.Println("gasWei : ", gasWei, "gasPriceWei : ", gasPriceWei, "fundWei : ", fundWei)
 
-			balanceETH := GetBalance(coin, from)
+			_, addr := eth.KeyPairFromSeed(from)
+
+			balanceETH := GetBalance(coin, addr)
 			fmt.Println("balanceETH : ", balanceETH, "fundETH : ", fundETH)
 			if balanceETH < fundETH {
 				fmt.Println("ETH not enough balance !!!", balanceETH, "funds : ", fundETH)
@@ -195,7 +198,9 @@ func SendCoin(coin, from, to, amount string) (tx string) {
 				tx = eth.SendTransaction(msg)
 			*/
 
-			valueAM := big.NewInt(int64(valueWei))
+			s := strconv.FormatFloat(valueWei, 'f', -1, 64)
+			valueAM := eth.ToBig256(s)
+
 			tx = eth.SendTransactionRaw(from, to, valueAM, []byte{})
 			fmt.Println("tx ETH : ", tx)
 		}

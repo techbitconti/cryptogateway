@@ -31,6 +31,7 @@ var BCH_ADDR string
 
 var XLM_NET string
 
+var GWEI = float64(20)
 var BTC_FEE = float64(0.0001)
 var ETH_GAS = float64(21000)
 var XLM_FEE = float64(0.00001)

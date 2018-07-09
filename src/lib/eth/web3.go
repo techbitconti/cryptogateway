@@ -25,6 +25,7 @@ import (
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	mathETH "github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
@@ -109,6 +110,17 @@ func ToBigNumber(value uint64) string {
 	return hexutil.EncodeUint64(value)
 }
 
+func ToBig256(s string) *big.Int {
+
+	bi, ok := mathETH.ParseBig256(s)
+	if !ok {
+		return &big.Int{}
+	}
+	fmt.Println(bi, ok)
+
+	return bi
+}
+
 func NewAccount() (string, string, error) {
 
 	// Generate a new random account and a funded simulator
@@ -122,6 +134,19 @@ func NewAccount() (string, string, error) {
 	fmt.Println("addr Hex : ", strings.ToLower(addr.Hex()))
 
 	return keyHex, strings.ToLower(addr.Hex()), err
+}
+
+func KeyPairFromSeed(hex string) (string, string) {
+
+	key, err := crypto.HexToECDSA(hex)
+	if err != nil {
+		return "", ""
+	}
+
+	keyHex := common.Bytes2Hex(crypto.FromECDSA(key))
+	addr := crypto.PubkeyToAddress(key.PublicKey)
+
+	return keyHex, strings.ToLower(addr.Hex())
 }
 
 func StoreAccount(keyHex, pass, path string) (string, error) {
