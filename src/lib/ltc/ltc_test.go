@@ -1,7 +1,11 @@
 package ltc
 
 import (
+	"encoding/base64"
+	"fmt"
+	"strconv"
 	"testing"
+	"time"
 )
 
 func Test_Litecoin(t *testing.T) {
@@ -29,4 +33,25 @@ func Test_Litecoin(t *testing.T) {
 
 	//SendFrom("mgJVwHGgFjSvsRXWQ5iyUksWL6GoxbbdRs", "mq9ayFf2aZ7VmsFCYuvNGrSKP7TzEe3Ewf", float64(100))
 	//GetTransaction("fdb4ab403ada197fda5a56d620833e3ecc6a8bbf402f586bed49d0dc16969e13")
+
+	addr, priv := genAddressLTC()
+	fmt.Println(addr, priv)
+}
+
+func genAddressLTC() (string, string) {
+
+	utc := time.Now().Unix()
+	decode := strconv.FormatInt(utc, 10)
+	encode := base64.StdEncoding.EncodeToString([]byte(decode))
+
+	address, err1 := GetNewAddress(encode)
+	if err1 != nil {
+		return "", ""
+	}
+	privKey, err2 := DumpPrivKey(address.String())
+	if err2 != nil {
+		return "", ""
+	}
+
+	return address.String(), privKey.String()
 }

@@ -42,52 +42,61 @@ func Do_Deposit(ip string, w http.ResponseWriter, params []byte) {
 
 			deposit_Address, seed := genAddress(coin)
 
-			switch coin {
-			case "BTC", "LTC", "BCH", "ETH", "XLM":
-				{
-					deposit_Map := dbScan.NewDepositCoin(seed, deposit_Address, coin)
-					dbScan.HMAP_DEPOSIT[deposit_Address] = deposit_Map
+			if deposit_Address == "" || seed == "" {
 
-					resp.Data = bson.M{"coin": coin, "deposit": deposit_Address}
-				}
-			case "ERC20":
-				{
-					contract := request["contract"].(string)
+				resp.Status = -5
+				resp.Error = "Error not generate deposit address !!!"
 
-					// GO : verifyAddress Contract
-					if !verifyAddress(coin, contract) {
-						resp.Status = -3
-						resp.Error = "Error Address Not Contract !!!"
+				fmt.Println(resp.Error)
 
-						fmt.Println(resp.Error)
+			} else {
+
+				switch coin {
+				case "BTC", "LTC", "BCH", "ETH", "XLM":
+					{
+						deposit_Map := dbScan.NewDepositCoin(seed, deposit_Address, coin)
+						dbScan.HMAP_DEPOSIT[deposit_Address] = deposit_Map
+
+						resp.Data = bson.M{"coin": coin, "deposit": deposit_Address}
 					}
+				case "ERC20":
+					{
+						contract := request["contract"].(string)
 
-					// Go : get rating contract on etherscan
-					if resp.Status == 0 {
-
-						ratio := getRatingFromEtherScan(contract, "test")
-
-						if ratio <= float64(0) {
-							resp.Status = -4
-							resp.Error = "Contract Not On EtherScan !!!" + contract
+						// GO : verifyAddress Contract
+						if !verifyAddress(coin, contract) {
+							resp.Status = -3
+							resp.Error = "Error Address Not Contract !!!"
 
 							fmt.Println(resp.Error)
 						}
+
+						// Go : get rating contract on etherscan
+						if resp.Status == 0 {
+
+							ratio := getRatingFromEtherScan(contract, "test")
+
+							if ratio <= float64(0) {
+								resp.Status = -4
+								resp.Error = "Contract Not On EtherScan !!!" + contract
+
+								fmt.Println(resp.Error)
+							}
+						}
+
+						// Go : new depost address
+						if resp.Status == 0 {
+
+							deposit_Map := dbScan.NewDepositERC20(deposit_Address, contract, coin)
+							dbScan.HMAP_DEPOSIT[deposit_Address] = deposit_Map
+
+							resp.Data = bson.M{"coin": coin, "deposit": deposit_Address, "contract": contract}
+
+							fmt.Println(resp.Data)
+						}
 					}
-
-					// Go : new depost address
-					if resp.Status == 0 {
-
-						deposit_Map := dbScan.NewDepositERC20(deposit_Address, contract, coin)
-						dbScan.HMAP_DEPOSIT[deposit_Address] = deposit_Map
-
-						resp.Data = bson.M{"coin": coin, "deposit": deposit_Address, "contract": contract}
-					}
-
 				}
 			}
-
-			fmt.Println(resp.Data)
 		}
 	}
 

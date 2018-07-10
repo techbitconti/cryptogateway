@@ -5,6 +5,7 @@
 package btc
 
 import (
+	"errors"
 	"io/ioutil"
 	"log"
 	"path/filepath"
@@ -391,6 +392,7 @@ func GetNewAddress(account string) (address btcutil.Address, err error) {
 
 	list, _ := ListAccounts()
 	if _, exist := list[account]; exist {
+		err = errors.New("Error account exist ==>" + account)
 		log.Println("Error account exist ==>", account)
 		return
 	}

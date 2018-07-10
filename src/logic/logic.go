@@ -260,8 +260,14 @@ func genAddressBTC() (string, string) {
 	decode := strconv.FormatInt(utc, 10)
 	encode := base64.StdEncoding.EncodeToString([]byte(decode))
 
-	address, _ := btc.GetNewAddress(encode)
-	privKey, _ := btc.DumpPrivKey(address.String())
+	address, err1 := btc.GetNewAddress(encode)
+	if err1 != nil {
+		return "", ""
+	}
+	privKey, err2 := btc.DumpPrivKey(address.String())
+	if err2 != nil {
+		return "", ""
+	}
 
 	return address.String(), privKey.String()
 }
@@ -272,8 +278,14 @@ func genAddressBCH() (string, string) {
 	decode := strconv.FormatInt(utc, 10)
 	encode := base64.StdEncoding.EncodeToString([]byte(decode))
 
-	address, _ := bch.GetNewAddress(encode)
-	privKey, _ := bch.DumpPrivKey(address.String())
+	address, err1 := bch.GetNewAddress(encode)
+	if err1 != nil {
+		return "", ""
+	}
+	privKey, err2 := bch.DumpPrivKey(address.String())
+	if err2 != nil {
+		return "", ""
+	}
 
 	return address.String(), privKey.String()
 }
@@ -284,8 +296,14 @@ func genAddressLTC() (string, string) {
 	decode := strconv.FormatInt(utc, 10)
 	encode := base64.StdEncoding.EncodeToString([]byte(decode))
 
-	address, _ := ltc.GetNewAddress(encode)
-	privKey, _ := ltc.DumpPrivKey(address.String())
+	address, err1 := ltc.GetNewAddress(encode)
+	if err1 != nil {
+		return "", ""
+	}
+	privKey, err2 := ltc.DumpPrivKey(address.String())
+	if err2 != nil {
+		return "", ""
+	}
 
 	return address.String(), privKey.String()
 }

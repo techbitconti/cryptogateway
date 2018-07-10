@@ -50,17 +50,17 @@ litecoin-cli -rpcuser="123" -rpcpassword="123"
 
 ------------------------------------------------------------------------------
 
-bitcashd -rpcuser="123" -rpcpassword="123" -txindex -debug=1 -server -rest  -daemon -rpcport=7332
+bitcashd -rpcuser="123" -rpcpassword="123" -txindex -debug=1 -server -rest  -daemon  -rpcport=7332 
 -reindex
  -testnet -rpcport=17332
  -regtest -rpcport=17443
 
 
- -datadir=/Users/A/bitcash/bitcashd/simnet
+ -datadir=/Users/A/bitcash/bitcashd/simnet -rpcallowip=112.109.93.83
  -datadir=/Users/A/bitcash/bitcashd/testnet
  -datadir=/Users/A/bitcash/bitcashd/mainnet
 
- -datadir=/home/ramost/bitcash/bitcashd/simnet
+ -datadir=/home/ramost/bitcash/bitcashd/simnet -rpcallowip=14.161.40.26
  -datadir=/home/ramost/bitcash/bitcashd/testnet
  -datadir=/home/ramost/bitcash/bitcashd/mainnet
 

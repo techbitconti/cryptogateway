@@ -2,6 +2,7 @@ package bch
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"strconv"
 
@@ -20,24 +21,26 @@ var Bch *rpcclient.Client
 var Chaincfg chaincfg.Params
 var NotifyHandlers rpcclient.NotificationHandlers
 
-func Connect(net string) {
+func Connect(net, host string) {
 
 	if Bch != nil {
 		return
 	}
 
-	host := ""
 	NET = net
 
 	switch net {
 	case "mainnet":
-		host = "localhost:7332"
+		//host = "localhost:7332"
+		host += ":7332"
 		Chaincfg = chaincfg.MainNetParams
 	case "testnet":
-		host = "localhost:17332"
+		//host = "localhost:17332"
+		host += ":17332"
 		Chaincfg = chaincfg.TestNet3Params
 	case "simnet":
-		host = "localhost:17443"
+		//host = "localhost:17443"
+		host += ":17443"
 		Chaincfg = chaincfg.RegressionNetParams
 	}
 
@@ -314,10 +317,11 @@ func GetBalance(addr string) float64 {
 	return amount.ToBCH()
 }
 
-func GetNewAddress(account string) (address bchutil.Address, err error) {
+func GetNewAddress(account string) (address *CashAddressPubKeyHash, err error) {
 
 	list, _ := ListAccounts()
 	if _, exist := list[account]; exist {
+		err = errors.New("Error account exist ==>" + account)
 		log.Println("Error account exist ==>", account)
 		return
 	}
@@ -334,12 +338,12 @@ func GetNewAddress(account string) (address bchutil.Address, err error) {
 	pubHash := bchutil.Hash160(priv.PubKey().SerializeCompressed())
 	addrHash, _ := bchutil.NewAddressPubKeyHash(pubHash, &Chaincfg)
 
-	addrCash, err := NewCashAddressPubKeyHash(addrHash.ScriptAddress(), &Chaincfg)
+	address, err = NewCashAddressPubKeyHash(addrHash.ScriptAddress(), &Chaincfg)
 
 	wif, _ := bchutil.NewWIF(priv, &Chaincfg, true)
 	ImportPrivKey(wif.String(), account, true)
 
-	log.Println("GetNewAddress", "account : ", account, "   -- addrCash : ", addrCash, "   --- privKey : ", wif.String())
+	log.Println("GetNewAddress", "account : ", account, "   -- addrCash : ", address.String(), "   --- privKey : ", wif.String())
 
 	return
 }

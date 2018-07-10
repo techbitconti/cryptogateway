@@ -2,6 +2,7 @@ package ltc
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"strconv"
 
@@ -316,6 +317,7 @@ func GetNewAddress(account string) (address ltcutil.Address, err error) {
 
 	list, _ := ListAccounts()
 	if _, exist := list[account]; exist {
+		err = errors.New("Error account exist ==>" + account)
 		log.Println("Error account exist ==>", account)
 		return
 	}
@@ -325,7 +327,7 @@ func GetNewAddress(account string) (address ltcutil.Address, err error) {
 	if err != nil {
 		log.Println("Error GetNewAddress", err)
 	}
-	//log.Println("GetNewAddress: ", address)
+	log.Println("GetNewAddress: ", address)
 
 	return
 }

@@ -41,7 +41,7 @@ func main() {
 	startETH()
 	startBTC()
 	startLTC()
-	//startBCH()
+	startBCH()
 	startXLM()
 
 	// GO-3 : dbScan
@@ -80,7 +80,7 @@ func startLTC() {
 }
 
 func startBCH() {
-	bch.Connect("simnet")
+	bch.Connect("simnet", "14.161.40.26")
 	bchScan.Start()
 }
 
