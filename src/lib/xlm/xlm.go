@@ -56,7 +56,7 @@ func HorizonPassPhrase(net string) (pass string) {
 
 /*-------------------------------Amount--------------------------------------*/
 
-func AmountParse(v string) (xdr.Int64, error) {
+func AmountParse(v string) (xdr.Int64, error) { // stroops
 	return amount.Parse(v)
 }
 
@@ -476,7 +476,10 @@ func TxAddManageOfferOp(tx *xdr.Transaction, selling, buying xdr.Asset, amount x
 }
 
 func TxAddCreatePassiveOfferOp(tx *xdr.Transaction) {}
-func TxAddSetOptionsOp(tx *xdr.Transaction)         {}
+
+func TxAddSetOptionsOp(tx *xdr.Transaction) {
+
+}
 
 func TxAddChangeTrustOp(tx *xdr.Transaction, asset_type, asset_code, asset_issuer, limit string) {
 
@@ -534,6 +537,10 @@ func TxAddAllowTrustOp(tx *xdr.Transaction, trustor, asset_code string, asset_ty
 
 	tx.Operations = append(tx.Operations, operation)
 }
+
+func TxAddAccountMergeOp(tx *xdr.Transaction) {}
+
+func TxAddInflationOp(tx *xdr.Transaction) {}
 
 func TxAddManageDataOp(tx *xdr.Transaction) {}
 

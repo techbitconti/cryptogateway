@@ -2,7 +2,7 @@ package xlm
 
 import (
 	//"encoding/json"
-	//"fmt"
+	"fmt"
 	//"strconv"
 	"testing"
 )
@@ -42,6 +42,9 @@ func Test_Amount(t *testing.T) {
 	//	fmt.Println(lumen)
 	//	stroops := ToStroops(lumen)
 	//	fmt.Println(strconv.FormatFloat(stroops, 'f', -1, 64))
+
+	am, _ := AmountParse("1.5")
+	fmt.Println(am)
 }
 
 func Test_Tranfer(t *testing.T) {
