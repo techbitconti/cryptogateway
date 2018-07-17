@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"math"
@@ -53,6 +54,8 @@ func HorizonPassPhrase(net string) (pass string) {
 	return
 }
 
+/*-------------------------------Amount--------------------------------------*/
+
 func AmountParse(v string) (xdr.Int64, error) {
 	return amount.Parse(v)
 }
@@ -79,6 +82,8 @@ func ToStroops(lumen float64) float64 {
 	return lumen * math.Pow10(7)
 }
 
+/*-------------------------------Verify--------------------------------------*/
+
 func VerifyAmount(v string) bool {
 
 	_, err := AmountParse(v)
@@ -88,6 +93,65 @@ func VerifyAmount(v string) bool {
 
 	return true
 }
+
+func VerifyAddress(addr string) bool {
+
+	// prefix : G
+	_, err := strkey.Decode(strkey.VersionByteAccountID, addr)
+	if err != nil {
+		fmt.Println("Error VerifyAddress", err)
+		return false
+	}
+
+	return true
+}
+
+func VerifySeed(seed string) bool {
+
+	// prefix : S
+	_, err := strkey.Decode(strkey.VersionByteSeed, seed)
+	if err != nil {
+		fmt.Println("Error VerifySeed", err)
+		return false
+	}
+
+	return true
+}
+
+func VerifyHashTx(tx string) bool {
+
+	// prefix : T
+	_, err := strkey.Decode(strkey.VersionByteHashTx, tx)
+	if err != nil {
+		fmt.Println("Error VerifyHashTx", err)
+		return false
+	}
+
+	return true
+}
+
+func VerifyHashX(hx string) bool {
+
+	// prefix : X
+	_, err := strkey.Decode(strkey.VersionByteHashX, hx)
+	if err != nil {
+		fmt.Println("Error VerifyHashX", err)
+		return false
+	}
+
+	return true
+}
+
+func VerifyTx(net, txHash string) bool {
+	tx := TxByHash(net, txHash)
+	if tx.ID != "" && tx.Ledger != 0 {
+		return true
+	}
+
+	return false
+}
+
+/*-------------------------------KeyPair--------------------------------------*/
 
 func KeyPairRandom() (full *keypair.Full, err error) {
 
@@ -155,99 +219,61 @@ func KeySignSeed(seed string, input []byte) ([]byte, error) {
 	return xdr.Signature(ed25519.Sign(priv, input)[:]), nil
 }
 
-func VerifyAddress(addr string) bool {
+/*-------------------------------Builder--------------------------------------*/
 
-	// prefix : G
-	_, err := strkey.Decode(strkey.VersionByteAccountID, addr)
-	if err != nil {
-		fmt.Println("Error VerifyAddress", err)
-		return false
-	}
-
-	return true
-}
-
-func VerifySeed(seed string) bool {
-
-	// prefix : S
-	_, err := strkey.Decode(strkey.VersionByteSeed, seed)
-	if err != nil {
-		fmt.Println("Error VerifySeed", err)
-		return false
-	}
-
-	return true
-}
-
-func VerifyHashTx(tx string) bool {
-
-	// prefix : T
-	_, err := strkey.Decode(strkey.VersionByteHashTx, tx)
-	if err != nil {
-		fmt.Println("Error VerifyHashTx", err)
-		return false
-	}
-
-	return true
-}
-
-func VerifyHashX(hx string) bool {
-
-	// prefix : X
-	_, err := strkey.Decode(strkey.VersionByteHashX, hx)
-	if err != nil {
-		fmt.Println("Error VerifyHashX", err)
-		return false
-	}
-
-	return true
-}
-
-func VerifyTx(net, txHash string) bool {
-	tx := TxByHash(net, txHash)
-	if tx.ID != "" && tx.Ledger != 0 {
-		return true
-	}
-
-	return false
-}
-
-func AccountID(addr string) (accountID xdr.AccountId, err error) {
+func NewAccountID(addr string) (accountID xdr.AccountId, err error) {
 
 	err = accountID.SetAddress(addr)
 
 	return
 }
 
-func AssestSetCredit(code, issuer string) (asset xdr.Asset, err error) {
+func NewAssest(asset_type, asset_code, asset_issuer string) (asset xdr.Asset, err error) {
+
+	if asset_type != ASSET_TYPE_NATIVE && asset_type !=
+		ASSET_TYPE_CREDIT_ALPHANUM4 && asset_type !=
+		ASSET_TYPE_CREDIT_ALPHANUM12 {
+
+		err = errors.New("Error asset_type")
+		return
+	}
 
 	var accountID xdr.AccountId
-	err = accountID.SetAddress(issuer)
+	err = accountID.SetAddress(asset_issuer)
 	if err != nil {
 		return
 	}
 
-	err = asset.SetCredit(code, accountID)
+	err = asset.SetCredit(asset_code, accountID)
 	if err != nil {
 		return
+	}
+
+	switch asset_type {
+	case ASSET_TYPE_NATIVE:
+		asset.Type = xdr.AssetTypeAssetTypeNative
+	case ASSET_TYPE_CREDIT_ALPHANUM4:
+		asset.Type = xdr.AssetTypeAssetTypeCreditAlphanum4
+	case ASSET_TYPE_CREDIT_ALPHANUM12:
+		asset.Type = xdr.AssetTypeAssetTypeCreditAlphanum12
 	}
 
 	return
 }
 
-func AssetSetNative() (asset xdr.Asset, err error) {
+func NewNative() (asset xdr.Asset, err error) {
 
 	err = asset.SetNative()
 
 	return
 }
 
-func MemoNew(aType xdr.MemoType, value interface{}) (memo xdr.Memo, err error) {
+func NewMemo(aType xdr.MemoType, value interface{}) (memo xdr.Memo, err error) {
 
 	return xdr.NewMemo(aType, value)
 }
 
-func TxBuilder(net, fromSeed, toAddress, amount string) (tx *build.TransactionBuilder, err error) {
+func NewPayment(net, fromSeed, toAddress, amount string) (tx *build.TransactionBuilder, err error) {
 
 	if !VerifySeed(fromSeed) {
 		return
@@ -329,14 +355,14 @@ func TxDecode(data string) (tx xdr.TransactionEnvelope) {
 	return
 }
 
-func TxNew(from string) (tx *xdr.Transaction) {
+func TxBuilder(sourceAccount string) (tx *xdr.Transaction) {
 
-	if !VerifyAddress(from) {
+	if !VerifyAddress(sourceAccount) {
 		return
 	}
 
 	var source xdr.AccountId
-	err := source.SetAddress(from)
+	err := source.SetAddress(sourceAccount)
 	if err != nil {
 		return
 	}
@@ -358,7 +384,15 @@ func TxAddMemo(tx *xdr.Transaction, memo xdr.Memo) {
 	tx.Memo = memo
 }
 
+func TxAddTimeBound(tx *xdr.Transaction, timebound xdr.TimeBounds) {
+	tx.TimeBounds = &timebound
+}
+
 func TxAddPaymentOp(tx *xdr.Transaction, to, amount string, asset xdr.Asset) {
+
+	if !VerifyAddress(to) {
+		return
+	}
 
 	var destination xdr.AccountId
 	err := destination.SetAddress(to)
@@ -371,13 +405,13 @@ func TxAddPaymentOp(tx *xdr.Transaction, to, amount string, asset xdr.Asset) {
 		return
 	}
 
-	option := xdr.PaymentOp{
+	op := xdr.PaymentOp{
 		Destination: destination,
 		Asset:       asset,
 		Amount:      lumens,
 	}
 
-	body, err := xdr.NewOperationBody(xdr.OperationTypePayment, option)
+	body, err := xdr.NewOperationBody(xdr.OperationTypePayment, op)
 	if err != nil {
 		return
 	}
@@ -387,17 +421,123 @@ func TxAddPaymentOp(tx *xdr.Transaction, to, amount string, asset xdr.Asset) {
 	tx.Operations = append(tx.Operations, operation)
 }
 
-func TxAddCreateAccountOp(tx *xdr.Transaction)      {}
-func TxAddPathPaymentOp(tx *xdr.Transaction)        {}
-func TxAddManageOfferOp(tx *xdr.Transaction)        {}
+func TxAddCreateAccountOp(tx *xdr.Transaction, to, balance string) {
+
+	if !VerifyAddress(to) {
+		return
+	}
+
+	var destination xdr.AccountId
+	err := destination.SetAddress(to)
+	if err != nil {
+		return
+	}
+
+	lumens, err := AmountParse(balance)
+	if err != nil {
+		return
+	}
+
+	op := xdr.CreateAccountOp{
+		Destination:     destination,
+		StartingBalance: lumens,
+	}
+
+	body, err := xdr.NewOperationBody(xdr.OperationTypeCreateAccount, op)
+	if err != nil {
+		return
+	}
+
+	operation := xdr.Operation{Body: body}
+
+	tx.Operations = append(tx.Operations, operation)
+}
+
+func TxAddPathPaymentOp(tx *xdr.Transaction) {}
+
+func TxAddManageOfferOp(tx *xdr.Transaction, selling, buying xdr.Asset, amount xdr.Int64, price xdr.Price, offerID xdr.Uint64) {
+
+	op := xdr.ManageOfferOp{
+		Selling: selling,
+		Buying:  buying,
+		Amount:  amount,
+		Price:   price,
+		OfferId: offerID,
+	}
+
+	body, err := xdr.NewOperationBody(xdr.OperationTypeManageOffer, op)
+	if err != nil {
+		return
+	}
+
+	operation := xdr.Operation{Body: body}
+
+	tx.Operations = append(tx.Operations, operation)
+}
+
 func TxAddCreatePassiveOfferOp(tx *xdr.Transaction) {}
 func TxAddSetOptionsOp(tx *xdr.Transaction)         {}
-func TxAddChangeTrustOp(tx *xdr.Transaction)        {}
-func TxAddAllowTrustOp(tx *xdr.Transaction)         {}
-func TxAddDestination(tx *xdr.Transaction)          {}
-func TxAddManageDataOp(tx *xdr.Transaction)         {}
 
-func TxEnvelopNew(tx xdr.Transaction) *xdr.TransactionEnvelope {
+func TxAddChangeTrustOp(tx *xdr.Transaction, asset_type, asset_code, asset_issuer, limit string) {
+
+	if limit == "" {
+		limit = string(build.MaxLimit)
+	}
+
+	tokens, errL := AmountParse(limit)
+	if errL != nil {
+		return
+	}
+
+	ass, errA := NewAssest(asset_type, asset_code, asset_issuer)
+	if errA != nil {
+		return
+	}
+
+	op := xdr.ChangeTrustOp{Line: ass, Limit: tokens}
+
+	body, err := xdr.NewOperationBody(xdr.OperationTypeChangeTrust, op)
+	if err != nil {
+		return
+	}
+
+	operation := xdr.Operation{Body: body}
+
+	tx.Operations = append(tx.Operations, operation)
+}
+
+func TxAddAllowTrustOp(tx *xdr.Transaction, trustor, asset_code string, asset_type xdr.AssetType, authorize bool) {
+
+	if !VerifyAddress(trustor) {
+		return
+	}
+
+	var destination xdr.AccountId
+	err := destination.SetAddress(trustor)
+	if err != nil {
+		return
+	}
+
+	ass, errA := xdr.NewAllowTrustOpAsset(asset_type, asset_code)
+	if errA != nil {
+		return
+	}
+
+	op := xdr.AllowTrustOp{Trustor: destination, Asset: ass, Authorize: authorize}
+
+	body, err := xdr.NewOperationBody(xdr.OperationTypeAllowTrust, op)
+	if err != nil {
+		return
+	}
+
+	operation := xdr.Operation{Body: body}
+
+	tx.Operations = append(tx.Operations, operation)
+}
+
+func TxAddManageDataOp(tx *xdr.Transaction) {}
+
+func TxEnvelopBuilder(tx xdr.Transaction) *xdr.TransactionEnvelope {
 
 	txe := &xdr.TransactionEnvelope{
 		Tx:         tx,

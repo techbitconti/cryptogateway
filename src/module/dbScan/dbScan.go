@@ -219,7 +219,7 @@ func SendCoin(coin, from, to, amount string) (tx string) {
 				return ""
 			}
 
-			txBuilder, err := xlm.TxBuilder(config.XLM_NET, from, to, amount)
+			txBuilder, err := xlm.NewPayment(config.XLM_NET, from, to, amount)
 			if err != nil {
 				fmt.Println("XLM send fail !!!")
 				return ""
