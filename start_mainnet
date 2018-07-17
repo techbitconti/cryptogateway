@@ -1,0 +1,31 @@
+geth  --rpc --rpccorsdomain "*" --rpcapi "net,eth,web3,miner,personal"  console 2>>geth.log 
+ --datadir=/home/ramost/ethereum/mainnet
+
+------------------------------------------------------------------------------
+
+
+bitcoind -rpcuser="123" -rpcpassword="123" -txindex -debug=1 -server -rest  -daemon -rpcport=8332
+ -datadir=/home/ramost/bitcoin/bitcoind/mainnet
+ -reindex
+
+
+bitcoin-cli -rpcuser="123" -rpcpassword="123"  -rpcport=8332
+
+------------------------------------------------------------------------------
+
+
+litecoind -rpcuser="123" -rpcpassword="123" -txindex -debug=1 -server -rest  -daemon -rpcport=9332
+ -datadir=/home/ramost/litecoin/litecoind/mainnet
+ -reindex
+
+
+litecoin-cli -rpcuser="123" -rpcpassword="123" -rpcport=9332
+
+------------------------------------------------------------------------------
+
+bitcashd -rpcuser="123" -rpcpassword="123" -txindex -debug=1 -server -rest  -daemon  -rpcport=7332 
+ -datadir=/home/ramost/bitcash/bitcashd/mainnet -rpcallowip=14.161.40.26
+ -reindex
+
+
+bitcash-cli -rpcuser="123" -rpcpassword="123" -rpcport=7332 
