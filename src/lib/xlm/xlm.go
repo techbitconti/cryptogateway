@@ -273,6 +273,39 @@ func NewMemo(aType xdr.MemoType, value interface{}) (memo xdr.Memo, err error) {
 	return xdr.NewMemo(aType, value)
 }
 
+func NewOption() *xdr.SetOptionsOp {
+
+	return &xdr.SetOptionsOp{}
+}
+
+func SetOption_Inflation(option *xdr.SetOptionsOp) {
+
+}
+
+func SetOption_SetFlags(option *xdr.SetOptionsOp) {
+
+}
+
+func SetOption_ClearFlags(option *xdr.SetOptionsOp) {
+
+}
+
+func SetOption_MasterWeight(option *xdr.SetOptionsOp) {
+
+}
+
+func SetOption_Threshold(option *xdr.SetOptionsOp) {
+
+}
+
+func SetOption_SignerType(option *xdr.SetOptionsOp) {
+
+}
+
+func SetOption_HomeDomain(option *xdr.SetOptionsOp) {
+
+}
+
 func NewPayment(net, fromSeed, toAddress, amount string) (tx *build.TransactionBuilder, err error) {
 
 	if !VerifySeed(fromSeed) {
@@ -475,10 +508,35 @@ func TxAddManageOfferOp(tx *xdr.Transaction, selling, buying xdr.Asset, amount x
 	tx.Operations = append(tx.Operations, operation)
 }
 
-func TxAddCreatePassiveOfferOp(tx *xdr.Transaction) {}
+func TxAddCreatePassiveOfferOp(tx *xdr.Transaction, selling, buying xdr.Asset, amount xdr.Int64, price xdr.Price) {
 
-func TxAddSetOptionsOp(tx *xdr.Transaction) {
+	op := xdr.CreatePassiveOfferOp{
+		Selling: selling,
+		Buying:  buying,
+		Amount:  amount,
+		Price:   price,
+	}
 
+	body, err := xdr.NewOperationBody(xdr.OperationTypeCreatePassiveOffer, op)
+	if err != nil {
+		return
+	}
+
+	operation := xdr.Operation{Body: body}
+
+	tx.Operations = append(tx.Operations, operation)
+}
+
+func TxAddSetOptionsOp(tx *xdr.Transaction, op *xdr.SetOptionsOp) {
+
+	body, err := xdr.NewOperationBody(xdr.OperationTypeSetOptions, op)
+	if err != nil {
+		return
+	}
+
+	operation := xdr.Operation{Body: body}
+
+	tx.Operations = append(tx.Operations, operation)
 }
 
 func TxAddChangeTrustOp(tx *xdr.Transaction, asset_type, asset_code, asset_issuer, limit string) {
@@ -538,11 +596,47 @@ func TxAddAllowTrustOp(tx *xdr.Transaction, trustor, asset_code string, asset_ty
 	tx.Operations = append(tx.Operations, operation)
 }
 
-func TxAddAccountMergeOp(tx *xdr.Transaction) {}
+func TxAddAccountMergeOp(tx *xdr.Transaction, to string) {
 
-func TxAddInflationOp(tx *xdr.Transaction) {}
+	if !VerifyAddress(to) {
+		return
+	}
 
-func TxAddManageDataOp(tx *xdr.Transaction) {}
+	accountMergeBuilder := build.AccountMerge(build.Destination{to})
+
+	tx.Operations = append(tx.Operations, accountMergeBuilder.O)
+}
+
+func TxAddInflationOp(tx *xdr.Transaction, to string, lumens xdr.Int64) {
+
+	if !VerifyAddress(to) {
+		return
+	}
+
+	var destination xdr.AccountId
+	err := destination.SetAddress(to)
+	if err != nil {
+		return
+	}
+
+	op := xdr.InflationPayout{Destination: destination, Amount: lumens}
+
+	body, err := xdr.NewOperationBody(xdr.OperationTypeInflation, op)
+	if err != nil {
+		return
+	}
+
+	operation := xdr.Operation{Body: body}
+
+	tx.Operations = append(tx.Operations, operation)
+}
+
+func TxAddManageDataOp(tx *xdr.Transaction, key string, value []byte) {
+
+	dataBuilder := build.SetData(key, value)
+
+	tx.Operations = append(tx.Operations, dataBuilder.O)
+}
 
 func TxEnvelopBuilder(tx xdr.Transaction) *xdr.TransactionEnvelope {
 
