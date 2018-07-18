@@ -273,37 +273,65 @@ func NewMemo(aType xdr.MemoType, value interface{}) (memo xdr.Memo, err error) {
 	return xdr.NewMemo(aType, value)
 }
 
-func NewOption() *xdr.SetOptionsOp {
+func NewOption(muts ...interface{}) build.SetOptionsBuilder {
 
-	return &xdr.SetOptionsOp{}
+	return build.SetOptions(muts)
 }
 
-func SetOption_Inflation(option *xdr.SetOptionsOp) {
+func SetOption_Inflation(option *build.SetOptionsBuilder, to string) {
 
+	var destination xdr.AccountId
+	err := destination.SetAddress(to)
+	if err != nil {
+		return
+	}
+
+	option.Mutate(build.InflationDest(to))
 }
 
-func SetOption_SetFlags(option *xdr.SetOptionsOp) {
-
+func SetOption_SetAuthRequired(option *build.SetOptionsBuilder) {
+	option.Mutate(build.SetAuthRequired())
 }
 
-func SetOption_ClearFlags(option *xdr.SetOptionsOp) {
-
+func SetOption_SetAuthRevocable(option *build.SetOptionsBuilder) {
+	option.Mutate(build.SetAuthRevocable())
 }
 
-func SetOption_MasterWeight(option *xdr.SetOptionsOp) {
-
+func SetOption_SetAuthImmutable(option *build.SetOptionsBuilder) {
+	option.Mutate(build.SetAuthImmutable())
 }
 
-func SetOption_Threshold(option *xdr.SetOptionsOp) {
-
+func SetOption_ClearAuthRequired(option *build.SetOptionsBuilder) {
+	option.Mutate(build.ClearAuthRequired())
 }
 
-func SetOption_SignerType(option *xdr.SetOptionsOp) {
-
+func SetOption_ClearAuthRevocable(option *build.SetOptionsBuilder) {
+	option.Mutate(build.ClearAuthRevocable())
 }
 
-func SetOption_HomeDomain(option *xdr.SetOptionsOp) {
+func SetOption_ClearAuthImmutable(option *build.SetOptionsBuilder) {
+	option.Mutate(build.ClearAuthImmutable())
+}
 
+func SetOption_MasterWeight(option *build.SetOptionsBuilder, weight uint32) {
+	option.Mutate(build.MasterWeight(weight))
+}
+
+func SetOption_Threshold(option *build.SetOptionsBuilder, low, medium, high uint32) {
+	option.Mutate(build.SetThresholds(low, medium, high))
+}
+
+func SetOption_AddSigner(option *build.SetOptionsBuilder, address string, weight uint32) {
+
+	if !VerifyAddress(address) {
+		return
+	}
+
+	option.Mutate(build.AddSigner(address, weight))
+}
+
+func SetOption_HomeDomain(option *build.SetOptionsBuilder, domain string) {
+	option.Mutate(build.HomeDomain(domain))
 }
 
 func NewPayment(net, fromSeed, toAddress, amount string) (tx *build.TransactionBuilder, err error) {
